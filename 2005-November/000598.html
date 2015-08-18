@@ -1,0 +1,295 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r626 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r626%20-%20trunk/maay&In-Reply-To=%3C200511231450.jANEotRG010114%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000597.html">
+   <LINK REL="Next"  HREF="000599.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r626 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r626%20-%20trunk/maay&In-Reply-To=%3C200511231450.jANEotRG010114%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r626 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 15:50:55 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000597.html">[Maay-svncheckins] r625 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000599.html">[Maay-svncheckins] r627 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#598">[ date ]</a>
+              <a href="thread.html#598">[ thread ]</a>
+              <a href="subject.html#598">[ subject ]</a>
+              <a href="author.html#598">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-23 15:50:55 +0100 (Wed, 23 Nov 2005)
+New Revision: 626
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+   trunk/maay/webapplication.py
+Log:
+Small refactoring
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-23 14:37:31 UTC (rev 625)
++++ trunk/maay/dbentity.py	2005-11-23 14:50:55 UTC (rev 626)
+@@ -142,19 +142,7 @@
+             setattr(self, attrname, value)
+ 
+         
+-def sqlCriterium(foo):
+-    return (&quot;D.publication_time, &quot;
+-            &quot;DS.relevance, &quot;
+-            &quot;DS.popularity &quot;)
+ 
+-def sqlOrder(order, direction):
+-    if order == 'publication_time':
+-        prefix = 'ORDER BY D.'
+-    else:
+-        prefix = 'ORDER BY DS.'
+-    return prefix + order + ' ' + direction
+-
+-
+ class Document(DBEntity):
+     &quot;&quot;&quot;Represent a Document in the database
+     A Document is different from a file, because several files can store
+@@ -191,14 +179,14 @@
+     The state of a document can be (values in parenthesis give the
+     French word used in the PhD thesis):
+ 
+-    * PUBLISHED_STATE (intentionnel): the document was put on purpose by
++    * PUBLISHED_STATE (intentional): the document was put on purpose by
+     the user in an indexed directory
+ 
+-    * CACHED_STATE (mis en cache): the document has been downloaded by
++    * CACHED_STATE (put into cache): the document has been downloaded by
+     the user using Maay. It is available on the hard drive, but can be
+     suppressed if disk space needs to be reclaimed
+ 
+-    * KNOWN_STATE (connu): the document is known through answers to
++    * KNOWN_STATE (known): the document is known through answers to
+     requests that have been received. The available profile is lacunar
+     and only a few words are known
+ 
+@@ -226,24 +214,10 @@
+     attributes = ('db_document_id', 'document_id', 'mime_type', 'title',
+                   'size', 'text', 'publication_time', 'state', 'download_count',
+                   'url', 'matching', 'indexed')
+-    extended_attrs = attributes + ('relevance', 'popularity')
+     
+     tableName = 'documents'
+     key = ('db_document_id',)
+ 
+-    def __init__(self, **values):
+-        for attrname, value in values.iteritems():
+-            assert attrname in self.extended_attrs, 'Unknown attribute %s' % attrname
+-            setattr(self, attrname, value)
+-        for keyattr in self.key:
+-            assert keyattr in self.attributes, \
+-                   &quot;invalid value for key: %s&quot; % keyattr
+-
+-    def boundAttributes(self):
+-        &quot;&quot;&quot;returns the list of attributes for which a value is specified&quot;&quot;&quot;
+-        return [attr for attr in self.extended_attrs if hasattr(self, attr)]
+-
+-    
+     def readable_size(self):
+         if not self.size:
+             return 'XXX NO KNOWN SIZE'
+@@ -261,6 +235,50 @@
+         return self.text[:200]
+     abstract = property(get_abstract)
+ 
++    def selectUrlAndTypeWhereDocid(cls, cursor, document_id):
++        query = &quot;SELECT url, mime_type FROM documents WHERE document_id=%s&quot;
++        cursor.execute(query, [document_id])
++        results = cursor.fetchall()
++        return results[0]
++    selectUrlAndTypeWhereDocid = classmethod(selectUrlAndTypeWhereDocid)
++
++    # for stat purpose
++    def getDocumentCount(cls, cursor):
++        query = &quot;SELECT state, count(*) FROM documents GROUP BY state&quot;
++        cursor.execute(query)
++        results = cursor.fetchall()
++
++        docCounts = {Document.PUBLISHED_STATE:0, Document.PRIVATE_STATE:0,
++            Document.CACHED_STATE:0, Document.KNOWN_STATE:0}
++
++        for result in results:
++            docCounts[int(result[0])] = result[1]
++        return docCounts
++    getDocumentCount = classmethod(getDocumentCount)
++
++
++def sqlCriterium(foo):
++    return (&quot;D.publication_time, &quot;
++            &quot;DS.relevance, &quot;
++            &quot;DS.popularity &quot;)
++
++def sqlOrder(order, direction):
++    if order == 'publication_time':
++        prefix = 'ORDER BY D.'
++    else:
++        prefix = 'ORDER BY DS.'
++    return prefix + order + ' ' + direction
++
++
++class ScoredDocument(Document):
++    &quot;&quot;&quot;A read-only transitional Document augmented with popularity and
++       relevance scores, for consumption by Results&quot;&quot;&quot;
++
++    attributes = Document.attributes + ('relevance', 'popularity')
++    
++    tableName = 'documents'
++    key = ('db_document_id',)
++
+     # XXX Please rewrite this method. The way we build the SQL
+     #     query is quite messy
+     def _selectContainingQuery(cls, words, order, direction, mimetype=None, offset=0,
+@@ -309,7 +327,7 @@
+     def selectContaining(cls, cursor, words, mimetype=None, offset=0,
+                          limit=None, allowPrivate=False, order='publication_time',
+ 			 direction='DESC'):
+-        print &quot;Document selectContaining %s&quot; % words
++        print &quot;ScoredDocument selectContaining %s&quot; % words
+         if not words:
+             return []
+         query, params = cls._selectContainingQuery(words, order, direction,
+@@ -329,26 +347,6 @@
+             return []
+     selectContaining = classmethod(selectContaining)
+ 
+-    def selectUrlAndTypeWhereDocid(cls, cursor, document_id):
+-        query = &quot;SELECT url, mime_type FROM documents WHERE document_id=%s&quot;
+-        cursor.execute(query, [document_id])
+-        results = cursor.fetchall()
+-        return results[0]
+-    selectUrlAndTypeWhereDocid = classmethod(selectUrlAndTypeWhereDocid)
+-
+-    # for stat purpose
+-    def getDocumentCount(cls, cursor):
+-        query = &quot;SELECT state, count(*) FROM documents GROUP BY state&quot;
+-        cursor.execute(query)
+-        results = cursor.fetchall()
+-
+-        docCounts = {Document.PUBLISHED_STATE:0, Document.PRIVATE_STATE:0,
+-            Document.CACHED_STATE:0, Document.KNOWN_STATE:0}
+-
+-        for result in results:
+-            docCounts[int(result[0])] = result[1]
+-        return docCounts
+-    getDocumentCount = classmethod(getDocumentCount)
+     
+ class Result(Document):
+     &quot;&quot;&quot;Results are temporary relations created/destroyed on the fly
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-23 14:37:31 UTC (rev 625)
++++ trunk/maay/querier.py	2005-11-23 14:50:55 UTC (rev 626)
+@@ -33,8 +33,8 @@
+ from zope.interface import Interface, implements
+ 
+ from logilab.common.db import get_dbapi_compliant_module
+-from maay.dbentity import Document, FileInfo, DBEntity, \
+-     DocumentProvider, DocumentScore, Word, Node, Result
++from maay.dbentity import ScoredDocument, Document, FileInfo, \
++     DBEntity, DocumentProvider, DocumentScore, Word, Node, Result
+ from maay.texttool import normalizeText, WORDS_RGX, MAX_STORED_SIZE
+ 
+ IntegrityError = None
+@@ -161,11 +161,14 @@
+         self._updateQueryStatistics(words)
+         try:
+             cursor = self._cnx.cursor()
+-            return Document.selectContaining(cursor, words, query.filetype,
+-                                             query.offset, query.limit,
+-					     self.searchInPrivate,
+-					     order=query.order,
+-					     direction=query.direction)
++            # FIXME: it's quite obvious that we should feed the whole query
++            return ScoredDocument.selectContaining(cursor, words,
++                                                   query.filetype,
++                                                   query.offset,
++                                                   query.limit,
++                                                   self.searchInPrivate,
++                                                   order=query.order,
++                                                   direction=query.direction)
+         finally:
+             traceback.print_exc()
+             cursor.close()
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-23 14:37:31 UTC (rev 625)
++++ trunk/maay/webapplication.py	2005-11-23 14:50:55 UTC (rev 626)
+@@ -43,7 +43,7 @@
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+-from maay.dbentity import Document
++from maay.dbentity import ScoredDocument
+ from maay import indexer 
+ 
+ 
+@@ -119,6 +119,7 @@
+     def __init__(self):
+         athena.LivePage.__init__(self)
+         self.indexerConfig = indexer.indexerConfig
++        self.indexerConfig.load_from_files()
+         self.msg = 'not running'
+ 
+     def macro_footer(self, context):
+@@ -589,7 +590,7 @@
+             return static.File(get_path_of(self._javascript[name]))
+         
+     def onNewResults(self, provider, results):
+-        results = [Document(**params) for params in results]
++        results = [ScoredDocument(**params) for params in results]
+         self.querier.pushDocuments(self.queryId, results, provider)
+         results = self.querier.getQueryResults(self.query,
+                                                onlyLocal=self.onlyLocal,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000597.html">[Maay-svncheckins] r625 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000599.html">[Maay-svncheckins] r627 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#598">[ date ]</a>
+              <a href="thread.html#598">[ thread ]</a>
+              <a href="subject.html#598">[ subject ]</a>
+              <a href="author.html#598">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

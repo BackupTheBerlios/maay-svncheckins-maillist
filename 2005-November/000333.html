@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r357 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r357%20-%20trunk/maay&In-Reply-To=%3C200511090945.jA99joVM022225%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000332.html">
+   <LINK REL="Next"  HREF="000334.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r357 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r357%20-%20trunk/maay&In-Reply-To=%3C200511090945.jA99joVM022225%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r357 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 10:45:50 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000332.html">[Maay-svncheckins] r356 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000334.html">[Maay-svncheckins] r358 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#333">[ date ]</a>
+              <a href="thread.html#333">[ thread ]</a>
+              <a href="subject.html#333">[ subject ]</a>
+              <a href="author.html#333">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 10:45:48 +0100 (Wed, 09 Nov 2005)
+New Revision: 357
+
+Modified:
+   trunk/maay/converter.py
+Log:
+work around weird crash
+
+Modified: trunk/maay/converter.py
+===================================================================
+--- trunk/maay/converter.py	2005-11-09 09:45:37 UTC (rev 356)
++++ trunk/maay/converter.py	2005-11-09 09:45:48 UTC (rev 357)
+@@ -185,11 +185,14 @@
+             else:
+                 raise IndexationFailure('Unable to index %r' % filepath)
+         finally:
+-            if osp.isfile(outputFile):
+-                os.remove(outputFile)
+-            if osp.isfile(inputFile):
+-                os.remove(inputFile)
+-            os.rmdir(outputDir)
++            try:
++                if osp.isfile(outputFile):
++                    os.remove(outputFile)
++                if osp.isfile(inputFile):
++                    os.remove(inputFile)
++                os.rmdir(outputDir)
++            except OSError:
++                print &quot;leaving %s behind&quot; % outputDir
+ 
+ 
+ class PDFConverter(CommandBasedConverter, HTMLConverter):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000332.html">[Maay-svncheckins] r356 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000334.html">[Maay-svncheckins] r358 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#333">[ date ]</a>
+              <a href="thread.html#333">[ thread ]</a>
+              <a href="subject.html#333">[ subject ]</a>
+              <a href="author.html#333">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r375 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r375%20-%20trunk/maay&In-Reply-To=%3C200511091305.jA9D5Ork022499%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000350.html">
+   <LINK REL="Next"  HREF="000352.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r375 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r375%20-%20trunk/maay&In-Reply-To=%3C200511091305.jA9D5Ork022499%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r375 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 14:05:24 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000350.html">[Maay-svncheckins] r374 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000352.html">[Maay-svncheckins] r376 - trunk/doc
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#351">[ date ]</a>
+              <a href="thread.html#351">[ thread ]</a>
+              <a href="subject.html#351">[ subject ]</a>
+              <a href="author.html#351">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-09 14:05:09 +0100 (Wed, 09 Nov 2005)
+New Revision: 375
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+&quot;fix&quot; the class/dict multiple personnality disorder of document
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-09 12:58:05 UTC (rev 374)
++++ trunk/maay/p2pquerier.py	2005-11-09 13:05:09 UTC (rev 375)
+@@ -61,21 +61,10 @@
+         self.ttl -= 1
+ 
+     def addMatch(self, document):
+-        &quot;&quot;&quot;this function suffers from horrible polymorphism
+-           sometimes we get a Document, sometimes a plain dict
+-        &quot;&quot;&quot;
+-        if isinstance(document, dict):
+-            self.documents_ids.add(document['document_id'])
+-        else:
+-            self.documents_ids.add(document.document_id)
++        self.documents_ids.add(document['document_id'])
+ 
+     def isKnown(self, document):
+-        &quot;&quot;&quot;this function suffers from horrible polymorphism
+-           sometimes we get a Document, sometimes a plain dict
+-        &quot;&quot;&quot;
+-        if isinstance(document, dict):
+-            return document['document_id'] in self.documents_ids
+-        return document.document_id in self.documents_ids
++        return document['document_id'] in self.documents_ids
+  
+     def asKwargs(self):
+         &quot;&quot;&quot;return a dictionnary of arguments suitable for use as a
+@@ -200,9 +189,13 @@
+         toSend = []
+         
+         for document in answer.documents:
++            if not isinstance(document, dict):
++                document = document.__dict__
+             # TODO: record answer in database if local is False
+             # auc : to cache them ?
+             if not query.isKnown(document):
++                abstract = makeAbstract(document['text'], query.getWords())
++                document['text'] = untagText(removeSpace(abstract))
+                 query.addMatch(document)
+                 #toSend.append(document.asDictionnary())
+                 # above was meant to be like .asKwargs() ?
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000350.html">[Maay-svncheckins] r374 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000352.html">[Maay-svncheckins] r376 - trunk/doc
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#351">[ date ]</a>
+              <a href="thread.html#351">[ thread ]</a>
+              <a href="subject.html#351">[ subject ]</a>
+              <a href="author.html#351">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r615 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r615%20-%20trunk/maay&In-Reply-To=%3C200511231001.jANA1UYr022853%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000586.html">
+   <LINK REL="Next"  HREF="000588.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r615 - trunk/maay</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r615%20-%20trunk/maay&In-Reply-To=%3C200511231001.jANA1UYr022853%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r615 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 11:01:30 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000586.html">[Maay-svncheckins] r614 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000588.html">[Maay-svncheckins] r616 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#587">[ date ]</a>
+              <a href="thread.html#587">[ thread ]</a>
+              <a href="subject.html#587">[ subject ]</a>
+              <a href="author.html#587">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-23 11:01:30 +0100 (Wed, 23 Nov 2005)
+New Revision: 615
+
+Modified:
+   trunk/maay/querier.py
+   trunk/maay/webapplication.py
+Log:
+fixed in distant downloading
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-23 09:59:57 UTC (rev 614)
++++ trunk/maay/querier.py	2005-11-23 10:01:30 UTC (rev 615)
+@@ -363,8 +363,8 @@
+         (we don't want 'old' providers to appear in the list)
+         &quot;&quot;&quot;
+         cursor = self._cnx.cursor()
+-        query = 'SELECT host, port FROM results WHERE query_id=%(queryId) ' \
+-                'AND document_id=%(docId)'
++        query = 'SELECT host, port FROM results WHERE query_id=%(queryId)s ' \
++                'AND document_id=%(docId)s'
+         cursor.execute(query, locals())
+         providers = cursor.fetchall()
+         cursor.close()
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-23 09:59:57 UTC (rev 614)
++++ trunk/maay/webapplication.py	2005-11-23 10:01:30 UTC (rev 615)
+@@ -196,7 +196,6 @@
+     
+     def newDocumentIndexed(self, filename, state):
+         self.indexedDocuments += 1
+-        print &quot;newDocument indexed&quot;, filename, state
+         if state == Document.PRIVATE_STATE:
+             self.privateDocuments += 1
+         else:
+@@ -370,8 +369,8 @@
+         docid = context.arg('docid')
+         if not host or not port or not docid:
+             return Maay404()
+-        self.proivderSet = set()
+         proxy = Proxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port))
++        print &quot;[webapp] trying to donwload %r from %s:%s&quot; % (filename, host, port)
+         d = proxy.callRemote('downloadFile', docid, words)
+         d.addCallback(self.gotDataBack, filename)
+         d.addErrback(self.tryOtherProviders, filename, words, host,
+@@ -394,12 +393,14 @@
+     def tryOtherProviders(self, error, filename, words, host, port, docId, queryId):
+         &quot;&quot;&quot;starts to explore the list of other providers&quot;&quot;&quot;
+         providers = self.querier.getProvidersFor(docId, queryId)
+-        self.providerSet.remove((host, port))
+-        return self.retryWithOtherProvider(words, docId, filename)
++        self.providerSet = set(providers)
++        self.providerSet.remove((host, int(port)))
++        return self.retryWithOtherProvider('...', words, docId, filename)
+     
+-    def retryWithOtherProvider(self, words, docId, filename):
++    def retryWithOtherProvider(self, error, words, docId, filename):
+         if self.providerSet:
+             nextHost, nextPort = self.providerSet.pop()
++            print &quot;[webapp] trying to donwload %r from %s:%s&quot; % (filename, nextHost, nextPort)
+             proxy = Proxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (nextHost, nextPort))
+             d = proxy.callRemote('downloadFile', docId, words)
+             d.addCallback(self.gotDataBack, filename)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000586.html">[Maay-svncheckins] r614 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000588.html">[Maay-svncheckins] r616 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#587">[ date ]</a>
+              <a href="thread.html#587">[ thread ]</a>
+              <a href="subject.html#587">[ subject ]</a>
+              <a href="author.html#587">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

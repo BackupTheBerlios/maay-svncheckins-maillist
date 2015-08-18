@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r431 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r431%20-%20trunk/maay&In-Reply-To=%3C200511111730.jABHUQ5K020721%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000401.html">
+   <LINK REL="Next"  HREF="000404.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r431 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r431%20-%20trunk/maay&In-Reply-To=%3C200511111730.jABHUQ5K020721%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r431 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Nov 11 18:30:26 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000401.html">[Maay-svncheckins] r430 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000404.html">[Maay-svncheckins] r432 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#402">[ date ]</a>
+              <a href="thread.html#402">[ thread ]</a>
+              <a href="subject.html#402">[ subject ]</a>
+              <a href="author.html#402">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-11 18:30:24 +0100 (Fri, 11 Nov 2005)
+New Revision: 431
+
+Modified:
+   trunk/maay/dbentity.py
+Log:
+Add stuff for creation time
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-11 17:11:56 UTC (rev 430)
++++ trunk/maay/dbentity.py	2005-11-11 17:30:24 UTC (rev 431)
+@@ -294,7 +294,7 @@
+     tableName = None # will be provided at run-time
+ 
+     def __init__(self, name, **values):
+-        tableName = name
++        Result.tableName = name
+         DBEntity.__init__(self, **values)
+         self._buildTemporary()
+ 
+@@ -302,10 +302,25 @@
+         self._destroyTemporary()
+ 
+     def _buildTemporary(self):
+-        pass
++        query = (&quot;CREATE TABLE `%s` (&quot;
++                    &quot;`db_document_id` int(11) NOT NULL auto-increment,&quot;
++                    &quot;`document_id` varchar(40) NOT NULL default '',&quot;
++                    &quot;`mime_type` varchar(40) NOT NULL default '',&quot;
++                    &quot;`title` varchar(255) default NULL,&quot;
++                    &quot;`size` int(11) default NULL,&quot;
++                    &quot;`text` text,&quot;
++                    &quot;`publication_time` int(14) default NULL,&quot;
++                    &quot;`local_pathname` varchar(255) NOT NULL default '',&quot; # like url
++                    &quot;`host` varchar(15),&quot;
++                    &quot;`port` int(11),&quot; # check this
++                    &quot;`login` varchar(255),&quot;
++                    &quot;PRIMARY KEY (`db_document_id`),&quot;
++                    &quot;KEY `document_id` (`document_id`),&quot;
++                    &quot;KEY `local_pathname` (`local_pathname`))&quot;
++                 &quot;TYPE=MyISAM;&quot;)
+ 
+     def _destroyTemporary(self):
+-        pass
++        query = &quot;DROP TABLE %s;&quot; % Result.tableName
+ 
+     
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000401.html">[Maay-svncheckins] r430 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000404.html">[Maay-svncheckins] r432 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#402">[ date ]</a>
+              <a href="thread.html#402">[ thread ]</a>
+              <a href="subject.html#402">[ subject ]</a>
+              <a href="author.html#402">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

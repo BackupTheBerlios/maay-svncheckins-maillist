@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r563 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r563%20-%20trunk/maay&In-Reply-To=%3C200511181332.jAIDWO9K006511%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000534.html">
+   <LINK REL="Next"  HREF="000536.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r563 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r563%20-%20trunk/maay&In-Reply-To=%3C200511181332.jAIDWO9K006511%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r563 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 14:32:25 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000534.html">[Maay-svncheckins] r562 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000536.html">[Maay-svncheckins] r564 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#535">[ date ]</a>
+              <a href="thread.html#535">[ thread ]</a>
+              <a href="subject.html#535">[ subject ]</a>
+              <a href="author.html#535">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-18 14:32:22 +0100 (Fri, 18 Nov 2005)
+New Revision: 563
+
+Modified:
+   trunk/maay/indexer.py
+Log:
+Should be more robust against random encoding problems
+
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-18 10:55:41 UTC (rev 562)
++++ trunk/maay/indexer.py	2005-11-18 13:32:22 UTC (rev 563)
+@@ -76,7 +76,36 @@
+     else:
+         state = Document.PUBLISHED_STATE
+     return state
+-    
++
++
++def safe_encode(string):
++    &quot;&quot;&quot;because string.encode('iso-8859-1', 'replace') is not safe&quot;&quot;&quot;
++    if not isinstance(string, unicode):
++        uni = string.decode('iso-8859-1', 'replace')
++    else:
++        uni = string
++    res = uni.encode('iso-8859-1', 'replace')
++    return res
++        
++        # type(filepath) = str 
++        # filepath.encode('iso-8859-1', 'replace')
++        #   passe implicitement pas un objet unicode
++        #   Etape1: filepath.decode('', 'ignore') # &lt;--- cette etape foire
++        #   Etape2: filepath.encode() 
++
++
++
++class FileIndexationFailure(Exception):
++
++    def __init__(self, thefile, cause):
++        self.thefile = thefile
++        self.cause = cause
++
++    def __str__(self):
++        return &quot;Won't index %s because %s&quot; % (self.thefile,
++                                              self.cause)
++
++ 
+ # TODO: manage periodical runs
+ # TODO: memorize state of indexed document to avoid db lookup at each run
+ # TODO: do an initial db query to initialize the indexation state (?)
+@@ -131,8 +160,7 @@
+         for filename in fileset:
+             if self.verbose:
+                 print &quot;Requesting unindexation of %s&quot; % \
+-                      filename.encode('iso-8859-1',
+-                                      'replace')
++                      safe_encode(filename)
+             self.serverProxy.removeFileInfo(self.cnxId, filename)
+         if self.verbose:
+             print &quot;Requesting cleanup of unreferenced documents&quot;
+@@ -154,48 +182,49 @@
+ 
+     def runIndexer(self, isPrivate=True):
+         existingFiles = Set()
+-        
+         state = docState(isPrivate)
+         for filename in self.getFileIterator(isPrivate):
+             existingFiles.add(filename)
+-            self.indexFile(filename, isPrivate)
++            try:
++                self.indexFile(filename, isPrivate)
++            except FileIndexationFailure, fif: # should be catch-all
++                print fif
++                continue
+         return existingFiles
+ 
+     def indexFile(self, filepath, isPrivate=True):
+-        if not self.isIndexable(filepath):
+-            if self.verbose:
+-                print &quot;Indexer indexFile : can't index %s&quot; % \
+-                      filepath.encode('iso-8859-1', 'replace')
+-            return
+-
+-        state = docState(isPrivate)
+-        fileSize = os.path.getsize(filepath)
+-        lastModificationTime = os.path.getmtime(filepath)
+-        lastIdxTime, lastIdxState = self.getLastIndexationTimeAndState(filepath)
+-        if lastIdxState == state and lastIdxTime &gt;= lastModificationTime:
+-            if self.verbose:
+-                print &quot;%s didn't change since last indexation&quot; % \
+-                      filepath.encode('iso-8859-1', 'replace')
++        try:
++            if not self.isIndexable(filepath):
+                 return
+-        try:
+-            title, text, _, _ = converter.extractWordsFromFile(filepath)
+-        except converter.IndexationFailure, exc:
+-            if self.verbose:
+-                print exc
+-            return
+-        docId = makeDocumentId(filepath)
+-        mime_type = mimetypes.guess_type(filepath)[0]
+-        doc = FutureDocument(filename=unicode(filepath,
+-                                              self.filesystemEncoding),
+-                             title=title, text=text,
+-                             fileSize=fileSize,
+-                             lastModificationTime=lastModificationTime,
+-                             content_hash=docId, mime_type=mime_type,
+-                             state=state)
+-        self.indexDocument(doc)
++            state = docState(isPrivate)
++            fileSize = os.path.getsize(filepath)
++            lastModificationTime = os.path.getmtime(filepath)
++            lastIdxTime, lastIdxState = self.getLastIndexationTimeAndState(filepath)
++            if lastIdxState == state and lastIdxTime &gt;= lastModificationTime:
++                    raise FileIndexationFailure (safe_encode(filepath),
++                                                 &quot;it didn't change since last indexation&quot;)
++            try:
++                title, text, _, _ = converter.extractWordsFromFile(filepath)
++            except converter.IndexationFailure, exc:
++                raise FileIndexationFailure(safe_encode(filepath),
++                                            &quot;converter thus complained : %s&quot; % exc)
++            docId = makeDocumentId(filepath)
++            mime_type = mimetypes.guess_type(filepath)[0]
++            doc = FutureDocument(filename=filepath,
++                                 title=title, text=text,
++                                 fileSize=fileSize,
++                                 lastModificationTime=lastModificationTime,
++                                 content_hash=docId, mime_type=mime_type,
++                                 state=state)
++            self.indexDocument(doc)
++        except FileIndexationFailure:
++            raise
++        except Exception, exc:
++            raise FileIndexationFailure(safe_encode(filepath),
++                                        &quot;an exception %s was raised&quot; % exc)                                        
+        
+     def getLastIndexationTimeAndState(self, filename):
+-        filename = unicode(filename, self.filesystemEncoding)
++        filename = filename
+         answer = self.serverProxy.lastIndexationTimeAndState(self.cnxId, filename)
+         if answer is None:
+             raise MaayAuthenticationError(&quot;Bad cnxId sent to the Node&quot;)
+@@ -206,23 +235,23 @@
+         futureDoc.file_state=FileInfo.CREATED_FILE_STATE
+         if self.verbose:
+             print &quot;Requesting indexation of %s&quot; % \
+-                  futureDoc.filename.encode('iso-8859-1', 'replace'),
++                  safe_encode(futureDoc.filename),
+         try:
+             futureDoc.title = removeControlChar(futureDoc.title) 
+             futureDoc.text = removeControlChar(futureDoc.text)
+             if self.verbose:
+-                print '('+futureDoc.title.encode('iso-8859-1', 'replace')+')'
++                print '('+safe_encode(futureDoc.title)+')'
+             self.serverProxy.indexDocument(self.cnxId, futureDoc)
+ 
+         except (Fault, ProtocolError), exc:
+             if self.verbose:
+                 print &quot;An error occured on the Node while indexing %s&quot; % \
+-                      futureDoc.filename.encode('iso-8859-1', 'replace')
++                      safe_encode(futureDoc.filename)
+                 print exc
+                 print &quot;See Node log for details&quot;
+             else:
+                 print &quot;Error indexing %s: %s&quot; % \
+-                      (futureDoc.filename.encode('iso-8859-1', 'replace'), exc)
++                      (safe_encode(futureDoc.filename), exc)
+         for obs in self.observers:
+             obs.newDocumentIndexed(futureDoc.filename)
+ 
+@@ -252,7 +281,7 @@
+                     print &quot;looking in&quot;, dirpath
+                     self._removeSkippedDirnames(dirpath, dirnames)
+                     for filename in filenames:
+-                        if os.access(os.path.join(dirpath, filename), os.R_OK): 
++                        if os.access(os.path.join(dirpath, filename), os.R_OK):
+                             yield os.path.join(dirpath, filename)
+                     
+     def _removeSkippedDirnames(self, dirpath, dirnames):
+@@ -265,10 +294,10 @@
+ 
+ ## main() ##################################################
+ 
+-def run(webpage):
++def run(observers=None):
+     try:
+         try:
+-            indexer = Indexer(indexerConfig, observers=[webpage])
++            indexer = Indexer(indexerConfig, observers=observers)
+         except MaayAuthenticationError, exc:
+             print &quot;AuthenticationError:&quot;, exc
+             sys.exit(1)
+@@ -302,7 +331,7 @@
+         print &quot;Indexer already running&quot;, indexer_thread
+     else:
+         print &quot;launching indexer&quot;
+-        indexer_thread = Thread(target=run, args=(webpage,))
++        indexer_thread = Thread(target=run, args=([webpage],))
+         indexer_thread.start()
+ 
+ # index one file from webapp in a thread
+@@ -326,6 +355,8 @@
+         print &quot;Cannot contact Node:&quot;, exc
+         print &quot;Check that the Node is running on %s:%s&quot; % \
+               (indexerConfig.host, indexerConfig.port)
++    except FileIndexationFailure, fif:
++        print fif
+ 
+ if __name__ == '__main__':
+     run()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000534.html">[Maay-svncheckins] r562 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000536.html">[Maay-svncheckins] r564 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#535">[ date ]</a>
+              <a href="thread.html#535">[ thread ]</a>
+              <a href="subject.html#535">[ subject ]</a>
+              <a href="author.html#535">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

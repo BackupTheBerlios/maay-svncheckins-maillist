@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r155 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r155%20-%20trunk/maay&In-Reply-To=%3C200510061328.j96DSonN023254%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000127.html">
+   <LINK REL="Next"  HREF="000129.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r155 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r155%20-%20trunk/maay&In-Reply-To=%3C200510061328.j96DSonN023254%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r155 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Oct  6 15:28:50 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000127.html">[Maay-svncheckins] r154 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000129.html">[Maay-svncheckins] r156 - in trunk: . maay maay/configuration maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#128">[ date ]</a>
+              <a href="thread.html#128">[ thread ]</a>
+              <a href="subject.html#128">[ subject ]</a>
+              <a href="author.html#128">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-06 15:28:50 +0200 (Thu, 06 Oct 2005)
+New Revision: 155
+
+Added:
+   trunk/maay/registrationclient.py
+Modified:
+   trunk/maay/registration.py
+Log:
+registration client (not tested and not plugged into main application)
+
+Modified: trunk/maay/registration.py
+===================================================================
+--- trunk/maay/registration.py	2005-10-06 13:13:01 UTC (rev 154)
++++ trunk/maay/registration.py	2005-10-06 13:28:50 UTC (rev 155)
+@@ -40,7 +40,7 @@
+         print &quot;%s accepts %s&quot; % (id(self), nodeId)
+         if nodeId in self._registeredUsers:
+             print &quot;%s was already registered&quot; % (nodeId,)
+-        lastseen = datetime.now().isoformat()
++        lastseen = datetime.utcnow().isoformat()
+         self._registeredUsers[nodeId] = (lastseen,
+                                          nodeId,
+                                          ip,
+@@ -60,4 +60,4 @@
+         nodes.reverse()
+         for nodeinfo in nodes:
+             self.sendLine(&quot;\t&quot;.join(nodeinfo))
+-    
++        self.sendLine('EOT')
+
+Added: trunk/maay/registrationclient.py
+===================================================================
+--- trunk/maay/registrationclient.py	2005-10-06 13:13:01 UTC (rev 154)
++++ trunk/maay/registrationclient.py	2005-10-06 13:28:50 UTC (rev 155)
+@@ -0,0 +1,35 @@
++from twisted.internet.protocol import Protocol
++from time import mktime
++
++class RegistrationClient(Protocol):
++    def __init__(self, nodeRegisterCallback):
++        self._callback = nodeRegisterCallback
++    def login(self, nodeId, ip, port, bandwidth):
++        self.transport.write('login:%s:%d:%d\r\n' % (nodeId, ip, port, bandwidth))
++        self.disconnect()
++
++    def disconnect(self):
++        self.transport.looseConnection()
++
++    def logout(self, nodeId):
++        self.transport.write('logout:%s\r\n' % nodeId)
++        self.diconnect()
++
++    def who(self):
++        self.transport.write('who:\r\n')
++
++    def lineReceived(self, data):
++        data = data.strip()
++        if data.startswith('EOT'):
++            self.disconnect()
++            return
++        time, nodeId, nodeIP, nodePort, nodeBandwidth = data.split('\t')
++        lastSeenTime = parseTime(time)
++        self._callback(nodeId, nodeIP, nodePort, nodeBandwidth, lastSeenTime)
++        
++
++def parseTime(isodatetime):
++    date, time = isodatetime.split('T')
++    date = [int(s) for s in date.split('-')]
++    time = [int(float(s)) for s in time.split(':')]
++    return mktime(tuple(date+time+[0,0,0]))
+
+
+Property changes on: trunk/maay/registrationclient.py
+___________________________________________________________________
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000127.html">[Maay-svncheckins] r154 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000129.html">[Maay-svncheckins] r156 - in trunk: . maay maay/configuration maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#128">[ date ]</a>
+              <a href="thread.html#128">[ thread ]</a>
+              <a href="subject.html#128">[ subject ]</a>
+              <a href="author.html#128">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

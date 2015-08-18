@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r132 - trunk/maay/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r132%20-%20trunk/maay/test&In-Reply-To=%3C200510051051.j95Ap8Hj030092%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000104.html">
+   <LINK REL="Next"  HREF="000106.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r132 - trunk/maay/test</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r132%20-%20trunk/maay/test&In-Reply-To=%3C200510051051.j95Ap8Hj030092%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r132 - trunk/maay/test">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Oct  5 12:51:08 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000104.html">[Maay-svncheckins] r131 - in trunk: . debian
+</A></li>
+        <LI>Next message: <A HREF="000106.html">[Maay-svncheckins] r133 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#105">[ date ]</a>
+              <a href="thread.html#105">[ thread ]</a>
+              <a href="subject.html#105">[ subject ]</a>
+              <a href="author.html#105">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-05 12:50:43 +0200 (Wed, 05 Oct 2005)
+New Revision: 132
+
+Added:
+   trunk/maay/test/test_server.py
+Log:
+testsuite for raw query parsing
+
+
+Added: trunk/maay/test/test_server.py
+===================================================================
+--- trunk/maay/test/test_server.py	2005-10-05 09:47:59 UTC (rev 131)
++++ trunk/maay/test/test_server.py	2005-10-05 10:50:43 UTC (rev 132)
+@@ -0,0 +1,64 @@
++import unittest
++
++from maay.server import Query
++
++class UtilsTC(unittest.TestCase):
++
++    def testBasicQuery(self):
++        query = Query.fromRawQuery(u&quot;hello&quot;)
++        self.assertEquals(query.words, u&quot;hello&quot;)
++        # excplitly check for unicode-ness ('hello' == u'hello')
++        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(query.filename, None)
++        self.assertEquals(query.filetype, None)
++        self.assertEquals(query.offset, 0)
++        
++    def testBasicQueryWithSeveralWords(self):
++        query = Query.fromRawQuery(u&quot;hello world&quot;)
++        self.assertEquals(query.words, u&quot;hello world&quot;)
++        # excplitly check for unicode-ness ('hello' == u'hello')
++        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(query.filename, None)
++        self.assertEquals(query.filetype, None)
++        self.assertEquals(query.offset, 0)
++        
++    def testOneWordRestrictedQuery(self):
++        query = Query.fromRawQuery(u&quot;hello filetype:pdf&quot;)
++        self.assertEquals(query.words, u&quot;hello&quot;)
++        # excplitly check for unicode-ness ('hello' == u'hello')
++        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(query.filename, None)
++        self.assertEquals(query.filetype, 'application/pdf')
++        self.assertEquals(query.offset, 0)
++
++    def testTwoWordsRestrictedQuery(self):
++        query = Query.fromRawQuery(u&quot;hello filetype:pdf world&quot;)
++        self.assertEquals(query.words, u&quot;hello world&quot;)
++        # excplitly check for unicode-ness ('hello' == u'hello')
++        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(query.filename, None)
++        self.assertEquals(query.filetype, 'application/pdf')
++        self.assertEquals(query.offset, 0)
++
++    def testTwoWordsRestrictedQueryAndOffset(self):
++        query = Query.fromRawQuery(u&quot;hello filetype:pdf world&quot;, 12)
++        self.assertEquals(query.words, u&quot;hello world&quot;)
++        # excplitly check for unicode-ness ('hello' == u'hello')
++        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(query.filename, None)
++        self.assertEquals(query.filetype, 'application/pdf')
++        self.assertEquals(query.offset, 12)
++
++    # Commented because not sure how filename should be handled  :
++    # (regexps ? LIKE %...% ?, etc.)
++##     def testSeveralWordsAndSeveralRestrictions(self):
++##         query = Query.fromRawQuery(u&quot;hello filetype:pdf world filename:foo&quot;)
++##         self.assertEquals(query.words, u&quot;hello world&quot;)
++##         self.assertEquals(query.filename, u&quot;foo&quot;)
++##         self.assertEquals(query.filetype, 'text/pdf')
++
++
++if __name__ == '__main__':
++    unittest.main()
++
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000104.html">[Maay-svncheckins] r131 - in trunk: . debian
+</A></li>
+	<LI>Next message: <A HREF="000106.html">[Maay-svncheckins] r133 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#105">[ date ]</a>
+              <a href="thread.html#105">[ thread ]</a>
+              <a href="subject.html#105">[ subject ]</a>
+              <a href="author.html#105">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

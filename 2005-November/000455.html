@@ -1,0 +1,658 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r484 - in trunk: . doc maay maay/win32
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r484%20-%20in%20trunk%3A%20.%20doc%20maay%20maay/win32&In-Reply-To=%3C200511150851.jAF8pLei025898%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000454.html">
+   <LINK REL="Next"  HREF="000456.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r484 - in trunk: . doc maay maay/win32</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r484%20-%20in%20trunk%3A%20.%20doc%20maay%20maay/win32&In-Reply-To=%3C200511150851.jAF8pLei025898%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r484 - in trunk: . doc maay maay/win32">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 09:51:21 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000454.html">[Maay-svncheckins] r483 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000456.html">[Maay-svncheckins] r485 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#455">[ date ]</a>
+              <a href="thread.html#455">[ thread ]</a>
+              <a href="subject.html#455">[ subject ]</a>
+              <a href="author.html#455">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-15 09:51:11 +0100 (Tue, 15 Nov 2005)
+New Revision: 484
+
+Added:
+   trunk/doc/README.html
+   trunk/doc/default.css
+   trunk/maay/win32/
+   trunk/maay/win32/createdb.py
+   trunk/maay/win32/updateconfig.py
+Removed:
+   trunk/README.html
+   trunk/maay/createdb.py
+   trunk/maay/updateconfig.py
+Log:
+added css, set README.html in doc/
+
+Deleted: trunk/README.html
+===================================================================
+--- trunk/README.html	2005-11-15 08:49:34 UTC (rev 483)
++++ trunk/README.html	2005-11-15 08:51:11 UTC (rev 484)
+@@ -1,147 +0,0 @@
+-&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+-&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+-&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
+-&lt;head&gt;
+-&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+-&lt;meta name=&quot;generator&quot; content=&quot;Docutils 0.3.9: <A HREF="http://docutils.sourceforge.net/">http://docutils.sourceforge.net/</A>&quot; /&gt;
+-&lt;title&gt;Maay documentation&lt;/title&gt;
+-&lt;link rel=&quot;stylesheet&quot; href=&quot;default.css&quot; type=&quot;text/css&quot; /&gt;
+-&lt;/head&gt;
+-&lt;body&gt;
+-&lt;div class=&quot;document&quot; id=&quot;maay-documentation&quot;&gt;
+-&lt;h1 class=&quot;title&quot;&gt;Maay documentation&lt;/h1&gt;
+-&lt;div class=&quot;section&quot; id=&quot;warning&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;warning&quot;&gt;Warning&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;This is beta quality software. Before launching anything be sure to read 
+-this document and the release notes for the program. On Windows systems, 
+-the release notes are available through the start menu shortcut of Maay.&lt;/p&gt;
+-&lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;what-is-maay&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;what-is-maay&quot;&gt;What is Maay?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;Maay is a P2P indexation and search engine. You can use it to index
+-files on your computer, and export them to other members of the Maay
+-P2P network. You can also issue searches which will look for documents
+-on your computer as well as on other nodes of the P2P network.&lt;/p&gt;
+-&lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;what-is-in-the-current-implementation&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;what-is-in-the-current-implementation&quot;&gt;What is in the current implementation?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;The current Maay implementation features:&lt;/p&gt;
+-&lt;blockquote&gt;
+-&lt;ul class=&quot;simple&quot;&gt;
+-&lt;li&gt;the maay node, which acts as an XMLRPC and HTTP server. The XMLRPC
+-interface is used to process indexation requests and distributed
+-queries. The HTTP interface is available through a web browser to
+-issue local and distributed queries, as well as indexation
+-requests.&lt;/li&gt;
+-&lt;li&gt;an indexer, which can handle the following document formats: raw
+-text, HTML, Microsoft Word, Rich Text Format, Portable Document
+-Format.&lt;/li&gt;
+-&lt;li&gt;a presence server, which can handle presence information from maay
+-nodes, in order to seed the node database.&lt;/li&gt;
+-&lt;/ul&gt;
+-&lt;/blockquote&gt;
+-&lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;how-do-i-install-maay-from-source&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;how-do-i-install-maay-from-source&quot;&gt;How do I install Maay from source?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;These instruction are intended for people using a unix-like
+-OS. Windows users are strongly advised to use the prebuilt package
+-(see below).&lt;/p&gt;
+-&lt;p&gt;A few Python libraries are required to make the whole think work. Most
+-of them should be available in your OS distribution too :&lt;/p&gt;
+-&lt;blockquote&gt;
+-&lt;ul class=&quot;simple&quot;&gt;
+-&lt;li&gt;logilab common libraries 0.12.1 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>&quot;&gt;<A HREF="http://www.logilab.org/projects/common&lt;/a">http://www.logilab.org/projects/common&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;mysql-python (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>&quot;&gt;<A HREF="http://sourceforge.net/projects/mysql-python&lt;/a">http://sourceforge.net/projects/mysql-python&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-twisted 2.0 or above ((&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/&lt;/a">http://twistedmatrix.com/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-twisted-web (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/&lt;/a">http://twistedmatrix.com/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-nevow 0.6 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://nevow.com/">http://nevow.com/</A>&quot;&gt;<A HREF="http://nevow.com/&lt;/a">http://nevow.com/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-imaging (www.pythonware.com/products/pil/)&lt;/li&gt;
+-&lt;/ul&gt;
+-&lt;/blockquote&gt;
+-&lt;p&gt;You will also need a few helper applications to perform the conversion
+-of various binary formats to something that Maay can index. There is
+-probably a prebuilt binary available for your OS distribution
+-somewhere. You will need to download and install :&lt;/p&gt;
+-&lt;blockquote&gt;
+-&lt;ul class=&quot;simple&quot;&gt;
+-&lt;li&gt;pdftohtml (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://pdftohtml.sourceforge.net/">http://pdftohtml.sourceforge.net/</A>&quot;&gt;<A HREF="http://pdftohtml.sourceforge.net/&lt;/a">http://pdftohtml.sourceforge.net/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;antiword (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>&quot;&gt;<A HREF="http://www.winfield.demon.nl/&lt;/a">http://www.winfield.demon.nl/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;unrtf (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>&quot;&gt;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html&lt;/a">http://www.gnu.org/software/unrtf/unrtf.html&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;/ul&gt;
+-&lt;/blockquote&gt;
+-&lt;p&gt;The indexation part uses a MySQL database (version 4.1). You
+-will need to install such a database or get in touch with your
+-DBA. The following assumes a local mysql installation, with no root
+-password. Maay has not been tested with MySQL 5.0, but it should
+-work. Please report if you encounter problems with this version of
+-MySQL.&lt;/p&gt;
+-&lt;p&gt;Once everything else is installed, you can point you web browser to
+-&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and download the latest
+-source tarball. Unpack it, go to the newly created directory and run:&lt;/p&gt;
+-&lt;pre class=&quot;literal-block&quot;&gt;
+-# python setup.py install
+-&lt;/pre&gt;
+-&lt;p&gt;It is now necessary to create the MySQL database instance that will
+-store the indexation data:&lt;/p&gt;
+-&lt;pre class=&quot;literal-block&quot;&gt;
+-# mysql -u root mysql
+-mysql&gt; \. sql/mysql.sql
+-&lt;/pre&gt;
+-&lt;p&gt;You're done !&lt;/p&gt;
+-&lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;how-do-i-install-maay-from-a-package&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;how-do-i-install-maay-from-a-package&quot;&gt;How do I install Maay from a package?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;For now, only a Windows installer is available. Download it from
+-&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and run it. This should
+-install and setup everything properly.&lt;/p&gt;
+-&lt;p&gt;A package for the Debian GNU/Linux distribution will soon be made
+-available.&lt;/p&gt;
+-&lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;how-do-i-start-using-maay&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;how-do-i-start-using-maay&quot;&gt;How do I start using Maay?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;First, edit the configuration files. On Windows, they are in 
+-C:Program FilesMaaywebapp.ini and C:Program
+-FilesMaayindexer.ini. The Windows installer should have set the
+-different configuration values
+-On Unix systems, they are in /etc/maay, and you can copy them to 
+-~/.maay/ if you want to have some personnalized settings. Pay attention 
+-to the index-dir and skip-dir settings in indexer.ini.&lt;/p&gt;
+-&lt;p&gt;Then, start the Maay service. On Windows, this is done automatically
+-when your machine boots. On unix systems, use /usr/bin/maay-server&lt;/p&gt;
+-&lt;p&gt;You can now visit &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://localhost:7777/">http://localhost:7777/</A>&quot;&gt;<A HREF="http://localhost:7777/&lt;/a">http://localhost:7777/&lt;/a</A>&gt; which will display the Maay
+-search page. Issuing a search will probably not yield any result since
+-you have not indexed any files yet.&lt;/p&gt;
+-&lt;p&gt;Launch the indexer: visit &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://localhost:7777/indexation">http://localhost:7777/indexation</A>&quot;&gt;<A HREF="http://localhost:7777/indexation&lt;/a">http://localhost:7777/indexation&lt;/a</A>&gt;, check that
+-the directories are correct and click on the &quot;index now&quot; button. On
+-Windows, the indexation can also be launched manually through the
+-start menu again by choosing &quot;Maay Indexer&quot;. On Unix systems, the
+-manual indexation is done by running /usr/bin/maay-indexer.&lt;/p&gt;
+-&lt;p&gt;The indexer will look for files on your hard disks and index them by
+-sending indexation requests to the server. Once the indexation is
+-done, queries issued through the web interface should give results.&lt;/p&gt;
+-&lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;where-can-i-get-help&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;where-can-i-get-help&quot;&gt;Where can I get help?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;For now the best place to ask for help is on the development mailing
+-list of Maay. You can subscribe from&lt;/p&gt;
+-&lt;p&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev">http://lists.berlios.de/mailman/listinfo/maay-dev</A>&quot;&gt;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a">http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a</A>&gt;&lt;/p&gt;
+-&lt;p&gt;You may also use the bug tracker on the Berlios project page at 
+-&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt;&lt;/p&gt;
+-&lt;p&gt;When reporting a bug or asking for help, don't forget to provide the
+-following pieces of information:&lt;/p&gt;
+-&lt;blockquote&gt;
+-&lt;ul class=&quot;simple&quot;&gt;
+-&lt;li&gt;operating system&lt;/li&gt;
+-&lt;li&gt;version of maay&lt;/li&gt;
+-&lt;li&gt;on unix: version of python&lt;/li&gt;
+-&lt;li&gt;steps to reproduce the bug&lt;/li&gt;
+-&lt;/ul&gt;
+-&lt;/blockquote&gt;
+-&lt;p&gt;Be as precise as possible. Just saying &quot;the indexer does not work&quot;
+-won't give us any clue to help you.&lt;/p&gt;
+-&lt;blockquote&gt;
+-Alexandre Fayolle &lt;&lt;a class=&quot;reference&quot; href=&quot;mailto:alexandre.fayolle&#64;logilab.fr&quot;&gt;alexandre.fayolle&#64;logilab.fr&lt;/a&gt;&gt;, Tue, 15 Nov 2005 09:41:54 +0100&lt;/blockquote&gt;
+-&lt;/div&gt;
+-&lt;/div&gt;
+-&lt;/body&gt;
+-&lt;/html&gt;
+
+Copied: trunk/doc/README.html (from rev 483, trunk/README.html)
+
+Added: trunk/doc/default.css
+===================================================================
+--- trunk/doc/default.css	2005-11-15 08:49:34 UTC (rev 483)
++++ trunk/doc/default.css	2005-11-15 08:51:11 UTC (rev 484)
+@@ -0,0 +1,263 @@
++/*
++:Author: David Goodger
++:Contact: <A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">goodger at users.sourceforge.net</A>
++:Date: $Date: 2005-05-26 12:51:39 +0200 (Thu, 26 May 2005) $
++:Version: $Revision: 3368 $
++:Copyright: This stylesheet has been placed in the public domain.
++
++Default cascading style sheet for the HTML output of Docutils.
++*/
++
++/* &quot;! important&quot; is used here to override other ``margin-top`` and
++   ``margin-bottom`` styles that are later in the stylesheet or 
++   more specific.  See <A HREF="http://www.w3.org/TR/CSS1#the-cascade">http://www.w3.org/TR/CSS1#the-cascade</A> */
++.first {
++  margin-top: 0 ! important }
++
++.last, .with-subtitle {
++  margin-bottom: 0 ! important }
++
++.hidden {
++  display: none }
++
++a.toc-backref {
++  text-decoration: none ;
++  color: black }
++
++blockquote.epigraph {
++  margin: 2em 5em ; }
++
++dl.docutils dd {
++  margin-bottom: 0.5em }
++
++/* Uncomment (and remove this text!) to get bold-faced definition list terms
++dl.docutils dt {
++  font-weight: bold }
++*/
++
++div.abstract {
++  margin: 2em 5em }
++
++div.abstract p.topic-title {
++  font-weight: bold ;
++  text-align: center }
++
++div.admonition, div.attention, div.caution, div.danger, div.error,
++div.hint, div.important, div.note, div.tip, div.warning {
++  margin: 2em ;
++  border: medium outset ;
++  padding: 1em }
++
++div.admonition p.admonition-title, div.hint p.admonition-title,
++div.important p.admonition-title, div.note p.admonition-title,
++div.tip p.admonition-title {
++  font-weight: bold ;
++  font-family: sans-serif }
++
++div.attention p.admonition-title, div.caution p.admonition-title,
++div.danger p.admonition-title, div.error p.admonition-title,
++div.warning p.admonition-title {
++  color: red ;
++  font-weight: bold ;
++  font-family: sans-serif }
++
++/* Uncomment (and remove this text!) to get reduced vertical space in
++   compound paragraphs.
++div.compound .compound-first, div.compound .compound-middle {
++  margin-bottom: 0.5em }
++
++div.compound .compound-last, div.compound .compound-middle {
++  margin-top: 0.5em }
++*/
++
++div.dedication {
++  margin: 2em 5em ;
++  text-align: center ;
++  font-style: italic }
++
++div.dedication p.topic-title {
++  font-weight: bold ;
++  font-style: normal }
++
++div.figure {
++  margin-left: 2em }
++
++div.footer, div.header {
++  font-size: smaller }
++
++div.line-block {
++  display: block ;
++  margin-top: 1em ;
++  margin-bottom: 1em }
++
++div.line-block div.line-block {
++  margin-top: 0 ;
++  margin-bottom: 0 ;
++  margin-left: 1.5em }
++
++div.sidebar {
++  margin-left: 1em ;
++  border: medium outset ;
++  padding: 1em ;
++  background-color: #ffffee ;
++  width: 40% ;
++  float: right ;
++  clear: right }
++
++div.sidebar p.rubric {
++  font-family: sans-serif ;
++  font-size: medium }
++
++div.system-messages {
++  margin: 5em }
++
++div.system-messages h1 {
++  color: red }
++
++div.system-message {
++  border: medium outset ;
++  padding: 1em }
++
++div.system-message p.system-message-title {
++  color: red ;
++  font-weight: bold }
++
++div.topic {
++  margin: 2em }
++
++h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
++h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
++  margin-top: 0.4em }
++
++h1.title {
++  text-align: center }
++
++h2.subtitle {
++  text-align: center }
++
++hr.docutils {
++  width: 75% }
++
++ol.simple, ul.simple {
++  margin-bottom: 1em }
++
++ol.arabic {
++  list-style: decimal }
++
++ol.loweralpha {
++  list-style: lower-alpha }
++
++ol.upperalpha {
++  list-style: upper-alpha }
++
++ol.lowerroman {
++  list-style: lower-roman }
++
++ol.upperroman {
++  list-style: upper-roman }
++
++p.attribution {
++  text-align: right ;
++  margin-left: 50% }
++
++p.caption {
++  font-style: italic }
++
++p.credits {
++  font-style: italic ;
++  font-size: smaller }
++
++p.label {
++  white-space: nowrap }
++
++p.rubric {
++  font-weight: bold ;
++  font-size: larger ;
++  color: maroon ;
++  text-align: center }
++
++p.sidebar-title {
++  font-family: sans-serif ;
++  font-weight: bold ;
++  font-size: larger }
++
++p.sidebar-subtitle {
++  font-family: sans-serif ;
++  font-weight: bold }
++
++p.topic-title {
++  font-weight: bold }
++
++pre.address {
++  margin-bottom: 0 ;
++  margin-top: 0 ;
++  font-family: serif ;
++  font-size: 100% }
++
++pre.line-block {
++  font-family: serif ;
++  font-size: 100% }
++
++pre.literal-block, pre.doctest-block {
++  margin-left: 2em ;
++  margin-right: 2em ;
++  background-color: #eeeeee }
++
++span.classifier {
++  font-family: sans-serif ;
++  font-style: oblique }
++
++span.classifier-delimiter {
++  font-family: sans-serif ;
++  font-weight: bold }
++
++span.interpreted {
++  font-family: sans-serif }
++
++span.option {
++  white-space: nowrap }
++
++span.pre {
++  white-space: pre }
++
++span.problematic {
++  color: red }
++
++span.section-subtitle {
++  /* font-size relative to parent (&lt;h#&gt; element) */
++  font-size: 80% }
++
++table.citation {
++  border-left: solid thin gray }
++
++table.docinfo {
++  margin: 2em 4em }
++
++table.docutils {
++  margin-top: 0.5em ;
++  margin-bottom: 0.5em }
++
++table.footnote {
++  border-left: solid thin black }
++
++table.docutils td, table.docutils th,
++table.docinfo td, table.docinfo th {
++  padding-left: 0.5em ;
++  padding-right: 0.5em ;
++  vertical-align: top }
++
++table.docutils th.field-name, table.docinfo th.docinfo-name {
++  font-weight: bold ;
++  text-align: left ;
++  white-space: nowrap ;
++  padding-left: 0 }
++
++h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
++h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
++  font-size: 100% }
++
++tt.docutils {
++  background-color: #eeeeee }
++
++ul.auto-toc {
++  list-style-type: none }
+
+Deleted: trunk/maay/createdb.py
+===================================================================
+--- trunk/maay/createdb.py	2005-11-15 08:49:34 UTC (rev 483)
++++ trunk/maay/createdb.py	2005-11-15 08:51:11 UTC (rev 484)
+@@ -1,41 +0,0 @@
+-#     Maay : a network of peers for document search
+-#
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This library is free software; you can redistribute it and/or
+-#     modify it under the terms of the GNU Lesser General Public
+-#     License as published by the Free Software Foundation; either
+-#     version 2.1 of the License, or (at your option) any later version.
+-#
+-#     This library is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-#     Lesser General Public License for more details.
+-#
+-#     You should have received a copy of the GNU Lesser General Public
+-#     License along with this library; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-
+-&quot;&quot;&quot; helper to create the maay mysql instance on windows platform&quot;&quot;&quot;
+-
+-__revision__ = '$Id$'
+-
+-import os
+-
+-def do_delete():
+-    pipe = os.popen(r'mysql\bin\mysql.exe -u root mysql', 'w')
+-    pipe.write('DROP DATABASE maay;\n')
+-    pipe.close()
+-    
+-
+-def do_create():
+-    pipe = os.popen(r'mysql\bin\mysql.exe -u root mysql', 'w')
+-    data = file('mysql.sql','rb').read()
+-    pipe.write(data)
+-    pipe.close()
+-    
+-if __name__ == '__main__':
+-    do_delete()
+-    do_create()
+-	
+-	
+
+Deleted: trunk/maay/updateconfig.py
+===================================================================
+--- trunk/maay/updateconfig.py	2005-11-15 08:49:34 UTC (rev 483)
++++ trunk/maay/updateconfig.py	2005-11-15 08:51:11 UTC (rev 484)
+@@ -1,99 +0,0 @@
+-#     Maay : a network of peers for document search
+-#
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This library is free software; you can redistribute it and/or
+-#     modify it under the terms of the GNU Lesser General Public
+-#     License as published by the Free Software Foundation; either
+-#     version 2.1 of the License, or (at your option) any later version.
+-#
+-#     This library is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-#     Lesser General Public License for more details.
+-#
+-#     You should have received a copy of the GNU Lesser General Public
+-#     License along with this library; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-
+-&quot;&quot;&quot; helper to create the indexer.ini configuration file at install time on windows&quot;&quot;&quot;
+-
+-__revision__ = '$Id$'
+-import os
+-import sys
+-
+-indexer_config = &quot;&quot;&quot;[INDEXER]
+-# Host on which the maay node is running
+-host=localhost
+-#Port on which the maay node is listening
+-port=6789
+-
+-# User login on the maay node 
+-user=maay
+-# User password on the maay node
+-password=maay
+-
+-# Which directories are to be indexed
+-#  - private indexed directories are not available to  queries from other nodes
+-#  - public indexed directories are available to these queries
+-#  - skip dirs are not indexed
+-#
+-# If a document is available through both a public and a private directory, 
+-# the public version prevails
+-#
+-# You can use a comma separated list of values to specify several
+-# directories in each configuration variable. 
+-private-index-dir=%(private)s
+-private-skip-dir=%(private_skip)s
+-public-index-dir=%(public)s
+-public-skip-dir=%(public_skip)s
+-&quot;&quot;&quot;
+-
+-node_config = &quot;&quot;&quot;[NODE]
+-db-name=maay
+-db-host=localhost
+-user=maay
+-password=maay
+-presence-host=%(presence)s
+-presence-port=%(port)d
+-&quot;&quot;&quot;
+-import socket
+-
+-def createConfigFile(myDesktop, myDocuments):
+-    f=open(&quot;indexer.ini&quot;, &quot;w&quot;)
+-    values = {'private'     : '%s,%s' % (myDesktop, myDocuments),
+-              'private_skip': '',
+-              'public'      : '%s\\Maay Documents' % myDesktop,
+-              'public_skip' : '',
+-              }
+-    f.write(indexer_config % values)
+-    f.close()
+-
+-    f = open(&quot;node.ini&quot;, &quot;w&quot;)
+-    presence, port = probe_presence_config()
+-    values = {'presence': presence,
+-              'port': port}
+-    f.write(node_config % values)
+-    f.close()
+-
+-def probe_presence_config():
+-    for addr in (('maay.rd.francetelecom.fr', 2345), # private FT server
+-                 ('192.33.178.29', 2345), # public FT server
+-                 ('172.17.1.4', 2345),    # private logilab server
+-                 ('192.168.74.105', 2345),# private logilab server
+-                 ):
+-        print 'probing', addr
+-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-        try:
+-            s.connect(addr)
+-            s.close()
+-        except socket.error, exc:
+-            continue
+-        else:
+-            return addr
+-    return '192.33.178.29', 2345
+-        
+-    
+-if __name__ == '__main__':
+-    createConfigFile(sys.argv[1], sys.argv[2])
+-	
+
+Copied: trunk/maay/win32/createdb.py (from rev 482, trunk/maay/createdb.py)
+
+Copied: trunk/maay/win32/updateconfig.py (from rev 482, trunk/maay/updateconfig.py)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000454.html">[Maay-svncheckins] r483 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000456.html">[Maay-svncheckins] r485 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#455">[ date ]</a>
+              <a href="thread.html#455">[ thread ]</a>
+              <a href="subject.html#455">[ subject ]</a>
+              <a href="author.html#455">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

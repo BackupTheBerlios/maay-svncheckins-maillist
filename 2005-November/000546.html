@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r574 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r574%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511181555.jAIFtoRJ026436%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000545.html">
+   <LINK REL="Next"  HREF="000547.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r574 - in trunk/maay: . data</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r574%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511181555.jAIFtoRJ026436%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r574 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 16:55:50 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000545.html">[Maay-svncheckins] r573 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000547.html">[Maay-svncheckins] r575 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#546">[ date ]</a>
+              <a href="thread.html#546">[ thread ]</a>
+              <a href="subject.html#546">[ subject ]</a>
+              <a href="author.html#546">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-18 16:55:50 +0100 (Fri, 18 Nov 2005)
+New Revision: 574
+
+Modified:
+   trunk/maay/data/indexationpage.html
+   trunk/maay/indexer.py
+   trunk/maay/webapplication.py
+Log:
+added number of &quot;untouched&quot; documents on the indexation web page
+
+Modified: trunk/maay/data/indexationpage.html
+===================================================================
+--- trunk/maay/data/indexationpage.html	2005-11-18 15:28:31 UTC (rev 573)
++++ trunk/maay/data/indexationpage.html	2005-11-18 15:55:50 UTC (rev 574)
+@@ -8,6 +8,8 @@
+     &lt;nevow:invisible nevow:render=&quot;liveglue&quot; /&gt;
+ 
+     &lt;script type='text/javascript' language='javascript'&gt;
++
++abortNeeded = true;
+ function live() {
+   server.callRemote('live');
+ }
+@@ -16,6 +18,7 @@
+   elt = document.getElementById('statusMessage');
+   elt.innerHTML = msg;
+ }
++
+     &lt;/script&gt;
+   &lt;/head&gt;
+   &lt;body onload=&quot;live();&quot;&gt;
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-18 15:28:31 UTC (rev 573)
++++ trunk/maay/indexer.py	2005-11-18 15:55:50 UTC (rev 574)
+@@ -53,11 +53,13 @@
+     def newDocumentIndexed(filename):
+         &quot;&quot;&quot;called by indexer when a document was just indexed&quot;&quot;&quot;
+ 
++    def documentUntouched(filename):
++        &quot;&quot;&quot;called when a document was left untouched&quot;&quot;&quot;
++
+     def indexationCompleted():
+         &quot;&quot;&quot;called when indexation is over&quot;&quot;&quot;
+ 
+ 
+-
+ def makeDocumentId(filename):
+     &quot;&quot;&quot;return the SHA hash value from of the contents of the file&quot;&quot;&quot;
+     stream = file(filename, 'rb')
+@@ -201,8 +203,10 @@
+             lastModificationTime = os.path.getmtime(filepath)
+             lastIdxTime, lastIdxState = self.getLastIndexationTimeAndState(filepath)
+             if lastIdxState == state and lastIdxTime &gt;= lastModificationTime:
+-                    raise FileIndexationFailure (safe_encode(filepath),
+-                                                 &quot;it didn't change since last indexation&quot;)
++                for obs in self.observers:
++                    obs.documentUntouched(filepath)
++                print &quot;%s didn't change since last indexation&quot; % (safe_encode(filepath),)
++                return
+             try:
+                 title, text, _, _ = converter.extractWordsFromFile(filepath)
+             except converter.IndexationFailure, exc:
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-18 15:28:31 UTC (rev 573)
++++ trunk/maay/webapplication.py	2005-11-18 15:55:50 UTC (rev 574)
+@@ -113,7 +113,8 @@
+     implements(indexer.IIndexerObserver)
+ 
+     # share counter among instances
+-    counter = 0
++    indexedDocuments = 0
++    untouchedDocuments = 0
+     
+     def __init__(self):
+         athena.LivePage.__init__(self)
+@@ -139,15 +140,22 @@
+         self.callRemote('updateStatus', message)
+ 
+     def newDocumentIndexed(self, filename):
+-        IndexationPage.counter += 1
+-        if (IndexationPage.counter % 10) == 0:
+-            self.updateStatus(u'Indexation in progress - %s documents indexed'
+-                              % IndexationPage.counter)
++        IndexationPage.indexedDocuments += 1
++        if (IndexationPage.indexedDocuments % 10) == 0:
++            self.updateStatus(u'Indexation in progress - %s documents indexed (%s left untouched)'
++                              % (IndexationPage.indexedDocuments, IndexationPage.untouchedDocuments))
+ 
++    def documentUntouched(self, filename):
++        IndexationPage.untouchedDocuments += 1
++        if (IndexationPage.untouchedDocuments % 10) == 0:
++            self.updateStatus(u'Indexation in progress - %s documents indexed (%s left untouched)'
++                              % (IndexationPage.indexedDocuments, IndexationPage.untouchedDocuments))
++        
+     def indexationCompleted(self):
+-        self.updateStatus(u'Indexation completed (%s documents indexed)' %
+-                          (IndexationPage.counter,))
++        self.updateStatus(u'Indexation completed (%s documents indexed - %s left untouched)' %
++                          (IndexationPage.indexedDocuments, IndexationPage.untouchedDocuments))
+ 
++
+     def render_message(self, context, data):
+         return self.msg
+ 
+@@ -178,6 +186,10 @@
+         for webpage in self.clients.itervalues():
+             webpage.newDocumentIndexed(filename)
+         
++    def documentUntouched(self, filename):
++        for webpage in self.clients.itervalues():
++            webpage.documentUntouched(filename)
++        
+     def indexationCompleted(self):
+         for webpage in self.clients.itervalues():
+             webpage.indexationCompleted()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000545.html">[Maay-svncheckins] r573 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000547.html">[Maay-svncheckins] r575 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#546">[ date ]</a>
+              <a href="thread.html#546">[ thread ]</a>
+              <a href="subject.html#546">[ subject ]</a>
+              <a href="author.html#546">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

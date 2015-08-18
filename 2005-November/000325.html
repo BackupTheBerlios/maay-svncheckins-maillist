@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r349 - trunk/maay/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r349%20-%20trunk/maay/data&In-Reply-To=%3C200511081805.jA8I51mq008358%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000324.html">
+   <LINK REL="Next"  HREF="000326.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r349 - trunk/maay/data</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r349%20-%20trunk/maay/data&In-Reply-To=%3C200511081805.jA8I51mq008358%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r349 - trunk/maay/data">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 19:05:01 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000324.html">[Maay-svncheckins] r348 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000326.html">[Maay-svncheckins] r350 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#325">[ date ]</a>
+              <a href="thread.html#325">[ thread ]</a>
+              <a href="subject.html#325">[ subject ]</a>
+              <a href="author.html#325">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-08 19:04:59 +0100 (Tue, 08 Nov 2005)
+New Revision: 349
+
+Modified:
+   trunk/maay/data/maay.css
+   trunk/maay/data/resultpage.html
+Log:
+Some esthetic modifications...
+
+
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-08 18:03:51 UTC (rev 348)
++++ trunk/maay/data/maay.css	2005-11-08 18:04:59 UTC (rev 349)
+@@ -4,7 +4,6 @@
+ h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 12pt; font-style:italic ; font-weight: bold ; color: #444444}
+ h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; color: #888888}
+ 
+-
+ /** login page ********/
+ table.loginTable {
+   width: 100%;
+@@ -49,6 +48,7 @@
+ 
+ div.prevnext {
+   width: 100%;
++  font-size: 10px;
+ }
+ 
+ div.prevnext a {
+@@ -73,6 +73,10 @@
+   background: lightgrey;
+ }
+ 
++image{
++  border: 0px;
++}
++
+ /** icon *******/
+ div.text_html {
+   /* display: block; */
+
+Modified: trunk/maay/data/resultpage.html
+===================================================================
+--- trunk/maay/data/resultpage.html	2005-11-08 18:03:51 UTC (rev 348)
++++ trunk/maay/data/resultpage.html	2005-11-08 18:04:59 UTC (rev 349)
+@@ -6,7 +6,7 @@
+     &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+       &lt;table&gt;
+         &lt;tr&gt;
+-          &lt;td&gt;&lt;img src=&quot;images/smallmaay.png&quot; /&gt;&lt;/td&gt;
++          &lt;td&gt;&lt;a href=&quot;/&quot;&gt;&lt;img border=&quot;0&quot; src=&quot;images/smallmaay.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
+           &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;words&quot; nevow:render=&quot;searchfield&quot;&gt;&lt;nevow:attr name=&quot;value&quot; &gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;/input&gt;&lt;/td&gt;
+           &lt;td&gt;&lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;&lt;/td&gt;
+ 	&lt;/tr&gt;
+@@ -25,7 +25,10 @@
+       &lt;/td&gt;
+     &lt;/tr&gt;
+   &lt;/table&gt;
++  &lt;br /&gt;
++  &lt;center&gt;
+   &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+   nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+   name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
++  &lt;/center&gt;
+ &lt;/nevow:invisible&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000324.html">[Maay-svncheckins] r348 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000326.html">[Maay-svncheckins] r350 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#325">[ date ]</a>
+              <a href="thread.html#325">[ thread ]</a>
+              <a href="subject.html#325">[ subject ]</a>
+              <a href="author.html#325">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

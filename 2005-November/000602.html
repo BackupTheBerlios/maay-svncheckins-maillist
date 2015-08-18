@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r630 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r630%20-%20trunk/maay&In-Reply-To=%3C200511231650.jANGoV2o021232%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000601.html">
+   <LINK REL="Next"  HREF="000603.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r630 - trunk/maay</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r630%20-%20trunk/maay&In-Reply-To=%3C200511231650.jANGoV2o021232%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r630 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 17:50:31 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000601.html">[Maay-svncheckins] r629 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000603.html">[Maay-svncheckins] r631 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#602">[ date ]</a>
+              <a href="thread.html#602">[ thread ]</a>
+              <a href="subject.html#602">[ subject ]</a>
+              <a href="author.html#602">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-23 17:50:31 +0100 (Wed, 23 Nov 2005)
+New Revision: 630
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/webapplication.py
+Log:
+- restored the 15-limit
+- sort either on &quot;publication_time, relevance&quot;, &quot;relevance, publication_time&quot;
+  or &quot;popularity, publication_time&quot;
+
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-23 16:33:18 UTC (rev 629)
++++ trunk/maay/dbentity.py	2005-11-23 16:50:31 UTC (rev 630)
+@@ -378,11 +378,16 @@
+     fromDocument = staticmethod(fromDocument)
+ 
+     def _selectQuery(cls, query, onlyLocal=False, onlyDistant=False):
++        limit = query.limit or 15
+         wheres = ['query_id=%(query_id)s']
+         if onlyDistant:
+             wheres.append(&quot;host != 'localhost'&quot;)
+         elif onlyLocal:
+             wheres.append(&quot;host = 'localhost'&quot;)
++        if query.order == 'publication_time':
++            orderClause = 'publication_time, relevance'
++        else:
++            orderClause = '%s, publication_time' % (query.order,)
+         sqlQuery = 'SELECT %s FROM %s WHERE %s GROUP BY document_id ' \
+             'HAVING record_ts=MIN(record_ts) ' \
+             'ORDER BY %s %s ' \
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-23 16:33:18 UTC (rev 629)
++++ trunk/maay/webapplication.py	2005-11-23 16:50:31 UTC (rev 630)
+@@ -580,8 +580,6 @@
+             p2pQuery = P2pQuery(sender=webappConfig.get_node_id(),
+                                 query=self.query)
+             self.qid = p2pQuery.qid
+-            # XXX: attach queryId to query object. Will be handled cleanly
+-            #      in a next release
+             self.p2pQuery = p2pQuery
+             # purge old results
+             self.querier.purgeOldResults()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000601.html">[Maay-svncheckins] r629 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000603.html">[Maay-svncheckins] r631 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#602">[ date ]</a>
+              <a href="thread.html#602">[ thread ]</a>
+              <a href="subject.html#602">[ subject ]</a>
+              <a href="author.html#602">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

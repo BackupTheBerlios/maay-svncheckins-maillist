@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r339 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r339%20-%20trunk/maay&In-Reply-To=%3C200511081404.jA8E4vHG028428%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000314.html">
+   <LINK REL="Next"  HREF="000316.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r339 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r339%20-%20trunk/maay&In-Reply-To=%3C200511081404.jA8E4vHG028428%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r339 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 15:04:57 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000314.html">[Maay-svncheckins] r338 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000316.html">[Maay-svncheckins] r340 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#315">[ date ]</a>
+              <a href="thread.html#315">[ thread ]</a>
+              <a href="subject.html#315">[ subject ]</a>
+              <a href="author.html#315">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-08 15:04:56 +0100 (Tue, 08 Nov 2005)
+New Revision: 339
+
+Modified:
+   trunk/maay/querier.py
+Log:
+Robustify against non unicode query words
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-08 11:18:07 UTC (rev 338)
++++ trunk/maay/querier.py	2005-11-08 14:04:56 UTC (rev 339)
+@@ -144,7 +144,7 @@
+     def findDocuments(self, query):
+         &quot;&quot;&quot;Find all indexed documents matching the query&quot;&quot;&quot;
+         # TODO: order results using document_scores information
+-        words = WORDS_RGX.findall(normalizeText(query.words))
++        words = WORDS_RGX.findall(normalizeText(unicode(query.words)))
+         self._updateQueryStatistics(words)
+         try:
+             cursor = self._cnx.cursor()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000314.html">[Maay-svncheckins] r338 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000316.html">[Maay-svncheckins] r340 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#315">[ date ]</a>
+              <a href="thread.html#315">[ thread ]</a>
+              <a href="subject.html#315">[ subject ]</a>
+              <a href="author.html#315">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

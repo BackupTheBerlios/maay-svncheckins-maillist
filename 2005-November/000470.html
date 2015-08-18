@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r499 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r499%20-%20trunk/maay&In-Reply-To=%3C200511151308.jAFD8waZ005460%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000469.html">
+   <LINK REL="Next"  HREF="000471.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r499 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r499%20-%20trunk/maay&In-Reply-To=%3C200511151308.jAFD8waZ005460%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r499 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 14:08:58 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000469.html">[Maay-svncheckins] r498 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000471.html">[Maay-svncheckins] r500 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#470">[ date ]</a>
+              <a href="thread.html#470">[ thread ]</a>
+              <a href="subject.html#470">[ subject ]</a>
+              <a href="author.html#470">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-15 14:08:55 +0100 (Tue, 15 Nov 2005)
+New Revision: 499
+
+Modified:
+   trunk/maay/configuration.py
+   trunk/maay/webapplication.py
+Log:
+Restore correct configuration beheviour for nodes
+
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-15 11:58:01 UTC (rev 498)
++++ trunk/maay/configuration.py	2005-11-15 13:08:55 UTC (rev 499)
+@@ -87,13 +87,30 @@
+     return [file_obj for file_obj in file_list
+             if os.access(file_obj, access_criterium)]
+ 
++def _download_index_dir():
++    if sys.platform == 'win32':
++        theDir = &quot;C:\Documents and Settings\All Users\Documents\MaayDownloads&quot;
++    else:
++        theDir = osp.expanduser('~/maay-downloads/')
++    if not osp.exists(theDir):
++        os.makedirs(theDir)
++    return theDir
++
+ class Configuration(BaseConfiguration):
+     options = [
+         ('config-name',
+          {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;config-name&gt;&quot;, 'short' : &quot;C&quot;,
+          'help' : &quot;allow to specify a config directory name&quot;,
+           'default' : &quot;maay&quot;,
+-        })]
++        }),
++        ('download-index-dir',
++         {'type': 'string',
++          'metavar': '&lt;downloads&gt;',
++          'help': 'downloaded files will go there and be immediately indexed',
++          'default' : _download_index_dir()
++          })
++
++        ]
+     config_file = None
+ 
+     def __init__(self, name=None):
+@@ -253,17 +270,7 @@
+         raise ValueError('Unable to find a writable directory to store the node id')
+ 
+ ################ Indexer stuff
+-
+     
+-def _download_index_dir():
+-    if sys.platform == 'win32':
+-        theDir = &quot;C:\Documents and Settings\All Users\Documents\MaayDownloads&quot;
+-    else:
+-        theDir = osp.expanduser('~/maay-downloads/')
+-    if not osp.exists(theDir):
+-        os.makedirs(theDir)
+-    return theDir
+-
+ class IndexerConfiguration(Configuration):
+     options = Configuration.options + [
+         ('host',
+@@ -317,12 +324,6 @@
+           'help': 'the public indexer will skip this directory',
+           'default' : []
+           }),
+-        ('download-index-dir',
+-         {'type': 'string',
+-          'metavar': '&lt;downloads&gt;',
+-          'help': 'downloaded files will go there and be immediately indexed',
+-          'default' : _download_index_dir()
+-          }),
+         
+         ('verbose',
+          {'type': 'yn',
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-15 11:58:01 UTC (rev 498)
++++ trunk/maay/webapplication.py	2005-11-15 13:08:55 UTC (rev 499)
+@@ -36,7 +36,7 @@
+ from logilab.common.textutils import normalize_text
+ 
+ from maay.querier import WEB_AVATARID
+-from maay.configuration import get_path_of, IndexerConfiguration
++from maay.configuration import get_path_of, NodeConfiguration
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+@@ -72,7 +72,6 @@
+         self.msg = msg
+ 
+     def render_errormsg(self, context, data):
+-        print &quot;Rendering error msg&quot;, self.msg
+         return self.msg
+     
+     def renderHTTP_notFound(self, context):
+@@ -106,7 +105,7 @@
+             context.fillSlots(attrname, getattr(peerNode, attrname, 'N/A'))
+         return context.tag
+ 
+-_idxcfg = IndexerConfiguration()
++_idxcfg = NodeConfiguration()
+ _idxcfg.load()
+                     
+ class SearchForm(MaayPage):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000469.html">[Maay-svncheckins] r498 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000471.html">[Maay-svncheckins] r500 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#470">[ date ]</a>
+              <a href="thread.html#470">[ thread ]</a>
+              <a href="subject.html#470">[ subject ]</a>
+              <a href="author.html#470">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

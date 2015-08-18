@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r197 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r197%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510191526.j9JFQocf027166%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000167.html">
+   <LINK REL="Next"  HREF="000169.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r197 - in trunk/maay: . test</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r197%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510191526.j9JFQocf027166%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r197 - in trunk/maay: . test">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Oct 19 17:26:50 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000167.html">[Maay-svncheckins] r196 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000169.html">[Maay-svncheckins] r198 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#168">[ date ]</a>
+              <a href="thread.html#168">[ thread ]</a>
+              <a href="subject.html#168">[ subject ]</a>
+              <a href="author.html#168">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-19 17:26:50 +0200 (Wed, 19 Oct 2005)
+New Revision: 197
+
+Modified:
+   trunk/maay/p2pquerier.py
+   trunk/maay/test/test_p2p.py
+Log:
+- test fixed to match API
+- cosmetic and docstrings in p2pquerier
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-10-18 20:12:39 UTC (rev 196)
++++ trunk/maay/p2pquerier.py	2005-10-19 15:26:50 UTC (rev 197)
+@@ -19,19 +19,23 @@
+ &quot;&quot;&quot;
+ __revision__ = '$Id$'
+ 
+-from sets import Set
++from logilab.common.compat import set
+ 
+ from twisted.web.xmlrpc import Proxy
+ 
+ # XXX should P2pQuery derive from query.Query?
+ class P2pQuery:
+     def __init__(self, queryId, sender, ttl, query):
++        &quot;&quot;&quot;
++        :param query: the query to wrap
++        :type query: `maay.query.Query`
++        &quot;&quot;&quot;
+         self.id = queryId
+         self.sender = sender
+         self.ttl = ttl
+         self.query = query
+         self.query.searchtype = 'p2p'
+-        self.documents = Set
++        self.documents = set()
+ 
+     def hop(self):
+         self.ttl -= 1
+@@ -72,7 +76,7 @@
+     the statistical information available about the neighbors'
+     documents.
+     &quot;&quot;&quot;
+-    _queries = {} # AUC : needs to be shared amongst instances, why not, but then, what ...
++    _queries = {} 
+     
+     def __init__(self, nodeId, querier):  # about those ? 
+         self.nodeId = nodeId  
+
+Modified: trunk/maay/test/test_p2p.py
+===================================================================
+--- trunk/maay/test/test_p2p.py	2005-10-18 20:12:39 UTC (rev 196)
++++ trunk/maay/test/test_p2p.py	2005-10-19 15:26:50 UTC (rev 197)
+@@ -19,7 +19,7 @@
+ __revision__ = '$Id$'
+ 
+ import unittest
+-from maay.server import Query
++from maay.query import Query
+ from maay.p2pquerier import *
+ from maay.dbentity import Document
+ 
+@@ -28,7 +28,7 @@
+         self.query = P2pQuery(queryId='1'*40,
+                               sender='<A HREF="http://localhost:3423">http://localhost:3423</A>',
+                               ttl=2,
+-                              query=None)
++                              query=Query.fromRawQuery(&quot;foo&quot;))
+ 
+     def testHop(self):
+         ttl = self.query.ttl
+@@ -48,11 +48,11 @@
+ 
+ class P2pQuerierTC(unittest.TestCase):
+     def setUp(self):
+-        self.querier = P2pQuerier('0'*40)
++        self.querier = P2pQuerier('0'*40, None)  #XXX: How can we get a querier ?
+         self.query = P2pQuery(queryId='1'*40,
+                               sender='<A HREF="http://localhost:3423">http://localhost:3423</A>',
+                               ttl=2,
+-                              query=None)
++                              query=Query.fromRawQuery(&quot;foo&quot;))
+ 
+     def tearDown(self):
+         self.querier._queries = {}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000167.html">[Maay-svncheckins] r196 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000169.html">[Maay-svncheckins] r198 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#168">[ date ]</a>
+              <a href="thread.html#168">[ thread ]</a>
+              <a href="subject.html#168">[ subject ]</a>
+              <a href="author.html#168">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

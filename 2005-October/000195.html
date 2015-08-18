@@ -1,0 +1,418 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r224 - in trunk/maay: . data data/images
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r224%20-%20in%20trunk/maay%3A%20.%20data%20data/images&In-Reply-To=%3C200510251508.j9PF8MWZ030574%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000194.html">
+   <LINK REL="Next"  HREF="000196.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r224 - in trunk/maay: . data data/images</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r224%20-%20in%20trunk/maay%3A%20.%20data%20data/images&In-Reply-To=%3C200510251508.j9PF8MWZ030574%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r224 - in trunk/maay: . data data/images">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Oct 25 17:08:22 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000194.html">[Maay-svncheckins] r223 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000196.html">[Maay-svncheckins] r225 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#195">[ date ]</a>
+              <a href="thread.html#195">[ thread ]</a>
+              <a href="subject.html#195">[ subject ]</a>
+              <a href="author.html#195">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-25 17:08:18 +0200 (Tue, 25 Oct 2005)
+New Revision: 224
+
+Modified:
+   trunk/maay/data/images/smallmaay.png
+   trunk/maay/data/resultpage.html
+   trunk/maay/data/searchform.html
+   trunk/maay/data/skeleton.html
+   trunk/maay/rpc.py
+   trunk/maay/server.py
+Log:
+This set of fixes tries to provide the &quot;autologin&quot; feature with the less possible modifications.
+It is surely not the best way. 
+- changes to server.py are 90% commenting out now unused code, adding some print statements and changing slightly the init procedure of the portal
+- html templates have parts of them accordingly commented out
+- something insignificant (and a question) in rpc.py
+
+
+Modified: trunk/maay/data/images/smallmaay.png
+===================================================================
+(Binary files differ)
+
+Modified: trunk/maay/data/resultpage.html
+===================================================================
+--- trunk/maay/data/resultpage.html	2005-10-25 09:30:45 UTC (rev 223)
++++ trunk/maay/data/resultpage.html	2005-10-25 15:08:18 UTC (rev 224)
+@@ -1,7 +1,7 @@
+ &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+ &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+ &lt;nevow:invisible xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+-  &lt;a nevow:render=&quot;loginurl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;loginurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;actionlabel&quot; /&gt;&lt;/a&gt;
++  &lt;!-- &lt;a nevow:render=&quot;loginurl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;loginurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;actionlabel&quot; /&gt;&lt;/a&gt; --&gt;
+   &lt;div class=&quot;reSearch&quot;&gt;
+     &lt;img src=&quot;images/smallmaay.png&quot; /&gt;
+     &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+
+Modified: trunk/maay/data/searchform.html
+===================================================================
+--- trunk/maay/data/searchform.html	2005-10-25 09:30:45 UTC (rev 223)
++++ trunk/maay/data/searchform.html	2005-10-25 15:08:18 UTC (rev 224)
+@@ -1,19 +1,25 @@
+ &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+ &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+ 
+-&lt;nevow:invisible xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+-  &lt;a nevow:render=&quot;loginurl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;loginurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;actionlabel&quot; /&gt;&lt;/a&gt;
+-  &lt;table class=&quot;searchHome&quot;&gt;
+-    &lt;tr&gt;
+-      &lt;td&gt;&lt;img src=&quot;images/maay.png&quot; /&gt;&lt;/td&gt;
+-    &lt;/tr&gt;
+-    &lt;tr&gt;
+-      &lt;td&gt;
+-	&lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+-	  &lt;input type=&quot;text&quot; name=&quot;words&quot; value=&quot;&quot; /&gt;
+-	  &lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;
+-	&lt;/form&gt;
+-      &lt;/td&gt;
+-    &lt;/tr&gt;
+-  &lt;/table&gt;
+-&lt;/nevow:invisible&gt;
++  &lt;nevow:invisible xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
++    &lt;!-- &lt;a nevow:render=&quot;loginurl&quot;&gt; --&gt;
++&lt;!--       &lt;nevow:attr name=&quot;href&quot;&gt; --&gt;
++&lt;!--         &lt;nevow:slot name=&quot;loginurl&quot; /&gt; --&gt;
++&lt;!--       &lt;/nevow:attr&gt; --&gt;
++&lt;!--       &lt;nevow:slot name=&quot;actionlabel&quot; /&gt; --&gt;
++&lt;!--     &lt;/a&gt; --&gt;
++    &lt;table class=&quot;searchHome&quot;&gt;
++      &lt;tr&gt;
++        &lt;td&gt;&lt;img src=&quot;images/maay.png&quot; /&gt;&lt;/td&gt;
++      &lt;/tr&gt;
++      &lt;tr&gt;
++        &lt;td&gt;
++          &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
++            &lt;input type=&quot;text&quot; name=&quot;words&quot; value=&quot;&quot; /&gt;
++              &lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;
++          &lt;/form&gt;
++        &lt;/td&gt;
++      &lt;/tr&gt;
++    &lt;/table&gt;
++  &lt;/nevow:invisible&gt;
++  
+\ No newline at end of file
+
+Modified: trunk/maay/data/skeleton.html
+===================================================================
+--- trunk/maay/data/skeleton.html	2005-10-25 09:30:45 UTC (rev 223)
++++ trunk/maay/data/skeleton.html	2005-10-25 15:08:18 UTC (rev 224)
+@@ -2,17 +2,18 @@
+     &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+ &lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+   &lt;head&gt;
+-    &lt;title&gt;Search Form&lt;/title&gt;
++    &lt;title&gt;Maay Search Form&lt;/title&gt;
+     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
+-    &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
++      &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
+   &lt;/head&gt;
+  
+   &lt;body&gt;
+     &lt;nevow:invisible nevow:macro=&quot;body&quot; /&gt;
+-    &lt;hr /&gt;
+-    &lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; &lt;a href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;
+-&lt;img src=&quot;<A HREF="http://developer.berlios.de/bslogo.php?group_id=0">http://developer.berlios.de/bslogo.php?group_id=0</A>&quot;
+-    width=&quot;124&quot; height=&quot;32&quot; border=&quot;0&quot; alt=&quot;BerliOS Logo&quot; /&gt;&lt;/a&gt;
+-
+-    &lt;/body&gt;  
++      &lt;hr /&gt;
++        &lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; 
++        &lt;a href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;
++          &lt;img src=&quot;<A HREF="http://developer.berlios.de/images/berliOS_logo.png">http://developer.berlios.de/images/berliOS_logo.png</A>&quot;
++            width=&quot;124&quot; height=&quot;32&quot; border=&quot;0&quot; alt=&quot;BerliOS Logo&quot; /&gt;
++        &lt;/a&gt;
++  &lt;/body&gt;  
+ &lt;/html&gt;
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-10-25 09:30:45 UTC (rev 223)
++++ trunk/maay/rpc.py	2005-10-25 15:08:18 UTC (rev 224)
+@@ -39,9 +39,11 @@
+ 
+     def __init__(self, nodeId, portal):
+         XMLRPC.__init__(self)
++        print &quot;init of MaayRPCServer, nodeId = &quot;, nodeId
++        assert nodeId == portal.config.get_node_id ()
+         self._sessions = {}
+         self.portal = portal
+-        self.nodeId = portal.config.get_node_id()
++        self.nodeId = portal.config.get_node_id() # hmmm ...
+         self._sessions[ANONYMOUS_AVATARID] = portal.anonymousQuerier
+         self._p2pQuerier = P2pQuerier(nodeId, portal.anonymousQuerier)
+         
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-25 09:30:45 UTC (rev 223)
++++ trunk/maay/server.py	2005-10-25 15:08:18 UTC (rev 224)
+@@ -64,6 +64,8 @@
+ from maay import registrationclient
+ from maay.query import Query
+ 
++ANONYMOUS_AVATARID = 'maay' # it's only a matter of definition after all ...
++
+ class MaayPage(rend.Page):
+     docFactory = loaders.xmlfile(get_path_of('skeleton.html'))
+     child_maaycss = static.File(get_path_of('maay.css'))
+@@ -73,22 +75,23 @@
+         rend.Page.__init__(self)
+         self.maayId = maayId
+ 
+-    def render_loginurl(self, context, data):
+-        url = URL.fromContext(context)
+-        # store current URL into  'goThereAfter' to be able to return here
+-        # after login
+-        if self.maayId != ANONYMOUS_AVATARID:
+-            goThereAfter = URL(url.scheme, url.netloc,
+-                               ['logout'] + url.pathList())
+-            context.fillSlots('actionlabel', 'Logout')
+-        else:
+-            goThereAfter = URL(url.scheme, url.netloc,
+-                               ['login'] + url.pathList())
+-            context.fillSlots('actionlabel', 'Login')            
+-        for param, value in url.queryList():
+-            goThereAfter = goThereAfter.add(param, value)
+-        context.fillSlots('loginurl', str(goThereAfter))
+-        return context.tag
++#     def render_loginurl(self, context, data):
++#         url = URL.fromContext(context)
++#         store current URL into  'goThereAfter' to be able to return here
++#         after login
++#         goThereAfter = URL(url.scheme, url.netloc, url.pathList())
++#         if self.maayId != ANONYMOUS_AVATARID:
++#            goThereAfter = URL(url.scheme, url.netloc,
++#                               ['logout'] + url.pathList())
++#            context.fillSlots('actionlabel', 'Logout')
++#         else:
++#            goThereAfter = URL(url.scheme, url.netloc,
++#                               ['login'] + url.pathList())
++#            context.fillSlots('actionlabel', 'Login')            
++#         for param, value in url.queryList():
++#            goThereAfter = goThereAfter.add(param, value)
++#         context.fillSlots('loginurl', str(goThereAfter))
++#         return context.tag
+ 
+     def macro_body(self, context):
+         return self.bodyFactory
+@@ -102,50 +105,51 @@
+         req.getSession().expire()
+         req.redirect('/' + guard.LOGOUT_AVATAR)
+ 
+-class LoginForm(MaayPage):
+-    &quot;&quot;&quot;a basic login form. This page is rendered until the user
+-    is logged.
+-    &quot;&quot;&quot;
+-    # addSlash = True
++# class LoginForm(MaayPage):
++#     &quot;&quot;&quot;a basic login form. This page is rendered until the user
++#     is logged.
++#     &quot;&quot;&quot;
++#     # addSlash = True
+ 
+-    def path(self, context, data):
+-        here = URL.fromContext(context)
+-        # transform /login/somePathAndQuery into /__login__/somePathAndQuery
+-        # to benefit from nevow.guard redirection magic
+-        pathList = ['__login__'] + here.pathList()[1:]
+-        goThereAfter = URL(here.scheme, here.netloc,
+-                           pathList, here.queryList())
+-        return str(goThereAfter)
++#     def path(self, context, data):
++#         here = URL.fromContext(context)
++#         # transform /login/somePathAndQuery into /__login__/somePathAndQuery
++#         # to benefit from nevow.guard redirection magic
++#         pathList = ['__login__'] + here.pathList()[1:]
++#         goThereAfter = URL(here.scheme, here.netloc,
++#                            pathList, here.queryList())
++#         return str(goThereAfter)
+ 
+-    bodyFactory = loaders.stan(
+-        tags.html[
+-            tags.head[tags.title[&quot;Maay Login Page&quot;,],
+-                      tags.link(rel='stylesheet', type='text/css', href='maay.css'),
+-                      tags.link(rel='shortcut icon', href='images/maay.ico'),
+-                      ],
++#     bodyFactory = loaders.stan(
++#         tags.html[
++#             tags.head[tags.title[&quot;Maay Login Page&quot;,],
++#                       tags.link(rel='stylesheet', type='text/css', href='maay.css'),
++#                       tags.link(rel='shortcut icon', href='images/maay.ico'),
++#                       ],
+             
+-            tags.body[
+-                # tags.form(action='/'+guard.LOGIN_AVATAR, render=path, method='post')[
+-                tags.form(action=path, method='post')[
+-                    tags.table(_class=&quot;loginTable&quot;)[
+-                        tags.tr[
+-                            tags.td[ &quot;Username:&quot; ],
+-                            tags.td[ tags.input(type='text', name='username') ],
+-                            ],
+-                        tags.tr[
+-                            tags.td[ &quot;Password:&quot; ],
+-                            tags.td[ tags.input(type='password', name='password') ],
+-                            ]
+-                        ],
+-                    tags.input(type='submit'),
+-                    tags.p,
+-                    ]
+-                ]
+-            ]
+-        )
++#             tags.body[
++#                 # tags.form(action='/'+guard.LOGIN_AVATAR, render=path, method='post')[
++#                 tags.form(action=path, method='post')[
++#                     tags.table(_class=&quot;loginTable&quot;)[
++#                         tags.tr[
++#                             tags.td[ &quot;Username :&quot; ],
++#                             tags.td[ tags.input(type='text', name='username') ],
++#                             ],
++#                         tags.tr[
++#                             tags.td[ &quot;Password :&quot; ],
++#                             tags.td[ tags.input(type='password', name='password') ],
++#                             ]
++#                         ],
++#                     tags.input(type='submit'),
++#                     tags.p,
++#                     ]
++#                 ]
++#             ]
++#         )
+ 
+-    def childFactory(self, context, segments):
+-        return LoginForm()
++#     def childFactory(self, context, segments):
++#         print &quot; child factory&quot;
++#         return LoginForm()
+ 
+ class PeersList(MaayPage):
+     &quot;&quot;&quot;display list of registered peers&quot;&quot;&quot;
+@@ -295,7 +299,7 @@
+                 if querier is None:
+                     return inevow.IResource, LoginForm(), lambda: None
+                 else:
+-                    print &quot;Building search form with&quot;, avatarId
++                    print &quot;Building search form for&quot;, avatarId
+                     resc = SearchForm(avatarId, querier)
+                 return inevow.IResource, resc, resc.logout
+             # if we wer asked for a querier
+@@ -309,9 +313,9 @@
+     def _getQuerier(self, avatarId):
+         try:
+             querier = self._sessions[avatarId]
+-            print &quot;Querier for&quot;, avatarId, &quot;was in the cache. Good.&quot;
++            print &quot;Querier of type&quot;, type(querier), &quot;for&quot;, avatarId, &quot;was in the cache. Good.&quot;
+         except KeyError:
+-            print &quot;No querier in cache far&quot;, avatarId, \
++            print &quot;No querier in cache for&quot;, str(avatarId)+ \
+                   &quot;. What are we supposed to do ?&quot;
+             querier = None
+         return querier
+@@ -320,6 +324,7 @@
+ class MaayPortal(object, portal.Portal):
+     &quot;&quot;&quot;Portal for Maay authentication system&quot;&quot;&quot;
+     def __init__(self, webappConfig):
++        print &quot;Portal creation&quot;
+         realm = MaayRealm()
+         checker = DBAuthChecker(realm, webappConfig.db_host,
+                                 webappConfig.db_name)
+@@ -329,10 +334,19 @@
+         self.config = webappConfig
+         # Create default anonymous querier, based on local configuration
+         try:
+-            anonymousQuerier = AnonymousQuerier(host=webappConfig.db_host,
+-                                                database=webappConfig.db_name,
+-                                                user=webappConfig.user,
+-                                                password=webappConfig.password)
++            print &quot;Credentials : &quot;
++            print &quot;  - host&quot;, webappConfig.db_host
++            print &quot;  - db&quot;, webappConfig.db_name
++            print &quot;  - user&quot;, webappConfig.user
++            print &quot;  - pass&quot;, webappConfig.password
++            anonymousQuerier = MaayQuerier(host=webappConfig.db_host,
++                                           database=webappConfig.db_name,
++                                           user=webappConfig.user,
++                                           password=webappConfig.password)
++            #anonymousQuerier = AnonymousQuerier(host=webappConfig.db_host,
++            #                                    database=webappConfig.db_name,
++            #                                    user=webappConfig.user,
++            #                                    password=webappConfig.password)
+         except Exception, exc:
+             # unable to create an anonymous querier
+             print &quot;***&quot;
+@@ -389,11 +403,12 @@
+         self.dbname = dbname
+     
+     def requestAvatarId(self, creds):
++        print &quot;Checking credentials for DB access&quot;
+         try:
+             querier = MaayQuerier(host=self.dbhost, database=self.dbname,
+                                   user=creds.username, password=creds.password)
+         except MaayAuthenticationError:
+-            print &quot;Got Authentication Error !&quot;
++            print &quot;DBAuthChecker : Authentication Error&quot;
+             return failure.Failure(error.UnauthorizedLogin())
+         self.realm.createUserSession(creds.username, querier)
+         return defer.succeed(creds.username)
+@@ -565,7 +580,7 @@
+                                           maayPortal))
+     reactor.listenTCP(webappConfig.webserver_port, website)
+     reactor.listenTCP(webappConfig.rpcserver_port, rpcserver)
+-    print &quot;Go !&quot;
++    print &quot;In the mainloop ...&quot;
+     reactor.run()
+ 
+ if __name__ == '__main__':
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000194.html">[Maay-svncheckins] r223 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000196.html">[Maay-svncheckins] r225 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#195">[ date ]</a>
+              <a href="thread.html#195">[ thread ]</a>
+              <a href="subject.html#195">[ subject ]</a>
+              <a href="author.html#195">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

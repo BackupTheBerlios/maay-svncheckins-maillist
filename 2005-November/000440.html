@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r469 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r469%20-%20trunk/maay&In-Reply-To=%3C200511141645.jAEGjfw0011813%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000439.html">
+   <LINK REL="Next"  HREF="000441.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r469 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r469%20-%20trunk/maay&In-Reply-To=%3C200511141645.jAEGjfw0011813%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r469 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov 14 17:45:41 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000439.html">[Maay-svncheckins] r468 - trunk/maay/configuration/win32
+</A></li>
+        <LI>Next message: <A HREF="000441.html">[Maay-svncheckins] r470 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#440">[ date ]</a>
+              <a href="thread.html#440">[ thread ]</a>
+              <a href="subject.html#440">[ subject ]</a>
+              <a href="author.html#440">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-14 17:45:39 +0100 (Mon, 14 Nov 2005)
+New Revision: 469
+
+Modified:
+   trunk/maay/rpc.py
+Log:
+Deverbosify
+
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-14 16:10:19 UTC (rev 468)
++++ trunk/maay/rpc.py	2005-11-14 16:45:39 UTC (rev 469)
+@@ -168,7 +168,7 @@
+     def xmlrpc_distributedQuery(self, queryDict):
+         &quot;&quot;&quot;On node has sent a query (P2pQuerier.sendQuery)
+         &quot;&quot;&quot;
+-        print &quot;MaayRPCServer distributedQuery : %s &quot; % queryDict
++        print &quot;MaayRPCServer distributedQuery : %s &quot; % queryDict['words']
+         query = P2pQuery.fromDict(queryDict)
+         query.host = self._lastClient.host
+         querier = self._sessions[ANONYMOUS_AVATARID]
+@@ -179,8 +179,8 @@
+         return self.nodeId
+ 
+     def xmlrpc_distributedQueryAnswer(self, queryId, senderId, provider, documents):
+-        print &quot;MaayRPCServer distributedQueryAnswer : %s %s, %s document(s) fom %s&quot; % \
+-              (queryId, senderId, len(documents), provider)
++        print &quot;MaayRPCServer distributedQueryAnswer : %s document(s) fom %s&quot; % \
++              (len(documents), provider)
+         answer = P2pAnswer(queryId, provider, documents)
+         reactor.callLater(.01, getP2pQuerier().relayAnswer, answer)
+         return self.nodeId
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000439.html">[Maay-svncheckins] r468 - trunk/maay/configuration/win32
+</A></li>
+	<LI>Next message: <A HREF="000441.html">[Maay-svncheckins] r470 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#440">[ date ]</a>
+              <a href="thread.html#440">[ thread ]</a>
+              <a href="subject.html#440">[ subject ]</a>
+              <a href="author.html#440">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

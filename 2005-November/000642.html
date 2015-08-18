@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r670 - in trunk: . maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r670%20-%20in%20trunk%3A%20.%20maay&In-Reply-To=%3C200511251912.jAPJCwlQ028547%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000641.html">
+   <LINK REL="Next"  HREF="000644.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r670 - in trunk: . maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r670%20-%20in%20trunk%3A%20.%20maay&In-Reply-To=%3C200511251912.jAPJCwlQ028547%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r670 - in trunk: . maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Nov 25 20:12:58 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000641.html">[Maay-svncheckins] r669 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000644.html">[Maay-svncheckins] r671 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#642">[ date ]</a>
+              <a href="thread.html#642">[ thread ]</a>
+              <a href="subject.html#642">[ subject ]</a>
+              <a href="author.html#642">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-25 20:12:52 +0100 (Fri, 25 Nov 2005)
+New Revision: 670
+
+Modified:
+   trunk/ChangeLog
+   trunk/ReleaseNotes.txt
+   trunk/maay.iss
+   trunk/maay/__init__.py
+   trunk/setup.py
+Log:
+Bump version number to 0.3.0 and update Changelog
+
+
+Modified: trunk/ChangeLog
+===================================================================
+--- trunk/ChangeLog	2005-11-25 18:06:04 UTC (rev 669)
++++ trunk/ChangeLog	2005-11-25 19:12:52 UTC (rev 670)
+@@ -1,3 +1,10 @@
++Maay-0.3.0 2005-11-25
++	* Ergonomic improvements
++	* Compute and use popularity and relevance scores
++	* Download files from other peers when the first ones fail
++	* Check maay version at startup time
++	* Lots of bug fixes
++	
+ Maay-0.2.2 2005-11-21
+ 	* Use IP adress of presence server instead of domain name
+ 	* Threshold on document relevance and popularity to avoid negative
+@@ -8,8 +15,6 @@
+ 	* Fix a communication bug when non-standard ports are used, and thus ...
+ 	* Is incompatible with prior versions (won't answer to queries from old version)
+ 
+-	
+-
+ Maay-0.2.1 2005-11-16
+         * Fixed bug #5647 caused by bad use of os.getlogin() preventing P2P
+ 	  queries from being processed on Windows
+
+Modified: trunk/ReleaseNotes.txt
+===================================================================
+--- trunk/ReleaseNotes.txt	2005-11-25 18:06:04 UTC (rev 669)
++++ trunk/ReleaseNotes.txt	2005-11-25 19:12:52 UTC (rev 670)
+@@ -1,4 +1,4 @@
+-Release Notes for version 0.2.4
++Release Notes for version 0.3.0
+ 
+ See README.txt for installation and quick start instructions. 
+ 
+
+Modified: trunk/maay/__init__.py
+===================================================================
+--- trunk/maay/__init__.py	2005-11-25 18:06:04 UTC (rev 669)
++++ trunk/maay/__init__.py	2005-11-25 19:12:52 UTC (rev 670)
+@@ -22,5 +22,5 @@
+ &quot;&quot;&quot;MAAY project
+ &quot;&quot;&quot;
+ 
+-VERSION = '0.2.4'
++VERSION = '0.3.0'
+ __revision__ = '$Id$'
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-11-25 18:06:04 UTC (rev 669)
++++ trunk/maay.iss	2005-11-25 19:12:52 UTC (rev 670)
+@@ -6,7 +6,7 @@
+ 
+ [Setup]
+ AppName=Maay
+-AppVerName=Maay-0.2.4
++AppVerName=Maay-0.3.0
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+ UninstallDisplayIcon={app}\maay_node.exe
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-11-25 18:06:04 UTC (rev 669)
++++ trunk/setup.py	2005-11-25 19:12:52 UTC (rev 670)
+@@ -23,7 +23,7 @@
+ import sys
+ from glob import glob
+ 
+-version = '0.2.4' # This should be imported from the maay package
++version = '0.3.0' # This should be imported from the maay package
+ author = &quot;France Telecom R&amp;D&quot;
+ author_email = &quot;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">maay-dev at lists.berlios.de</A>&quot;
+ copyright = &quot;Copyright (c)2004-2005 France Telecom R&amp;D&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000641.html">[Maay-svncheckins] r669 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000644.html">[Maay-svncheckins] r671 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#642">[ date ]</a>
+              <a href="thread.html#642">[ thread ]</a>
+              <a href="subject.html#642">[ subject ]</a>
+              <a href="author.html#642">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

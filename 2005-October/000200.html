@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r229 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C200510261221.j9QCLguo013160%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000199.html">
+   <LINK REL="Next"  HREF="000201.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r229 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C200510261221.j9QCLguo013160%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r229 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Oct 26 14:21:42 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000199.html">[Maay-svncheckins] r228 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000201.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#200">[ date ]</a>
+              <a href="thread.html#200">[ thread ]</a>
+              <a href="subject.html#200">[ subject ]</a>
+              <a href="author.html#200">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-26 14:21:23 +0200 (Wed, 26 Oct 2005)
+New Revision: 229
+
+Modified:
+   trunk/maay/server.py
+Log:
+keep a cache of creds/queriers instead of keeping a single
+querier in cache, because we don't want to provide the same
+querier to 2 different users ! (Even if, for our current
+use cases, it can't happen)
+
+
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-26 10:55:47 UTC (rev 228)
++++ trunk/maay/server.py	2005-10-26 12:21:23 UTC (rev 229)
+@@ -401,18 +401,23 @@
+         self.realm = realm
+         self.dbhost = dbhost
+         self.dbname = dbname
+-        self.querier = None # reusing the same querier has some benefits :)
++	# Keeping a cache of queriers reusing the same has some benefits :)
++        self.querierCache = {}
+     
+     def requestAvatarId(self, creds):
+         print &quot;DBAuthChecker : checking credentials for DB access&quot;
+         try:
+-            if not self.querier:
+-                self.querier = MaayQuerier(host=self.dbhost, database=self.dbname,
+-                                        user=creds.username, password=creds.password)
++	    try:
++		querier = self.querierCache[creds]
++	    except KeyError:
++		querier = MaayQuerier(host=self.dbhost, database=self.dbname,
++				      user=creds.username,
++				      password=creds.password)
++		self.querierCache[creds] = querier
+         except MaayAuthenticationError:
+             print &quot;DBAuthChecker : Authentication Error&quot;
+             return failure.Failure(error.UnauthorizedLogin())
+-        self.realm.createUserSession(creds.username, self.querier)
++        self.realm.createUserSession(creds.username, querier)
+         return defer.succeed(creds.username)
+ 
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000199.html">[Maay-svncheckins] r228 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000201.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#200">[ date ]</a>
+              <a href="thread.html#200">[ thread ]</a>
+              <a href="subject.html#200">[ subject ]</a>
+              <a href="author.html#200">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

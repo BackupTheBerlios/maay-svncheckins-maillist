@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r583 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r583%20-%20trunk/maay&In-Reply-To=%3C200511181747.jAIHl1Ua021320%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000554.html">
+   <LINK REL="Next"  HREF="000556.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r583 - trunk/maay</H1>
+    <B>afayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r583%20-%20trunk/maay&In-Reply-To=%3C200511181747.jAIHl1Ua021320%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r583 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 18:47:01 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000554.html">[Maay-svncheckins] r582 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000556.html">[Maay-svncheckins] r584 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#555">[ date ]</a>
+              <a href="thread.html#555">[ thread ]</a>
+              <a href="subject.html#555">[ subject ]</a>
+              <a href="author.html#555">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-18 18:46:58 +0100 (Fri, 18 Nov 2005)
+New Revision: 583
+
+Modified:
+   trunk/maay/querier.py
+Log:
+quick fix
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-18 17:42:24 UTC (rev 582)
++++ trunk/maay/querier.py	2005-11-18 17:46:58 UTC (rev 583)
+@@ -307,11 +307,11 @@
+         nodes = Node.selectWhere(cursor, node_id=nodeId)
+         if nodes:
+             node = nodes[0]
++            node.last_seen_time = int(time.time())
++            node.commit(cursor, update=True)
+         else:
+             log.debug('No matching node found for id {%s}' % nodeId,
+                       category='[warning]')
+-        node.last_seen_time = int(time.time())
+-        node.commit(cursor, update=True)
+         cursor.close()
+ 
+     def getRegisteredNeighbors(self, nodeId, nbNodes):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000554.html">[Maay-svncheckins] r582 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000556.html">[Maay-svncheckins] r584 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#555">[ date ]</a>
+              <a href="thread.html#555">[ thread ]</a>
+              <a href="subject.html#555">[ subject ]</a>
+              <a href="author.html#555">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

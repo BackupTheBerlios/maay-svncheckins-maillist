@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r36 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r36%20-%20trunk/maay&In-Reply-To=%3C200509161439.j8GEd33L031304%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000009.html">
+   <LINK REL="Next"  HREF="000011.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r36 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r36%20-%20trunk/maay&In-Reply-To=%3C200509161439.j8GEd33L031304%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r36 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Fri Sep 16 16:39:03 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000009.html">[Maay-svncheckins] r35 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000011.html">[Maay-svncheckins] r37 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10">[ date ]</a>
+              <a href="thread.html#10">[ thread ]</a>
+              <a href="subject.html#10">[ subject ]</a>
+              <a href="author.html#10">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-16 16:39:02 +0200 (Fri, 16 Sep 2005)
+New Revision: 36
+
+Modified:
+   trunk/maay/dbentity.py
+Log:
+formatting changes mostly
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-09-16 14:38:19 UTC (rev 35)
++++ trunk/maay/dbentity.py	2005-09-16 14:39:02 UTC (rev 36)
+@@ -1,10 +1,9 @@
+ &quot;&quot;&quot;this module provides a simple document abstraction&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+-__all__ = ['Document', 'FileInfo', 'DocumentProvider', 'DocumentScore']
++__all__ = ['Document', 'FileInfo', 'DocumentProvider', 'DocumentScore'
++           'Word', 'Node', 'NodeInterest']
+ 
+-import os
+-
+ class DBEntity:
+     attributes = []
+     tableName = None
+@@ -15,10 +14,11 @@
+             assert attrname in self.attributes
+             setattr(self, attrname, value)
+         for keyattr in self.key:
+-            assert keyattr in self.attributes, &quot;invalid value for key: %s&quot; % keyattr
++            assert keyattr in self.attributes, \
++                   &quot;invalid value for key: %s&quot; % keyattr
+ 
+     def buildStateDict(self):
+-        return dict([(attr, getattr(self, attr)) for attr in self.attribtutes])
++        return dict([(attr, getattr(self, attr)) for attr in self.attributes])
+     stateDict = property(buildStateDict, doc=&quot;current object's state&quot;)
+ 
+     def selectWhere(cls, cursor, **args):
+@@ -49,7 +49,8 @@
+                        if getattr(self, attr, None)]
+         wheres = ['%s=%%(%s)s' % (keyattr, keyattr) for keyattr in self.key]
+         where = ' AND '.join(wheres)
+-        query = 'UPDATE %s SET %s WHERE %s' % (self.tableName, ', '.join(attrClauses),
++        query = 'UPDATE %s SET %s WHERE %s' % (self.tableName,
++                                               ', '.join(attrClauses),
+                                                where)
+         return query
+ 
+@@ -255,7 +256,7 @@
+     attributes = ('word', 'claim_count', 'download_count')
+     key = ('word',)
+ 
+-class Nodes(DBEntity):
++class Node(DBEntity):
+     &quot;&quot;&quot;
+     Attributes:
+     -----------
+@@ -298,7 +299,8 @@
+        other nodes
+     &quot;&quot;&quot;
+     table = 'node_interests'
+-    attributes = ('node_id', 'word', 'claim_count', 'specialisation', 'expertise')
++    attributes = ('node_id', 'word', 'claim_count',
++                  'specialisation', 'expertise')
+     key = ('node_id', 'word')
+ 
+     
+
+
+Property changes on: trunk/maay/dbentity.py
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000009.html">[Maay-svncheckins] r35 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000011.html">[Maay-svncheckins] r37 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#10">[ date ]</a>
+              <a href="thread.html#10">[ thread ]</a>
+              <a href="subject.html#10">[ subject ]</a>
+              <a href="author.html#10">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

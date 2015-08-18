@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r81 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r81%20-%20trunk/maay&In-Reply-To=%3C200509271703.j8RH3JOe030058%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000053.html">
+   <LINK REL="Next"  HREF="000055.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r81 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r81%20-%20trunk/maay&In-Reply-To=%3C200509271703.j8RH3JOe030058%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r81 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Sep 27 19:03:19 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000053.html">[Maay-svncheckins] r80 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000055.html">[Maay-svncheckins] r82 - in trunk/maay: . test test/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-27 19:03:17 +0200 (Tue, 27 Sep 2005)
+New Revision: 81
+
+Modified:
+   trunk/maay/indexer.py
+   trunk/maay/querier.py
+   trunk/maay/rpc.py
+Log:
+Added removal of files which are no longer indexed (and linked documents and document_scores)
+Removed requirement for absolute paths in the indexer command line arguments
+
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-09-27 13:53:47 UTC (rev 80)
++++ trunk/maay/indexer.py	2005-09-27 17:03:17 UTC (rev 81)
+@@ -11,6 +11,7 @@
+ import time
+ import sys
+ import sha
++from sets import Set
+ from xmlrpclib import ServerProxy, Binary
+ import mimetypes
+ 
+@@ -60,7 +61,9 @@
+         return FileIterator(indexed, skipped)
+ 
+     def start(self):
++        existingFiles = Set()
+         for filename in self.getFileIterator():
++            existingFiles.add(filename)
+             lastModificationTime = os.path.getmtime(filename)
+             lastIndexationTime = self.getLastIndexationTime(filename)
+             if lastIndexationTime &gt;= lastModificationTime:
+@@ -81,9 +84,16 @@
+                 self.indexDocument(filename, title, text, fileSize,
+                                    lastModificationTime,
+                                    docId, mime_type, Document.PUBLISHED_STATE)
+-        # FIXME: do some cleanup of the database after indexing:
+-        # * remove FileInfo for files that are no longer on disk
+-        # * remove Documents with no corresponding files
++
++        indexedFiles = Set(self.serverProxy.getIndexedFiles(self.cnxId))
++        oldFiles = indexedFiles - existingFiles
++        for filename in oldFiles:
++            if self.verbose:
++                print &quot;Requesting unindexation of %s&quot; % filename
++            self.serverProxy.removeFileInfo(self.cnxId, filename)
++        if self.verbose:
++            print &quot;Requesting cleanup of unreferenced documents&quot;
++        self.serverProxy.removeUnreferencedDocuments(self.cnxId)
+         
+     def getLastIndexationTime(self, filename):
+         lastIndexationTime = self.serverProxy.lastIndexationTime(self.cnxId, filename)
+@@ -105,12 +115,9 @@
+ class FileIterator:
+     &quot;&quot;&quot;provide a simple way to walk through indexed dirs&quot;&quot;&quot;
+     def __init__(self, indexed, skipped=None):
+-        self.indexed = indexed
+-        self.skipped = skipped or []
+-        for dirpath in self.indexed:
+-            assert os.path.isabs(dirpath), &quot;relative paths not supported !&quot;
+-        for dirpath in self.skipped:
+-            assert os.path.isabs(dirpath), &quot;relative paths not supported !&quot;
++        self.indexed = [os.path.abspath(p) for p in indexed]
++        skipped = skipped or []
++        self.skipped = [os.path.abspath(p) for p in skipped]
+ 
+     def __iter__(self):
+         for path in self.indexed:
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-27 13:53:47 UTC (rev 80)
++++ trunk/maay/querier.py	2005-09-27 17:03:17 UTC (rev 81)
+@@ -33,11 +33,23 @@
+         to DB's content
+         &quot;&quot;&quot;
+ 
++    def getIndexedFiles():
++        &quot;&quot;&quot;returns a list of indexed file names as strings
++        &quot;&quot;&quot;
++
+     def indexDocument(filename, title, text, fileSize, lastModifiedOn,
+                       content_hash, mime_type, state, file_state):
+         &quot;&quot;&quot;Inserts or update information in table documents,
+         file_info, document_score and word&quot;&quot;&quot;
+ 
++    def removeFileInfo(filename):
++        &quot;&quot;&quot;remove filename from the database `files` table&quot;&quot;&quot;
++
++    def removeUnreferencedDocuments():
++        &quot;&quot;&quot;remove rows in `documents` table when no row in `files` or
++        `document_providers` table reference them, as well as the
++        corresponding `document_scores` rows&quot;&quot;&quot;
++        
+     def close():
+         &quot;&quot;&quot;closes the DB connection&quot;&quot;&quot;
+ 
+@@ -97,6 +109,41 @@
+         cursor.close()
+         return list(results)
+ 
++    def getIndexedFiles(self):
++        cursor = self._cnx.cursor()
++        results = FileInfo.selectWhere(cursor)
++        cursor.close()
++        return  [f.file_name for f in results]    
++        
++    def removeFileInfo(self, filename):
++        &quot;&quot;&quot;remove filename from the database `files` table&quot;&quot;&quot;
++        cursor = self._cnx.cursor()
++        rows = cursor.execute('DELETE FROM files WHERE file_name = %s', filename)
++        cursor.close()
++        self._cnx.commit()
++        print &quot;removed %s&quot; % filename
++        return rows
++
++    def removeUnreferencedDocuments(self):
++        &quot;&quot;&quot;remove rows in `documents` table when no row in `files` or
++        `document_providers` table reference them, as well as the
++        corresponding `document_scores` rows&quot;&quot;&quot;
++        cursor = self._cnx.cursor()
++        query1 = &quot;&quot;&quot;DELETE documents
++                    FROM documents LEFT JOIN files
++                                   ON documents.db_document_id = files.db_document_id
++                    WHERE files.db_document_id IS NULL&quot;&quot;&quot;
++        rows = cursor.execute(query1)
++        query2 = &quot;&quot;&quot;DELETE document_scores
++                    FROM document_scores LEFT JOIN documents
++                                   ON document_scores.db_document_id = documents.db_document_id
++                    WHERE documents.db_document_id IS NULL&quot;&quot;&quot;
++        rows += cursor.execute(query2)
++        cursor.close()
++        self._cnx.commit()
++        print &quot;removed %d rows related to unreferenced documents&quot; % rows
++        return rows
++
+     def indexDocument(self, filename, title, text, fileSize, lastModifiedOn,
+                       content_hash, mime_type, state, file_state):
+         &quot;&quot;&quot;Inserts or update information in table documents,
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-09-27 13:53:47 UTC (rev 80)
++++ trunk/maay/rpc.py	2005-09-27 17:03:17 UTC (rev 81)
+@@ -52,7 +52,25 @@
+             ## return Failure(ValueError(&quot;invalid connexion&quot;)
+             time = -1 # XXX: need to differenciate bad cnxId and no last mod time
+         return time
+-    
++
++    def xmlrpc_getIndexedFiles(self, cnxId):
++        if self.cnxIsValid(cnxId):
++            querier = self._sessions[cnxId]
++            return querier.getIndexedFiles()
++        return []
++        
++    def xmlrpc_removeFileInfo(self, cnxId, filename):
++        if self.cnxIsValid(cnxId):
++            querier = self._sessions[cnxId]
++            return querier.removeFileInfo(filename)
++        return 0
++
++    def xmlrpc_removeUnreferencedDocuments(self, cnxId):
++        if self.cnxIsValid(cnxId):
++            querier = self._sessions[cnxId]
++            return querier.removeUnreferencedDocuments()
++        return -1
++                    
+     def xmlrpc_indexDocument(self, cnxId, filename, title, text, fileSize,
+                              lastModifiedOn, content_hash, mime_type, state,
+                              file_state):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000053.html">[Maay-svncheckins] r80 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000055.html">[Maay-svncheckins] r82 - in trunk/maay: . test test/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#54">[ date ]</a>
+              <a href="thread.html#54">[ thread ]</a>
+              <a href="subject.html#54">[ subject ]</a>
+              <a href="author.html#54">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

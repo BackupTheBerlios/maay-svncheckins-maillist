@@ -1,0 +1,304 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r624 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r624%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511231215.jANCFbCU003108%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000595.html">
+   <LINK REL="Next"  HREF="000643.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r624 - in trunk/maay: . data</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r624%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511231215.jANCFbCU003108%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r624 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 13:15:37 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000595.html">[Maay-svncheckins] r623 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000643.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#596">[ date ]</a>
+              <a href="thread.html#596">[ thread ]</a>
+              <a href="subject.html#596">[ subject ]</a>
+              <a href="author.html#596">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-23 13:15:23 +0100 (Wed, 23 Nov 2005)
+New Revision: 624
+
+Modified:
+   trunk/maay/__init__.py
+   trunk/maay/data/maay.css
+   trunk/maay/data/searchform.html
+   trunk/maay/data/skeleton.html
+   trunk/maay/data/version.js
+   trunk/maay/webapplication.py
+Log:
+- restored use of nevow templates for search forms.
+- Moved the checkRelease() function to version.js
+- Maay's current_version is now computed from what is 
+  found in maay.__init__.py (setup.py should also do that)
+- added a visual separation (only CSS) in results page 
+
+NOTE: Frederic, The versioning checks seems to work here. Could you
+      please have a look and check that I did not break anything in
+      your stuff. If you need to fix a few things, please do it the
+      way I started to do things (using nevow templating system)
+
+
+
+Modified: trunk/maay/__init__.py
+===================================================================
+--- trunk/maay/__init__.py	2005-11-23 11:49:14 UTC (rev 623)
++++ trunk/maay/__init__.py	2005-11-23 12:15:23 UTC (rev 624)
+@@ -19,5 +19,5 @@
+ &quot;&quot;&quot;MAAY project
+ &quot;&quot;&quot;
+ 
+-
++VERSION = '0.2.4'
+ __revision__ = '$Id$'
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-23 11:49:14 UTC (rev 623)
++++ trunk/maay/data/maay.css	2005-11-23 12:15:23 UTC (rev 624)
+@@ -86,6 +86,11 @@
+   border-left-color: #ff0000;
+ }
+ 
++div.message {
++  text-align: right;
++  background: #e5ecf9;
++  border-top: 1px solid blue;
++}
+ 
+ div.resultDesc {
+   /* display: block; */
+
+Modified: trunk/maay/data/searchform.html
+===================================================================
+--- trunk/maay/data/searchform.html	2005-11-23 11:49:14 UTC (rev 623)
++++ trunk/maay/data/searchform.html	2005-11-23 12:15:23 UTC (rev 624)
+@@ -1,58 +1,8 @@
+ &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+ &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+-&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+-  &lt;head&gt;
+-    &lt;title&gt;Indexation Page&lt;/title&gt;
+-    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
+-    &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
+ 
+-    &lt;script type='text/javascript' language=&quot;text/javascript&quot; src=&quot;<A HREF="http://maay.netofpeers.net/version.js">http://maay.netofpeers.net/version.js</A>&quot;&gt;&lt;/script&gt;
+-    &lt;script type='text/javascript' language='javascript'&gt;
+-&lt;!--
+-// TODO: use the <A HREF="http://localhost:7777/version.js">http://localhost:7777/version.js</A> instead to get the
+-// current version
+-current_version = &quot;0.2.3&quot;;
+-
+-function checkNewRelease()
+-{
+-    v= current_version.split(&quot;.&quot;);
+-    current_ver =parseInt(v[0]);
+-    current_release = parseInt(v[1]);
+-    current_subrelease = parseInt(v[2]);
+-
+-    v= version.split(&quot;.&quot;);
+-    new_ver =parseInt(v[0]);
+-    new_release = parseInt(v[1]);
+-    new_subrelease = parseInt(v[2]);
+-
+-    if (new_ver &lt; current_ver)
+-        return 0;
+-
+-    if (new_ver == current_ver)
+-    {
+-            if (new_release &lt; current_release)
+-                return 0;
+-
+-            if (new_release == current_release)
+-                if (new_subrelease &lt;= current_subrelease)
+-                    return 0;
+-    }
+-    newReleaseMessage = document.getElementById(&quot;newReleaseMessage&quot;);
+-    newReleaseMessage.innerHTML = 'Your version of MAAY is outdated. &lt;a href=&quot;<A HREF="http://maay.netofpeers.net/wiki/index.php/Download">http://maay.netofpeers.net/wiki/index.php/Download</A>&quot;&gt; Download the version ' + version + ' of MAAY !&lt;/a&gt;'
+-    return 1;
+-}
+---&gt;
+-    &lt;/script&gt;
+-  &lt;/head&gt;
+-  &lt;body onLoad=&quot;checkNewRelease();&quot;&gt;
+-    &lt;table width=&quot;100%&quot;&gt;
+-      &lt;tr&gt;
+-        &lt;td valign=&quot;top&quot; width=&quot;100%&quot;&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot; class=&quot;footlink&quot;&gt;[Maay&nbsp;Homepage]&lt;/a&gt;&lt;/td&gt;
+-        &lt;td valign=&quot;top&quot;&gt;&lt;a href=&quot;/indexation&quot; class=&quot;footlink&quot;&gt;[Manage&nbsp;Folders]&lt;/a&gt;&lt;/td&gt;
+-      &lt;/tr&gt;
+-    &lt;/table&gt;
+-
+-    &lt;center&gt;
++&lt;nevow:invisible xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
++    &lt;center onLoad=&quot;checkNewRelease();&quot;&gt;
+     &lt;img src=&quot;images/maay.png&quot; /&gt;&lt;br /&gt;&lt;br /&gt;
+     &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+       &lt;table&gt;
+@@ -71,7 +21,4 @@
+     &lt;nevow:slot name=&quot;localDocumentCount&quot; /&gt; local documents / &lt;nevow:slot name=&quot;publicDocumentCount&quot; /&gt; published documents.
+     &lt;/div&gt;
+     &lt;/center&gt;
+-
+-  &lt;nevow:invisible nevow:macro=&quot;footer&quot; /&gt;
+-  &lt;/body&gt;
+-&lt;/html&gt;
+\ No newline at end of file
++&lt;/nevow:invisible&gt;
+
+Modified: trunk/maay/data/skeleton.html
+===================================================================
+--- trunk/maay/data/skeleton.html	2005-11-23 11:49:14 UTC (rev 623)
++++ trunk/maay/data/skeleton.html	2005-11-23 12:15:23 UTC (rev 624)
+@@ -4,7 +4,8 @@
+   &lt;head&gt;
+     &lt;title&gt;Maay Search Form&lt;/title&gt;
+     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
+-      &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
++    &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
++    &lt;nevow:invisible nevow:render=&quot;custom_htmlheader&quot; /&gt;
+   &lt;/head&gt;
+   &lt;table width=&quot;100%&quot;&gt;
+     &lt;tr&gt;
+
+Modified: trunk/maay/data/version.js
+===================================================================
+--- trunk/maay/data/version.js	2005-11-23 11:49:14 UTC (rev 623)
++++ trunk/maay/data/version.js	2005-11-23 12:15:23 UTC (rev 624)
+@@ -1 +1,29 @@
+-version = &quot;0.2.3&quot;;
+\ No newline at end of file
++// version = &quot;0.2.3&quot;;
++function checkNewRelease()
++{
++    v= current_version.split(&quot;.&quot;);
++    current_ver =parseInt(v[0]);
++    current_release = parseInt(v[1]);
++    current_subrelease = parseInt(v[2]);
++
++    v= version.split(&quot;.&quot;);
++    new_ver =parseInt(v[0]);
++    new_release = parseInt(v[1]);
++    new_subrelease = parseInt(v[2]);
++
++    if (new_ver &lt; current_ver)
++        return 0;
++
++    if (new_ver == current_ver)
++    {
++            if (new_release &lt; current_release)
++                return 0;
++
++            if (new_release == current_release)
++                if (new_subrelease &lt;= current_subrelease)
++                    return 0;
++    }
++    newReleaseMessage = document.getElementById(&quot;newReleaseMessage&quot;);
++    newReleaseMessage.innerHTML = 'Your version of MAAY is outdated. &lt;a href=&quot;<A HREF="http://maay.netofpeers.net/wiki/index.php/Download">http://maay.netofpeers.net/wiki/index.php/Download</A>&quot;&gt; Download the version ' + version + ' of MAAY !&lt;/a&gt;'
++    return 1;
++}
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-23 11:49:14 UTC (rev 623)
++++ trunk/maay/webapplication.py	2005-11-23 12:15:23 UTC (rev 624)
+@@ -32,11 +32,12 @@
+ from twisted.internet import reactor
+ from twisted.python import log
+ 
+-from nevow import rend, tags, loaders, athena, inevow
++from nevow import rend, tags, loaders, athena, inevow, url
+ 
+ from logilab.common.textutils import normalize_text
+ from logilab.common.compat import set
+ 
++from maay import VERSION
+ from maay.querier import IQuerier, WEB_AVATARID
+ from maay.configuration import get_path_of
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+@@ -65,6 +66,9 @@
+     def macro_footer(self, context):
+         return loaders.xmlfile(get_path_of('footer.html'))
+ 
++    def render_custom_htmlheader(self, context):
++        return ''
++
+ class Maay404(MaayPage, rend.FourOhFour):
+     &quot;&quot;&quot;Maay specific resource for 404 errors&quot;&quot;&quot;
+     # loader = loaders.xmlfile(get_path_of('notfound.html'))
+@@ -241,6 +245,15 @@
+         self.p2pquerier = p2pquerier
+         self.download_dir = indexer.indexerConfig.download_dir
+ 
++    def render_custom_htmlheader(self, context):
++        return [
++            tags.script(type='text/javascript', src='<A HREF="http://maay.netofpeers.net/version.js">http://maay.netofpeers.net/version.js</A>'),
++            tags.script(type='text/javascript')[
++                tags.raw('current_version = &quot;%s&quot;;' % VERSION)
++                ],
++            tags.script(type='text/javascript', src=url.here.child('version.js')),
++            ]
++
+     # TODO: since getDocumentCount might be quite costly to compute for the
+     # DBMS, cache the value and update it every 10 mn
+     def render_shortstat(self, context, data):
+@@ -563,6 +576,7 @@
+             self.querier.purgeOldResults()
+             self.querier.pushDocuments(self.queryId, results, provider=None)
+             self.results = self.querier.getQueryResults(self.queryId, offset=0)
++            # self.results = self.querier.getQueryResults(self.query)
+             
+     # XXX (refactoring): provide a common base class for LivePages
+     # Maay / py2exe / win32 related trick : we provide our own javascript
+@@ -575,6 +589,7 @@
+     def onNewResults(self, provider, results):
+         results = [Document(**params) for params in results]
+         self.querier.pushDocuments(self.queryId, results, provider)
++        # results = self.querier.getQueryResults(self.query,
+         results = self.querier.getQueryResults(self.queryId, offset=self.query.offset,
+                                                onlyLocal=self.onlyLocal,
+                                                onlyDistant=self.onlyDistant)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000595.html">[Maay-svncheckins] r623 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000643.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#596">[ date ]</a>
+              <a href="thread.html#596">[ thread ]</a>
+              <a href="subject.html#596">[ subject ]</a>
+              <a href="author.html#596">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

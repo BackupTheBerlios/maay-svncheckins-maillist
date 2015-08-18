@@ -1,0 +1,297 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r196 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r196%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200510182012.j9IKCdZk012189%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000166.html">
+   <LINK REL="Next"  HREF="000168.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r196 - in trunk/maay: . data</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r196%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200510182012.j9IKCdZk012189%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r196 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Tue Oct 18 22:12:39 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000166.html">[Maay-svncheckins] r195 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000168.html">[Maay-svncheckins] r197 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#167">[ date ]</a>
+              <a href="thread.html#167">[ thread ]</a>
+              <a href="subject.html#167">[ subject ]</a>
+              <a href="author.html#167">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-18 22:12:39 +0200 (Tue, 18 Oct 2005)
+New Revision: 196
+
+Added:
+   trunk/maay/data/peers.html
+Modified:
+   trunk/maay/TODO.txt
+   trunk/maay/data/maay.css
+   trunk/maay/dbentity.py
+   trunk/maay/server.py
+Log:
+- fixed bug (TypeError) in Node.selectActive
+- added a simple peers web page that lists all registered peers
+- added ability to choose which file will be used to store the
+  peer id (mainly for test purpose)
+
+
+
+Modified: trunk/maay/TODO.txt
+===================================================================
+--- trunk/maay/TODO.txt	2005-10-18 20:07:42 UTC (rev 195)
++++ trunk/maay/TODO.txt	2005-10-18 20:12:39 UTC (rev 196)
+@@ -9,6 +9,8 @@
+ #B   X v&#233;rifier qu'on utiliser de l'UTF-8 partout (2005.09.27)
+ #B   X g&#233;rer les documents compress&#233;s (2005.09.28)
+ #B   X Regarder la conversion pdf-&gt;html (2005.09.28)
++#B   _ utiliser des macros pour g&#233;rer l'aspect commun de toutes les pages (2005.10.18)
++#B   _ s'assurer qu'on g&#232;re correctement les child_* des diff&#233;rentes ressources (2005.10.18)
+ 
+ * Notes
+ 
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-10-18 20:07:42 UTC (rev 195)
++++ trunk/maay/data/maay.css	2005-10-18 20:12:39 UTC (rev 196)
+@@ -50,3 +50,19 @@
+   font-weight: bold;
+   color: blue;
+ }
++
++table.peersTable {
++  margin-top: 20px;
++  width: 100%;
++  border: 1px solid black;
++}
++
++table.peersTable th {
++  border-bottom: 1px dotted grey;
++  text-align: left;
++  margin: 0px;
++}
++
++table.peersTable td.nodeId {
++  background: lightgrey;
++}
+\ No newline at end of file
+
+Added: trunk/maay/data/peers.html
+===================================================================
+--- trunk/maay/data/peers.html	2005-10-18 20:07:42 UTC (rev 195)
++++ trunk/maay/data/peers.html	2005-10-18 20:12:39 UTC (rev 196)
+@@ -0,0 +1,38 @@
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
++    &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
++  &lt;head&gt;
++    &lt;title&gt;List of peers&lt;/title&gt;
++    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
++    &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
++  &lt;/head&gt;
++ 
++  &lt;body&gt; 
++    &lt;a nevow:render=&quot;loginurl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;loginurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;actionlabel&quot; /&gt;&lt;/a&gt;
++    &lt;table class=&quot;peersTable&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;peers&quot;&gt;
++      &lt;tr nevow:pattern=&quot;header&quot;&gt;
++	&lt;th&gt;Node id&lt;/th&gt;
++	&lt;th&gt;IP&lt;/th&gt;
++	&lt;th&gt;Port&lt;/th&gt;
++	&lt;th&gt;Last Seen on&lt;/th&gt;
++	&lt;th&gt;Number of Messages received&lt;/th&gt;
++	&lt;th&gt;Affinity&lt;/th&gt;
++	&lt;th&gt;Bandwidth&lt;/th&gt;
++      &lt;/tr&gt;
++      &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;peer&quot;&gt;
++	&lt;td class=&quot;nodeId&quot;&gt;&lt;nevow:slot name=&quot;node_id&quot; /&gt;&lt;/td&gt;
++	&lt;td&gt;&lt;nevow:slot name=&quot;ip&quot; /&gt;&lt;/td&gt;
++	&lt;td&gt;&lt;nevow:slot name=&quot;port&quot; /&gt;&lt;/td&gt;
++	&lt;td&gt;&lt;nevow:slot name=&quot;last_seen_time&quot; /&gt;&lt;/td&gt;
++	&lt;td&gt;&lt;nevow:slot name=&quot;claim_count&quot; /&gt;&lt;/td&gt;
++	&lt;td&gt;&lt;nevow:slot name=&quot;affinity&quot; /&gt;&lt;/td&gt;
++	&lt;td&gt;&lt;nevow:slot name=&quot;bandwidth&quot; /&gt;&lt;/td&gt;
++      &lt;/tr&gt;
++    &lt;/table&gt;
++    &lt;hr /&gt;
++    &lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; &lt;a href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;
++&lt;img src=&quot;<A HREF="http://developer.berlios.de/bslogo.php?group_id=0">http://developer.berlios.de/bslogo.php?group_id=0</A>&quot;
++    width=&quot;124&quot; height=&quot;32&quot; border=&quot;0&quot; alt=&quot;BerliOS Logo&quot; /&gt;&lt;/a&gt;
++
++    &lt;/body&gt;  
++&lt;/html&gt;
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-10-18 20:07:42 UTC (rev 195)
++++ trunk/maay/dbentity.py	2005-10-18 20:12:39 UTC (rev 196)
+@@ -398,7 +398,7 @@
+ 
+     def selectActive(cls, cursor, currentNodeId, maxResults):
+         query = cls._selectActiveQuery()
+-        cursor.execute(query, currentNodeId, maxResults)
++        cursor.execute(query, (currentNodeId, maxResults))
+         results = cursor.fetchall()
+         return [cls(**dict(zip(cls.attributes, row))) for row in results]
+     selectActive = classmethod(selectActive)
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-18 20:07:42 UTC (rev 195)
++++ trunk/maay/server.py	2005-10-18 20:12:39 UTC (rev 196)
+@@ -31,7 +31,7 @@
+ import re
+ import socket
+ 
+-from zope.interface import implements
++from zope.interface import implements, Interface
+ 
+ from twisted.cred import portal, checkers, error
+ from twisted.cred.checkers import ANONYMOUS, AllowAnonymousAccess, \
+@@ -98,7 +98,6 @@
+         req.getSession().expire()
+         req.redirect('/' + guard.LOGOUT_AVATAR)
+ 
+-
+ class LoginForm(MaayPage):
+     &quot;&quot;&quot;a basic login form. This page is rendered until the user
+     is logged.
+@@ -143,7 +142,29 @@
+ 
+     def childFactory(self, context, segments):
+         return LoginForm()
++
++class PeersList(MaayPage):
++    &quot;&quot;&quot;display list of registered peers&quot;&quot;&quot;
++    docFactory = loaders.xmlfile(get_path_of('peers.html'))
++    addSlash = True
++
++    def __init__(self, maayId, querier):
++        MaayPage.__init__(self, maayId)
++        self.querier = querier
++
++    def data_peers(self, context, data):
++        webappConfig = IWebappConfiguration(context)
++        peers = self.querier.getActiveNeighbors(webappConfig.get_node_id(), 10)
++        return peers
+     
++    def render_peer(self, context, peerNode):
++        # Note: might be convenient to register a special flattener for
++        #       Node objects
++        for attrname in ('node_id', 'ip', 'port', 'last_seen_time',
++                         'claim_count', 'affinity', 'bandwidth'):
++            context.fillSlots(attrname, getattr(peerNode, attrname, 'N/A'))
++        return context.tag
++                    
+ class SearchForm(MaayPage):
+     &quot;&quot;&quot;default search form&quot;&quot;&quot;
+     docFactory = loaders.xmlfile(get_path_of('searchform.html'))
+@@ -158,6 +179,9 @@
+         # XXX: logout message should be forwarded to registration server
+         return None
+ 
++    def child_peers(self, context):
++        return PeersList(self.maayId, self.querier)
++
+     def child_search(self, context):
+         # query = unicode(context.arg('words'))        
+         offset = int(context.arg('offset', 0))
+@@ -378,6 +402,8 @@
+         &quot;&quot;&quot;
+         return self.loader.load(context)[0]
+ 
++class IWebappConfiguration(Interface):
++    &quot;&quot;&quot;provide an interface in order to be able to remember webappconfig&quot;&quot;&quot;
+ 
+ class WebappConfiguration(Configuration):
+     options = [
+@@ -424,16 +450,16 @@
+           'help' : &quot;Internet port on which the xmlrpc server is listening&quot;,
+           'default' : 6789,
+           }),
+-        
+         ('bandwidth',
+          {'type' : &quot;int&quot;, 'metavar' : &quot;&lt;bandwidth&gt;&quot;, 
+           'help' : &quot;Internet port on which the xmlrpc server is listening&quot;,
+           'default' : 10,
+           }),
+-        
+-        
+-        
+-        
++        ('nodeid-file',
++         {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;node_id_file&gt;&quot;,
++          'help' : &quot;Maay will store the generated node id in this file&quot;,
++          'default' : &quot;node_id&quot;,
++          }),
+         ]
+ 
+     config_file = 'webapp.ini'
+@@ -450,7 +476,7 @@
+     def _read_node_id(self):
+         for directory in self.get_config_dirs():
+             try:
+-                filename = os.path.join(directory,'node_id')
++                filename = os.path.join(directory, self.nodeid_file)
+                 f = open(filename,'r')
+                 for line in f:
+                     line = line.strip()
+@@ -476,7 +502,7 @@
+         node_id = self._generate_node_id()
+         for directory in self.get_config_dirs():
+             try:
+-                filename = os.path.join(directory, 'node_id')
++                filename = os.path.join(directory, self.nodeid_file)
+                 f = open(filename, 'w')
+                 lines = ['# This file contains the Node Identifier for your computer\n',
+                          '# Do not edit it or erase it, or this will corrupt the database\n',
+@@ -519,6 +545,7 @@
+     website = appserver.NevowSite(MaaySessionWrapper(maayPortal,
+                                                      mindFactory=MaayMindFactory))
+     website.remember(Maay404(), inevow.ICanHandleNotFound)
++    website.remember(webappConfig, IWebappConfiguration)
+     registrationclient.login(reactor,
+                              webappConfig.registration_host, webappConfig.registration_port,
+                              maayPortal.anonymousQuerier,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000166.html">[Maay-svncheckins] r195 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000168.html">[Maay-svncheckins] r197 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#167">[ date ]</a>
+              <a href="thread.html#167">[ thread ]</a>
+              <a href="subject.html#167">[ subject ]</a>
+              <a href="author.html#167">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

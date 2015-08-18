@@ -1,0 +1,639 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r65 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r65%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509211738.j8LHcvv3026386%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000038.html">
+   <LINK REL="Next"  HREF="000040.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r65 - in trunk/maay: . test</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r65%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509211738.j8LHcvv3026386%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r65 - in trunk/maay: . test">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Sep 21 19:38:58 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000038.html">[Maay-svncheckins] r64 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000040.html">[Maay-svncheckins] r66 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#39">[ date ]</a>
+              <a href="thread.html#39">[ thread ]</a>
+              <a href="subject.html#39">[ subject ]</a>
+              <a href="author.html#39">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-09-21 19:38:56 +0200 (Wed, 21 Sep 2005)
+New Revision: 65
+
+Added:
+   trunk/maay/test/test_converter.py
+   trunk/maay/test/test_fileiteration.py
+   trunk/maay/test/test_rpc.py
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Removed:
+   trunk/maay/test/testConverterRegistry.py
+   trunk/maay/test/testFileIteration.py
+   trunk/maay/test/testrpc.py
+Modified:
+   trunk/maay/converter.py
+   trunk/maay/querier.py
+Log:
+- renamed tests to use always the same format
+- wrote simple HTMLParser
+- extract parsers from converter.py to texttool.py
+- moved normalize_text to texttool.py (and now, 
+  normalize_text remove special chars (ord 0-32))
+
+
+
+Modified: trunk/maay/converter.py
+===================================================================
+--- trunk/maay/converter.py	2005-09-21 16:32:15 UTC (rev 64)
++++ trunk/maay/converter.py	2005-09-21 17:38:56 UTC (rev 65)
+@@ -22,49 +22,14 @@
+ __revision__ = '$Id$'
+ 
+ import os
+-import re
+ from mimetypes import guess_type
+-from maay.querier import normalize_text
+ 
+-TAG = re.compile('&lt;.*?&gt;', re.S)
+-def remove_tags(htmlsource):
+-    return TAG.sub('', htmlsource)
+-
+ # REGISTRY is a mimetype / converterList map
+ REGISTRY = {}
+ 
+ class IndexationFailure(Exception):
+     &quot;&quot;&quot;raised when an indexation has failed&quot;&quot;&quot;
+ 
+-
+-class TextParser:
+-    def parseFile(self, filename):
+-        &quot;&quot;&quot;returns a 4-uple (title, normalized_text, links, offset)
+-        
+-        Aglorithm taken from original texttotext implementation
+-        &quot;&quot;&quot;
+-        content = file(filename).read()
+-        return self.parseString(content)
+-
+-    def parseString(self, source):
+-        table = ''.join([' ' * 32] + [chr(i) for i in xrange(32, 256)])
+-        translated = normalize_text(source.translate(table))
+-        # normalize white spaces
+-        result = ' '.join(translated.split())
+-        title = result[:60]
+-        return title, result, [], 0
+-        
+-
+-class HTMLParser:
+-    def parseFile(self, filename):
+-        &quot;&quot;&quot;returns a 4-uple (title, normalized_text, links, offset)
+-        TODO: port original code from htmltotext
+-        &quot;&quot;&quot;
+-        # XXX: really dummy implementation !!
+-        source = file(filename).read()
+-        return TextParser().parseString(source)
+-
+-
+ class MetaConverter(type):
+     &quot;&quot;&quot;a simple metaclass for automatic converter registration&quot;&quot;&quot;
+     def __new__(cls, classname, bases, classdict):
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-21 16:32:15 UTC (rev 64)
++++ trunk/maay/querier.py	2005-09-21 17:38:56 UTC (rev 65)
+@@ -14,8 +14,8 @@
+ 
+ from maay.dbentity import Document, FileInfo, DocumentProvider, DocumentScore, \
+      Word
++from maay.texttool import normalize_text
+ 
+-
+ WORD_MIN_LEN = 2
+ WORD_MAX_LEN = 50
+ 
+@@ -235,53 +235,3 @@
+             score = _scores.pop()
+             db_scores[score.word] = score
+         return db_scores
+-
+-        
+-from string import maketrans
+-_table = maketrans(
+-                   '\xc0\xc1\xc2\xc3\xc4\xc5'
+-                   '\xc7'
+-                   '\xc8\xc9\xca\xcb'
+-                   '\xcc\xcd\xce\xcf'
+-                   '\xd0'
+-                   '\xd1'
+-                   '\xd2\xd3\xd4\xd5\xd6\xd8'
+-                   '\xd9\xda\xdb\xdc'
+-                   '\xdd'
+-                   '\xe0\xe1\xe2\xe3\xe4\xe5'
+-                   '\xe7'
+-                   '\xe8\xe9\xea\xeb'
+-                   '\xec\xed\xee\xef'
+-                   '\xf0'
+-                   '\xf1'
+-                   '\xf2\xf3\xf4\xf5\xf6\xf8'
+-                   '\xf9\xfa\xfb\xfc'
+-                   '\xff'
+-                   ,
+-                   'aaaaaa'
+-                   'c'
+-                   'eeee'
+-                   'iiii'
+-                   'o'
+-                   'n'
+-                   'oooooo'
+-                   'uuuu'
+-                   'y'
+-                   'aaaaaa'
+-                   'c'
+-                   'eeee'
+-                   'iiii'
+-                   'o'
+-                   'n'
+-                   'oooooo'
+-                   'uuuu'
+-                   'y'
+-                   )
+-del maketrans
+-
+-def normalize_text(text, table=_table):
+-    &quot;&quot;&quot;turns everything to lowercase, and converts accentuated
+-    characters to non accentuated chars.&quot;&quot;&quot;
+-    return text.lower().translate(table)
+-
+-del _table
+
+Deleted: trunk/maay/test/testConverterRegistry.py
+===================================================================
+--- trunk/maay/test/testConverterRegistry.py	2005-09-21 16:32:15 UTC (rev 64)
++++ trunk/maay/test/testConverterRegistry.py	2005-09-21 17:38:56 UTC (rev 65)
+@@ -1,46 +0,0 @@
+-&quot;&quot;&quot;tests converters registry management&quot;&quot;&quot;
+-
+-import unittest
+-from mimetypes import guess_type
+-
+-from maay import converter
+-
+-class ConvertersTC(unittest.TestCase):
+-    
+-    def testRegistry(self):
+-        &quot;&quot;&quot;tests that converters we get match filenames's mimetype&quot;&quot;&quot;
+-        filenames = ['foo.pdf', 'foo.ps', 'foo.html', 'foo.txt',
+-                     'foo.doc', 'foo.rtf']
+-        for filename in filenames:
+-            mimetype = guess_type(filename)[0]
+-            if mimetype is None:
+-                print &quot;Your config can't guess %s 's filetype&quot; % filename
+-                continue
+-            converters = converter.REGISTRY[mimetype]
+-            for klass in converters:
+-                self.assertEquals(klass.MIME_TYPE, mimetype)
+-
+-    def testLowLevelRegistry(self):
+-        &quot;&quot;&quot;tests predefined converters registration&quot;&quot;&quot;
+-        self.assert_(converter.RawTextConverter in converter.REGISTRY['text/plain'])
+-        self.assert_(converter.HTMLConverter in converter.REGISTRY['text/html'])
+-        self.assert_(converter.RTFConverter in converter.REGISTRY['text/rtf'])
+-        self.assert_(converter.PSConverter in converter.REGISTRY['application/postscript'])
+-        self.assert_(converter.PDFConverter in converter.REGISTRY['application/pdf'])
+-        self.assert_(converter.MSWordConverter in converter.REGISTRY['application/msword'])
+-
+-    def testCustomizedConverter(self):
+-        &quot;&quot;&quot;make sure a user can define its own converter&quot;&quot;&quot;
+-        original_converters = list(converter.REGISTRY.get('application/pdf', []))
+-        class MyConverter(converter.CommandBasedConverter):
+-            COMMAND = &quot;mypdfindexer %(input)s %(output)s&quot;
+-            MIME_TYPE = 'application/pdf'
+-        new_converters = converter.REGISTRY.get('application/pdf', [])
+-        self.assertEquals(new_converters, [MyConverter] + original_converters)
+-
+-    def testIndexationFailure(self):
+-        self.assertRaises(converter.IndexationFailure, converter.extractWordsFromFile,
+-                          'AUTHORS')
+-
+-if __name__ == '__main__':
+-    unittest.main()
+
+Deleted: trunk/maay/test/testFileIteration.py
+===================================================================
+--- trunk/maay/test/testFileIteration.py	2005-09-21 16:32:15 UTC (rev 64)
++++ trunk/maay/test/testFileIteration.py	2005-09-21 17:38:56 UTC (rev 65)
+@@ -1,95 +0,0 @@
+-&quot;&quot;&quot;tests file iteration&quot;&quot;&quot;
+-
+-__revision__ = '$Id$'
+-
+-import unittest
+-import os
+-from os.path import join, abspath, dirname, exists
+-
+-from maay.indexer import FileIterator as BaseFileIterator
+-
+-HERE = dirname(__file__)
+-DATADIR = join(HERE, 'data')
+-assert exists(DATADIR)
+-
+-def touch(filename):
+-    # not a real *touch*, but oh well ...
+-    fp = file(filename, 'w')
+-    fp.close()
+-
+-
+-class FileIterator(BaseFileIterator):
+-    &quot;&quot;&quot;just transforms relative paths to absolute paths&quot;&quot;&quot;
+-    def __init__(self, indexed, skipped=None):
+-        indexed = [abspath(path) for path in indexed]
+-        if skipped:
+-            skipped = [abspath(path) for path in skipped]
+-        else:
+-            skipped = []
+-        BaseFileIterator.__init__(self, indexed, skipped)
+-            
+-
+-class FileIterationTC(unittest.TestCase):
+-    def setUp(self):
+-        self.pathList = [
+-            ('a/b/c', ['foo', 'bar']),
+-            ('a/c/d', []), ('a/b/e', []),
+-            ('b/c/d', ['baz', 'spam']),
+-            ('b/c/e', ['foobar', 'bazbar']),
+-            ]
+-        for dirpath, filenames in self.pathList:
+-            realpath = join(DATADIR, dirpath)
+-            os.makedirs(realpath)
+-            for filename in filenames:
+-                touch(join(realpath, filename))
+-
+-    def tearDown(self):
+-        for dirpath, filenames in self.pathList:
+-            realpath = join(DATADIR, dirpath)
+-            for filename in filenames:
+-                os.remove(join(realpath, filename))
+-            os.removedirs(realpath)
+-
+-    def testDirCreation(self):
+-        &quot;&quot;&quot;make sure all paths in pathList have been created&quot;&quot;&quot;
+-        for dirpath, filenames in self.pathList:
+-            self.assert_(os.path.exists(join(DATADIR, dirpath)))
+-
+-
+-    def testNothingSkipped(self):
+-        it = FileIterator(['a', 'b', 'c'])
+-        self.assertEquals(list(it), [])
+-        it = FileIterator(['data/a', 'data/b', 'data/c'])
+-        expected = [abspath(join('data', 'a', 'b', 'c', 'bar')),
+-                    abspath(join('data', 'a', 'b', 'c', 'foo')),
+-                    abspath(join('data', 'b', 'c', 'd', 'baz')),
+-                    abspath(join('data', 'b', 'c', 'd', 'spam')),
+-                    abspath(join('data', 'b', 'c', 'e', 'bazbar')),
+-                    abspath(join('data', 'b', 'c', 'e', 'foobar')),
+-                    ]
+-        self.assertEquals(list(it), expected)
+-
+-    def testEverythingSkipped(self):
+-        everything = ['data/a', 'data/b', 'data/c']
+-        it = FileIterator(everything, everything)
+-        self.assertEquals(list(it), [])
+-
+-
+-    def testSkippingSomething(self):
+-        everything = ['data/a', 'data/b', 'data/c']
+-        skipped = ['data/a', 'data/b/c/e']
+-        it = FileIterator(everything, skipped)
+-        expected = [abspath(join('data', 'b', 'c', 'd', 'baz')),
+-                    abspath(join('data', 'b', 'c', 'd', 'spam')),
+-                    ]
+-        self.assertEquals(list(it), expected)
+-
+-
+-    def testFailOnRelativePath(self):
+-        &quot;&quot;&quot;make sure FileIterator forbids relative paths&quot;&quot;&quot;
+-        self.assertRaises(AssertionError, BaseFileIterator, ['data/a'], ['data/b'])
+-        self.assertRaises(AssertionError, BaseFileIterator, ['/data/a'], ['/data/b', 'data/c'])
+-        
+-
+-if __name__ == '__main__':
+-    unittest.main()
+
+Copied: trunk/maay/test/test_converter.py (from rev 62, trunk/maay/test/testConverterRegistry.py)
+
+Copied: trunk/maay/test/test_fileiteration.py (from rev 61, trunk/maay/test/testFileIteration.py)
+
+Copied: trunk/maay/test/test_rpc.py (from rev 61, trunk/maay/test/testrpc.py)
+
+Added: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-09-21 16:32:15 UTC (rev 64)
++++ trunk/maay/test/test_texttool.py	2005-09-21 17:38:56 UTC (rev 65)
+@@ -0,0 +1,38 @@
++&quot;&quot;&quot;unit tests for Text and HTML parsers&quot;&quot;&quot;
++
++import unittest
++
++from maay.texttool import MaayHTMLParser
++
++ROW_TEXT = &quot;foo bar baz top bim bam boum&quot;
++
++SIMPLE_HTML = &quot;&quot;&quot;&lt;html&gt;
++&lt;head&gt;&lt;title&gt;maille Maay&lt;/title&gt;&lt;/head&gt;
++&lt;body&gt;Hello world
++This is &lt;a href=&quot;something.com&quot;&gt;a link&lt;/a&gt;
++and this is &lt;a href=&quot;somethingelse.com&quot;&gt;another link&lt;/a&gt;
++&lt;/body&gt;
++&lt;/html&gt;
++&quot;&quot;&quot;
++
++class HTMLParserTC(unittest.TestCase):
++
++    def setUp(self):
++        self.parser = MaayHTMLParser()
++
++    def testParseRaw(self):
++        html = '&lt;body&gt;%s&lt;/body&gt;' % ROW_TEXT
++        title, text, links, offset = self.parser.parseString(html)
++        self.assertEquals(title, '')
++        self.assertEquals(text, ROW_TEXT)
++        self.assertEquals(links, [])
++
++    def testParseSimpleHtml(self):
++        title, text, links, offset = self.parser.parseString(SIMPLE_HTML)
++        self.assertEquals(title, 'maille Maay')
++        self.assertEquals(text, 'hello world this is a link and this is another link')
++        self.assertEquals(links, ['something.com', 'somethingelse.com'])
++    
++
++if __name__ == '__main__':
++    unittest.main()
+
+Deleted: trunk/maay/test/testrpc.py
+===================================================================
+--- trunk/maay/test/testrpc.py	2005-09-21 16:32:15 UTC (rev 64)
++++ trunk/maay/test/testrpc.py	2005-09-21 17:38:56 UTC (rev 65)
+@@ -1,96 +0,0 @@
+-&quot;&quot;&quot;unit tests for Maay's XMLRPC server
+-
+-These test cases should be tested with the twisted's `trial` utility
+-&quot;&quot;&quot;
+-
+-__revision__ = '$Id$'
+-
+-# import unittest
+-from xmlrpclib import ServerProxy
+-
+-from zope.interface import implements
+-from twisted.web import server, xmlrpc
+-from twisted.internet import reactor, defer
+-from twisted.trial import unittest
+-from twisted.cred.checkers import ICredentialsChecker
+-from twisted.cred.credentials import IUsernamePassword
+-
+-from maay import rpc
+-from maay.querier import MaayQuerier
+-from maay.main import MaayPortal, WebappConfiguration
+-
+-class FakeConnection:
+-    def cursor(self):
+-        return self
+-    def execute(self, query, args=None):
+-        return self
+-    def fetchall(self):
+-        return []
+-    def fetchone(self):
+-        return []
+-    def fetchmany(self, *args, **kwargs):
+-        return []
+-    def close(self):
+-        pass
+-    
+-class FakeQuerier(MaayQuerier):
+-    def __init__(self, *args, **kwargs):
+-        self._cnx = FakeConnection()
+-
+-class FakeChecker:
+-    implements(ICredentialsChecker)
+-    credentialInterfaces = (IUsernamePassword,)
+-
+-    def __init__(self, realm):
+-        self.realm = realm
+-        
+-    def requestAvatarId(self, creds):
+-        # FakeChecker always succeeds
+-        self.realm.createUserSession(creds.username, FakeQuerier())
+-        return defer.succeed(creds.username)
+-
+-# override default make_uid to have a predictible behaviour
+-rpc.make_uid = lambda username, password: username+password
+-
+-class RPCServerTC(unittest.TestCase):
+-    def setUp(self):
+-        portal = MaayPortal(WebappConfiguration())
+-        portal.registerChecker(FakeChecker(portal.realm))
+-        rpcserver = server.Site(rpc.MaayRPCServer(portal))
+-        self.p = reactor.listenTCP(0, rpcserver, interface=&quot;127.0.0.1&quot;)
+-        self.port = self.p.getHost().port
+-        
+-    def tearDown(self):
+-        self.p.stopListening()
+-        reactor.iterate()
+-        reactor.iterate()
+-
+-    def _callRemote(self, methName, *args):
+-        proxy = xmlrpc.Proxy('<A HREF="http://localhost:%s">http://localhost:%s</A>' % self.port)
+-        return proxy.callRemote(methName, *args)        
+-    
+-    def testRawAuthentication(self):
+-        for user, passwd in [('adim', 'adim'), ('foo', 'bar')]:
+-            digest = self._callRemote('authenticate', user, passwd)
+-            expected = rpc.make_uid(user, passwd)
+-            self.assertEquals(unittest.deferredResult(digest), expected)
+-
+-    def testUncertifiedRemoteCall(self):
+-        &quot;&quot;&quot;only authentified people should be able to call remote methods&quot;&quot;&quot;
+-        retValue = self._callRemote('lastIndexationTime', 'evil', 'foo.pdf')
+-        self.assertEquals(unittest.deferredResult(retValue), -1)
+-
+-    def testCertifiedRemoteCall(self):
+-        d = self._callRemote('authenticate', 'adim', 'adim')
+-        cnxId = unittest.deferredResult(d)
+-        retValue = self._callRemote('lastIndexationTime', cnxId, 'foo.pdf')
+-        self.assertEquals(unittest.deferredResult(retValue), 0)
+-
+-if __name__ == '__main__':
+-    # FIXME: the following is nicer but triggers an assertion
+-    #        because we imported twisted.internet.reactor
+-##     from  twisted.scripts.trial import run
+-##     run()
+-    import sys
+-    import os
+-    os.system('trial %s'%sys.argv[0])
+
+Added: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-09-21 16:32:15 UTC (rev 64)
++++ trunk/maay/texttool.py	2005-09-21 17:38:56 UTC (rev 65)
+@@ -0,0 +1,117 @@
++&quot;&quot;&quot;this module provide text / parsing tools&quot;&quot;&quot;
++
++__revision__ = '$Id$'
++
++from HTMLParser import HTMLParser
++        
++class TextParser:
++    def parseFile(self, filename):
++        &quot;&quot;&quot;returns a 4-uple (title, normalized_text, links, offset)
++        
++        Aglorithm taken from original texttotext implementation
++        &quot;&quot;&quot;
++        content = file(filename).read()
++        return self.parseString(content)
++
++    def parseString(self, source):
++        result = normalize_text(source)
++        title = result[:60]
++        return title, result, [], 0
++        
++
++class MaayHTMLParser(HTMLParser):
++    def __init__(self):
++        HTMLParser.__init__(self)
++        self.links = []
++        self.textbuf = []
++        self.title = ''
++        self.parsingTitle = False
++        self.parsingBody = False
++        
++    def handle_starttag(self, tag, attrs):
++        if tag == 'title':
++            self.parsingTitle = True
++        elif tag == 'a':
++            attrs = dict(attrs)
++            href = attrs.get('href')
++            if href:
++                self.links.append(href)
++        elif tag == 'body':
++            self.parsingBody = True
++                
++    def handle_endtag(self, tag):
++        if tag == 'title':
++            self.parsingTitle = False
++
++    def handle_data(self, data):
++        if self.parsingTitle:
++            self.title += data
++        elif self.parsingBody:
++            self.textbuf.append(data)
++    
++    def parseFile(self, filename):
++        &quot;&quot;&quot;returns a 4-uple (title, normalized_text, links, offset)
++        TODO: port original code from htmltotext
++        &quot;&quot;&quot;
++        # XXX: really dummy implementation !!
++        source = file(filename).read()
++        return self.parseString(source)
++
++    def parseString(self, source):
++        self.feed(source)
++        result = normalize_text(''.join(self.textbuf))
++        return self.title, result, self.links, 0
++
++
++        
++from string import maketrans
++_table = maketrans(
++    ''.join([chr(i) for i in xrange(32)]) + 
++    '\xc0\xc1\xc2\xc3\xc4\xc5'
++    '\xc7'
++    '\xc8\xc9\xca\xcb'
++    '\xcc\xcd\xce\xcf'
++    '\xd0'
++    '\xd1'
++    '\xd2\xd3\xd4\xd5\xd6\xd8'
++    '\xd9\xda\xdb\xdc'
++    '\xdd'
++    '\xe0\xe1\xe2\xe3\xe4\xe5'
++    '\xe7'
++    '\xe8\xe9\xea\xeb'
++    '\xec\xed\xee\xef'
++    '\xf0'
++    '\xf1'
++    '\xf2\xf3\xf4\xf5\xf6\xf8'
++    '\xf9\xfa\xfb\xfc'
++    '\xff'
++    ,
++    ' ' * 32 +
++    'aaaaaa'
++    'c'
++    'eeee'
++    'iiii'
++    'o'
++    'n'
++    'oooooo'
++    'uuuu'
++    'y'
++    'aaaaaa'
++    'c'
++    'eeee'
++    'iiii'
++    'o'
++    'n'
++    'oooooo'
++    'uuuu'
++    'y'
++    )
++del maketrans
++
++def normalize_text(text, table=_table):
++    &quot;&quot;&quot;turns everything to lowercase, and converts accentuated
++    characters to non accentuated chars.&quot;&quot;&quot;
++    text = text.lower().translate(table)
++    return ' '.join(text.split())
++
++del _table
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000038.html">[Maay-svncheckins] r64 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000040.html">[Maay-svncheckins] r66 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#39">[ date ]</a>
+              <a href="thread.html#39">[ thread ]</a>
+              <a href="subject.html#39">[ subject ]</a>
+              <a href="author.html#39">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

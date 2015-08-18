@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r597 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r597%20-%20trunk/maay&In-Reply-To=%3C200511211659.jALGxkGQ032677%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000568.html">
+   <LINK REL="Next"  HREF="000570.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r597 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r597%20-%20trunk/maay&In-Reply-To=%3C200511211659.jALGxkGQ032677%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r597 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov 21 17:59:46 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000568.html">[Maay-svncheckins] r596 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000570.html">[Maay-svncheckins] r598 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#569">[ date ]</a>
+              <a href="thread.html#569">[ thread ]</a>
+              <a href="subject.html#569">[ subject ]</a>
+              <a href="author.html#569">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-21 17:59:41 +0100 (Mon, 21 Nov 2005)
+New Revision: 597
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+   trunk/maay/query.py
+Log:
+-inform query/querier of search criteria and order (with defaults)
+-misc cleanups
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-21 16:33:17 UTC (rev 596)
++++ trunk/maay/dbentity.py	2005-11-21 16:59:41 UTC (rev 597)
+@@ -149,20 +149,32 @@
+               'score_relevance'  : 2,
+               'score_popularity' : 3}
+ 
+-    def __init__(self, order):
++    def __init__(self, order='publication_time', direction='down'):
++        &quot;&quot;&quot;:param order: see class dict above
++           :param direction: 'up' or 'down'
++        &quot;&quot;&quot;
+         if order in DocumentOrder.orders:
+             self.order = DocumentOrder.orders[order]
+         else:
+             raise NotImplemented(&quot;Document ordering %s is unkown&quot; %
+                                  order)
++        if direction in ('up', 'down'):
++            if direction == 'up':
++                self.direction = &quot;ASC&quot;
++            else:
++                self.direction = &quot;DESC&quot;
++        else:
++            raise NotImplemented(&quot;Document direction %s is unkown&quot; %
++                                 direction)
+ 
+     def __str__(self):
+         if self.order == 1:
+-            return &quot;ORDER BY D.publication_time DESC &quot;
++            res = &quot;ORDER BY D.publication_time &quot; 
+         elif self.order == 2:
+-            return &quot;ORDER BY DS.relevance&quot;
++            res = &quot;ORDER BY DS.relevance &quot; 
+         else:
+-            return &quot;ORDER BY DS.popularity&quot;
++            res = &quot;ORDER BY DS.popularity&quot;
++        return res + self.direction
+ 
+ class Document(DBEntity):
+     &quot;&quot;&quot;Represent a Document in the database
+@@ -259,7 +271,7 @@
+     #     query is quite messy
+     def _selectContainingQuery(cls, words, mimetype=None, offset=0,
+                                limit=None, allowPrivate=False,
+-                               order='publication_time'):
++                               order=None):
+         # XXX mimetype handling is a HACK. It needs to be integrated
+         #     nicely in order to handle any kind of restrictions easily
+         #word = WORDS_RGX.finditer(normalizeText(' '.join(words)))
+@@ -273,7 +285,7 @@
+             restriction += &quot; AND D.state!=%s &quot;
+             restrictionParams.append(cls.PRIVATE_STATE)
+         # just translate the plain-text ordering to SQL stuff
+-        sql_order = str(DocumentOrder(order))
++        sql_order = order or str(DocumentOrder('publication_time'))
+         # Question: what is the HAVING clause supposed to do ?
+         # Answer: we select all documents containing one of the words
+         # that we are looking for, group them by their identifier, and
+@@ -303,14 +315,17 @@
+     _selectContainingQuery = classmethod(_selectContainingQuery)
+ 
+     def selectContaining(cls, cursor, words, mimetype=None, offset=0,
+-                         limit=None, allowPrivate=False):
++                         limit=None, allowPrivate=False, order='publication_time',
++                         direction='down'):
+         print &quot;Document selectContaining %s&quot; % words
+         if not words:
+             return []
++        doc_order = str(DocumentOrder(order, direction))
+         query, params = cls._selectContainingQuery(words, mimetype,
+                                                    offset=offset,
+                                                    limit=limit,
+-                                                   allowPrivate=allowPrivate)
++                                                   allowPrivate=allowPrivate,
++                                                   order=doc_order)
+         if query:
+             cursor.execute(query, params)
+             results = cursor.fetchall()
+@@ -525,6 +540,7 @@
+                   'counter', 'claim_count', 'affinity', 'bandwidth')
+     key = ('node_id',)
+ 
++## Gibberish belox might be useful later, don't delete it right now, please (auc)
+ ##     def _insertOrUpdateQuery(self):
+ ##         &quot;&quot;&quot;generates an INSERT query according to object's state
+ ##            also update node_id on collisions on (ip, port)&quot;&quot;&quot;
+@@ -541,20 +557,6 @@
+ ##                 query += &quot;, %s=%s&quot; % (attr, getattr(self, attr))
+ ##         return query
+ 
+-    ### select registered will probably be obsoleted very soon (auc, 11/21/05)
+-    def _selectRegisteredNodesQuery(cls):
+-        query = cls._selectQuery()
+-        query += &quot; WHERE node_id != %s ORDER BY last_seen_time DESC LIMIT %s&quot;
+-        return query
+-    _selectRegisteredNodesQuery = classmethod(_selectRegisteredNodesQuery)
+-
+-    def selectRegistered(cls, cursor, currentNodeId, maxResults):
+-        query = cls._selectRegisteredNodesQuery()
+-        cursor.execute(query, (currentNodeId, maxResults))
+-        results = cursor.fetchall()
+-        return [cls(**dict(zip(cls.attributes, row))) for row in results]
+-    selectRegistered = classmethod(selectRegistered)
+-
+     def _selectActiveNodesQuery(cls):
+         query = cls._selectQuery()
+         query += (&quot; WHERE node_id != %s AND last_seen_time &gt; last_sleep_time&quot;
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-21 16:33:17 UTC (rev 596)
++++ trunk/maay/querier.py	2005-11-21 16:59:41 UTC (rev 597)
+@@ -163,7 +163,9 @@
+             cursor = self._cnx.cursor()
+             return Document.selectContaining(cursor, words, query.filetype,
+                                              query.offset, query.limit,
+-                                             self.searchInPrivate)
++                                             self.searchInPrivate,
++                                             order=query.order,
++                                             direction=query.direction)
+         finally:
+             traceback.print_exc()
+             cursor.close()
+@@ -321,12 +323,6 @@
+                       category='[warning]')
+         cursor.close()        
+ 
+-    def getRegisteredNeighbors(self, nodeId, nbNodes):
+-        cursor = self._cnx.cursor() 
+-        nodes = Node.selectRegistered(cursor, nodeId, nbNodes) 
+-        cursor.close()
+-        return nodes
+-
+     def getActiveNeighbors(self, nodeId, nbNodes):
+         cursor = self._cnx.cursor() 
+         nodes = Node.selectActive(cursor, nodeId, nbNodes) 
+
+Modified: trunk/maay/query.py
+===================================================================
+--- trunk/maay/query.py	2005-11-21 16:33:17 UTC (rev 596)
++++ trunk/maay/query.py	2005-11-21 16:59:41 UTC (rev 597)
+@@ -48,12 +48,17 @@
+ 
+ class Query(object):
+     restrictions = ('filetype', 'filename', 'searchtype')
+-    def __init__(self, words, offset=0, filetype=None, filename=None):
++    def __init__(self, words, offset=0, filetype=None, filename=None,
++                 order=None, direction=None):
+         self.words = words # unicode string 
+         self.offset = offset
+         self.filetype = filetype
+         self.filename = filename
+         self.limit = None
++        #FIXME: ugly stuff below, related to result
++        #       presentation in the browser
++        self.order = order or 'publication_time'
++        self.direction = direction or 'down'
+ 
+     def fromRawQuery(rawQuery, offset=0):
+         &quot;&quot;&quot;:type rawQuery: str&quot;&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000568.html">[Maay-svncheckins] r596 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000570.html">[Maay-svncheckins] r598 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#569">[ date ]</a>
+              <a href="thread.html#569">[ thread ]</a>
+              <a href="subject.html#569">[ subject ]</a>
+              <a href="author.html#569">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

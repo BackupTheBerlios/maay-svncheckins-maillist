@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r651 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r651%20-%20trunk/maay&In-Reply-To=%3C200511241616.jAOGGqDZ027264%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000622.html">
+   <LINK REL="Next"  HREF="000623.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r651 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r651%20-%20trunk/maay&In-Reply-To=%3C200511241616.jAOGGqDZ027264%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r651 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov 24 17:16:52 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000622.html">[Maay-svncheckins] r650 - trunk/maay/data
+</A></li>
+        <LI>Next message: <A HREF="000623.html">[Maay-svncheckins] r652 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#624">[ date ]</a>
+              <a href="thread.html#624">[ thread ]</a>
+              <a href="subject.html#624">[ subject ]</a>
+              <a href="author.html#624">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-24 17:16:49 +0100 (Thu, 24 Nov 2005)
+New Revision: 651
+
+Modified:
+   trunk/maay/dbentity.py
+Log:
+Removed print
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-24 15:25:43 UTC (rev 650)
++++ trunk/maay/dbentity.py	2005-11-24 16:16:49 UTC (rev 651)
+@@ -394,7 +394,6 @@
+         sqlQuery = 'SELECT %s FROM (%s) AS T %s ORDER BY %s LIMIT %s OFFSET %s' % (
+             ', '.join(aliasedAttrs), subQuery, where,
+             orderClause, limit, query.offset)
+-        print &quot;QUERY =&quot;, sqlQuery
+         return sqlQuery, {'query_id' : query.qid}
+     _selectQuery = classmethod(_selectQuery)
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000622.html">[Maay-svncheckins] r650 - trunk/maay/data
+</A></li>
+	<LI>Next message: <A HREF="000623.html">[Maay-svncheckins] r652 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#624">[ date ]</a>
+              <a href="thread.html#624">[ thread ]</a>
+              <a href="subject.html#624">[ subject ]</a>
+              <a href="author.html#624">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

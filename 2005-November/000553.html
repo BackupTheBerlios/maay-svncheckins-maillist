@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r581 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r581%20-%20trunk/maay&In-Reply-To=%3C200511181729.jAIHTT87003730%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000552.html">
+   <LINK REL="Next"  HREF="000554.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r581 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r581%20-%20trunk/maay&In-Reply-To=%3C200511181729.jAIHTT87003730%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r581 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 18:29:29 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000552.html">[Maay-svncheckins] r580 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000554.html">[Maay-svncheckins] r582 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#553">[ date ]</a>
+              <a href="thread.html#553">[ thread ]</a>
+              <a href="subject.html#553">[ subject ]</a>
+              <a href="author.html#553">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-18 18:29:29 +0100 (Fri, 18 Nov 2005)
+New Revision: 581
+
+Modified:
+   trunk/maay/indexer.py
+Log:
+Add logging to indexer
+
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-18 16:56:06 UTC (rev 580)
++++ trunk/maay/indexer.py	2005-11-18 17:29:29 UTC (rev 581)
+@@ -45,9 +45,8 @@
+ from maay.querier import MaayAuthenticationError
+ from maay.texttool import removeControlChar
+ from threading import Thread
++from twisted.python import log
+ 
+-#log.startLogging(open('maay-indexer.log', 'w'))
+-
+ class IIndexerObserver(Interface):
+ 
+     def newDocumentIndexed(filename):
+@@ -174,6 +173,7 @@
+ 
+     def start(self):
+         # we index private dirs first because public overrides private
++        log.startLogging(open('maay-indexer.log', 'w'))
+         existingFiles = self.runIndexer(isPrivate=True)
+         existingFiles |= self.runIndexer(isPrivate=False)
+         indexedFiles = Set(self.serverProxy.getIndexedFiles(self.cnxId))
+@@ -355,6 +355,7 @@
+             print &quot;AuthenticationError:&quot;, exc
+             return
+         print 'going to index file %s', filepath
++        log.startLogging(open('maay-indexer.log', 'w'))
+         indexer.indexFile(filepath, isPrivate=False)
+     except socket.error, exc:
+         print &quot;Cannot contact Node:&quot;, exc
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000552.html">[Maay-svncheckins] r580 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000554.html">[Maay-svncheckins] r582 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#553">[ date ]</a>
+              <a href="thread.html#553">[ thread ]</a>
+              <a href="subject.html#553">[ subject ]</a>
+              <a href="author.html#553">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r229 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C20051027081229.GA1099%40logilab.fr%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000202.html">
+   <LINK REL="Next"  HREF="000204.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r229 - trunk/maay</H1>
+    <B>=?unknown-8bit?Q?Aur=E9lien_Camp=E9as?=</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C20051027081229.GA1099%40logilab.fr%3E"
+       TITLE="[Maay-svncheckins] r229 - trunk/maay">aurelien.campeas at logilab.fr
+       </A><BR>
+    <I>Thu Oct 27 10:12:29 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000202.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000204.html">[Maay-svncheckins] r230 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#203">[ date ]</a>
+              <a href="thread.html#203">[ thread ]</a>
+              <a href="subject.html#203">[ subject ]</a>
+              <a href="author.html#203">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Wed, Oct 26, 2005 at 06:37:52PM -0400, Adrien Di Mascio wrote:
+&gt;<i> On 10/26/05, Aur?lien Camp?as &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">aurelien.campeas at logilab.fr</A>&gt; wrote:
+</I>&gt;<i> &gt; Sorry, but this reintroduces the bug. Probably because id(cred) will
+</I>&gt;<i> &gt; be different each time even if the content is the same. I'll look at a
+</I>&gt;<i> &gt; whay to preserve your cache and get rid of the leak anyway, if possible.
+</I>&gt;<i> 
+</I>&gt;<i> I see. I should have imagined that. I guess the easiest solution would
+</I>&gt;<i> then be to directly use the (creds.username, creds.password) tuple
+</I>&gt;<i> as the dictionary key instead of the credential instance.
+</I>&gt;<i> 
+</I>
+Yup, that's what I am going to do.
+
+&gt;<i> But ... there is still the problem (If I understood correctly from the last
+</I>&gt;<i> mails / checkins) that the connection to the database is not closed
+</I>&gt;<i> when the querier is not used anymore, and that should be solved.
+</I>
+I'll investigate if we really miss an explicit cnx.close() on
+XQuerier.del()... or if the instantiated queriers are in fact
+abusively stored somewhere (eg in the MaayRealm session dict).
+
+&gt;<i> 
+</I>&gt;<i> BTW, why (where) do we instantiate several queriers ? 
+</I>
+AFAIK in requestAvatarId of DBAuthChecker, the place of the
+leak. That's what I had fixed I think.
+
+I still don't understand why the cache is needed here since there
+should be only one local user...
+
+Nor why we might need (in other places)
+different (anonymous) queriers for different (anonymous) users. After
+all, anonymous is anonymous is ...kind of the same user all the time.
+
+In short : 1 maayquerier for the local user, 1 anonymous querier for
+the distant users. Wrong ?
+
+&gt;<i> Should we
+</I>&gt;<i> call &quot;cnx.close()&quot; in the Querier.__del__ method ?
+</I>&gt;<i> 
+</I>
+I'll check that.
+
+Bye,
+Aur&#233;lien.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000202.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000204.html">[Maay-svncheckins] r230 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#203">[ date ]</a>
+              <a href="thread.html#203">[ thread ]</a>
+              <a href="subject.html#203">[ subject ]</a>
+              <a href="author.html#203">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

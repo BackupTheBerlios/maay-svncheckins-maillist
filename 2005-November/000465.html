@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r494 - trunk/maay/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r494%20-%20trunk/maay/data&In-Reply-To=%3C200511151025.jAFAPtQU015680%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000464.html">
+   <LINK REL="Next"  HREF="000466.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r494 - trunk/maay/data</H1>
+    <B>dnf at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r494%20-%20trunk/maay/data&In-Reply-To=%3C200511151025.jAFAPtQU015680%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r494 - trunk/maay/data">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 11:25:55 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000464.html">[Maay-svncheckins] r493 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000466.html">[Maay-svncheckins] r495 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#465">[ date ]</a>
+              <a href="thread.html#465">[ thread ]</a>
+              <a href="subject.html#465">[ subject ]</a>
+              <a href="author.html#465">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-15 11:25:52 +0100 (Tue, 15 Nov 2005)
+New Revision: 494
+
+Modified:
+   trunk/maay/data/footer.html
+   trunk/maay/data/maay.css
+   trunk/maay/data/resultpage.html
+Log:
+Add link to francetelecom r&amp;d site.
+
+
+
+Modified: trunk/maay/data/footer.html
+===================================================================
+--- trunk/maay/data/footer.html	2005-11-15 10:19:27 UTC (rev 493)
++++ trunk/maay/data/footer.html	2005-11-15 10:25:52 UTC (rev 494)
+@@ -6,7 +6,7 @@
+     &lt;tr&gt;
+       &lt;td valign=&quot;top&quot; width=&quot;100%&quot;&gt;&lt;a href=&quot;/&quot; class=&quot;footlink&quot;&gt;[Main&nbsp;page]&lt;/a&gt;&lt;/td&gt;
+       &lt;td valign=&quot;top&quot;&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot; class=&quot;footlink&quot;&gt;[Maay&nbsp;Home&nbsp;page]&lt;/a&gt;&lt;/td&gt;
+-      &lt;td align=&quot;right&quot;&gt;&lt;img src=&quot;/images/logoFT.png&quot; /&gt;&lt;/td&gt;
++      &lt;td align=&quot;right&quot;&gt;&lt;a href=&quot;<A HREF="http://www.francetelecom.com/en/group/rd/">http://www.francetelecom.com/en/group/rd/</A>&quot;&gt;&lt;img src=&quot;/images/logoFT.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
+     &lt;/tr&gt;
+   &lt;/table&gt;
+ &lt;/div&gt;
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-15 10:19:27 UTC (rev 493)
++++ trunk/maay/data/maay.css	2005-11-15 10:25:52 UTC (rev 494)
+@@ -15,8 +15,10 @@
+   text-align: right;
+ }
+ 
++img {
++  border:0px
++}
+ 
+-
+ /** footer ********/
+ a.footlink {
+   /* display: block; */
+
+Modified: trunk/maay/data/resultpage.html
+===================================================================
+--- trunk/maay/data/resultpage.html	2005-11-15 10:19:27 UTC (rev 493)
++++ trunk/maay/data/resultpage.html	2005-11-15 10:25:52 UTC (rev 494)
+@@ -6,7 +6,7 @@
+     &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+       &lt;table&gt;
+         &lt;tr&gt;
+-          &lt;td&gt;&lt;a href=&quot;/&quot;&gt;&lt;img border=&quot;0&quot; src=&quot;images/smallmaay.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
++          &lt;td&gt;&lt;a href=&quot;/&quot;&gt;&lt;img src=&quot;images/smallmaay.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
+           &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;words&quot; nevow:render=&quot;searchfield&quot;&gt;&lt;nevow:attr name=&quot;value&quot; &gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;/input&gt;&lt;/td&gt;
+           &lt;td&gt;&lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;&lt;/td&gt;
+ 	&lt;/tr&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000464.html">[Maay-svncheckins] r493 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000466.html">[Maay-svncheckins] r495 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#465">[ date ]</a>
+              <a href="thread.html#465">[ thread ]</a>
+              <a href="subject.html#465">[ subject ]</a>
+              <a href="author.html#465">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

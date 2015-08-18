@@ -1,0 +1,286 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r667 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r667%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511251652.jAPGq0oO003683%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000638.html">
+   <LINK REL="Next"  HREF="000640.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r667 - in trunk/maay: . test</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r667%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511251652.jAPGq0oO003683%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r667 - in trunk/maay: . test">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Nov 25 17:52:00 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000638.html">[Maay-svncheckins] r666 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000640.html">[Maay-svncheckins] r668 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#639">[ date ]</a>
+              <a href="thread.html#639">[ thread ]</a>
+              <a href="subject.html#639">[ subject ]</a>
+              <a href="author.html#639">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-25 17:51:59 +0100 (Fri, 25 Nov 2005)
+New Revision: 667
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/p2pquerier.py
+   trunk/maay/querier.py
+   trunk/maay/rpc.py
+   trunk/maay/test/test_dbentity.py
+   trunk/maay/webapplication.py
+Log:
+Fix download from alternative providers (and tooltip count of nodes)
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-25 16:48:46 UTC (rev 666)
++++ trunk/maay/dbentity.py	2005-11-25 16:51:59 UTC (rev 667)
+@@ -356,21 +356,15 @@
+                   'relevance', 'popularity', 'url',
+                   'host', 'port', 'login', 'record_ts')
+     extended_attrs = attributes
+-    key = ('document_id', 'query_id')
++    key = ('document_id', 'document_id', 'query_id')
+     tableName = 'results'
+ 
+-    def fromDocument(document, qid, our_node_id, provider=None):
++    def fromDocument(document, qid, provider):
+         stateDict = document.__dict__ # document.stateDict is wrong
+         for key, value in stateDict.items():
+             if key not in Result.attributes or value is None:
+                 del stateDict[key]
+-        if provider:
+-            stateDict['login'], stateDict['node_id'], stateDict['host'], stateDict['port'] = provider
+-        else:
+-            stateDict['host'] = 'localhost'
+-            stateDict['port'] = 0
+-            stateDict['node_id'] = our_node_id # local node id
+-            stateDict['login'] = NODE_LOGIN
++        stateDict['login'], stateDict['node_id'], stateDict['host'], stateDict['port'] = provider
+         stateDict['query_id'] = qid
+         return Result(**stateDict)
+     fromDocument = staticmethod(fromDocument)
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-25 16:48:46 UTC (rev 666)
++++ trunk/maay/p2pquerier.py	2005-11-25 16:51:59 UTC (rev 667)
+@@ -312,15 +312,15 @@
+                     document['url'] = os.path.basename(document['url'])
+             # TODO: record answer in database if local is False
+             # auc : to have them in Document with state == KNOWN
+-            if not query.isKnown(document):
+-                abstract = makeAbstract(document['text'], query.getWords())
+-                document['text'] = untagText(removeSpace(abstract))
+-                query.addMatch(document)
+-                toSend.append(document)
+-            else:
+-                #FIXME: shouldn't we add all documents regardless
+-                #       of duplicates, so as to add a new provider entry ?
+-                print &quot;we already know this doc !!!@~^#{&quot;
++            #if not query.isKnown(document):
++            abstract = makeAbstract(document['text'], query.getWords())
++            document['text'] = untagText(removeSpace(abstract))
++            query.addMatch(document)
++            toSend.append(document)
++            ## else:
++##                 #FIXME: shouldn't we add all documents regardless
++##                 #       of duplicates, so as to add a new provider entry ?
++##                 print &quot;we already know this doc !!!@~^#{&quot;
+ 
+         if query.sender != NODE_CONFIG.get_node_id():
+             self.querier.registerNodeActivity(answer.provider[1])
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-25 16:48:46 UTC (rev 666)
++++ trunk/maay/querier.py	2005-11-25 16:51:59 UTC (rev 667)
+@@ -248,8 +248,6 @@
+ 
+     def _updateDownloadStatistics(self, document, words):
+         cursor = self._cnx.cursor()
+-        # what's this max(0, doc.count) below ??? it should be set initially
+-        # at zero anyway ...
+         document.download_count = max(0, document.download_count) + 1
+         document.commit(cursor, update=True)
+         db_document_id = document.db_document_id
+@@ -375,14 +373,14 @@
+         cursor.close()
+         return providers
+         
+-    def pushDocuments(self, qid, documents, our_node_id, provider=None):
++    def pushDocuments(self, qid, documents, provider):
+         &quot;&quot;&quot;push &lt;documents&gt; into the temporary table built for
+         &lt;qid&gt;
+         &quot;&quot;&quot;
+         cursor = self._cnx.cursor()
+         try:
+             for document in documents:
+-                res = Result.fromDocument(document, qid, our_node_id, provider)
++                res = Result.fromDocument(document, qid, provider)
+                 res.commit(cursor, update=False)
+             cursor.close()
+             self._cnx.commit()
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-25 16:48:46 UTC (rev 666)
++++ trunk/maay/rpc.py	2005-11-25 16:51:59 UTC (rev 667)
+@@ -197,6 +197,6 @@
+         except Exception, exc:
+             import traceback
+             traceback.print_exc()
+-            return &quot;Could not get %r, cause %s&quot; % (doc_id, exc)
++            return ''
+         return data
+     
+
+Modified: trunk/maay/test/test_dbentity.py
+===================================================================
+--- trunk/maay/test/test_dbentity.py	2005-11-25 16:48:46 UTC (rev 666)
++++ trunk/maay/test/test_dbentity.py	2005-11-25 16:51:59 UTC (rev 667)
+@@ -79,26 +79,18 @@
+     
+ class ResultTC(unittest.TestCase):
+ 
+-    def testBuildFromLocalDocument(self):
+-        document = Document(document_id='foo', mime_type='application/pdf')
+-        result = Result.fromDocument(document, 'qid')
+-        self.assertEquals(result.document_id, 'foo')
+-        self.assertEquals(result.query_id, 'qid')
+-        self.assertEquals(result.host, 'localhost')
+-        self.assertEquals(result.mime_type, 'application/pdf')
+-        self.assertEquals(result.boundAttributes(), ['document_id', 'query_id',
+-                                                     'mime_type', 'host', 'port'])
+         
+-    def testBuildFromDistantDocument(self):
++    def testBuildFromDocument(self):
+         document = Document(document_id='foo', mime_type='application/pdf')
+-        result = Result.fromDocument(document, 'qid', ('adim', 'IP', 'PORT'))
++        result = Result.fromDocument(document, 'qid', ('adim', 'NID', 'IP', 'PORT'))
+         self.assertEquals(result.document_id, 'foo')
+         self.assertEquals(result.mime_type, 'application/pdf')
++        self.assertEquals(result.node_id, 'NID')
+         self.assertEquals(result.login, 'adim')
+         self.assertEquals(result.host, 'IP')
+         self.assertEquals(result.query_id, 'qid')
+         self.assertEquals(result.port, 'PORT')
+-        self.assertEquals(result.boundAttributes(), ['document_id', 'query_id', 'mime_type',
++        self.assertEquals(result.boundAttributes(), ['document_id', 'query_id', 'node_id', 'mime_type',
+                                                      'host', 'port', 'login'])
+ 
+ 
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-25 16:48:46 UTC (rev 666)
++++ trunk/maay/webapplication.py	2005-11-25 16:51:59 UTC (rev 667)
+@@ -46,6 +46,7 @@
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+ from maay.dbentity import ScoredDocument, Document
+ import maay.indexer as indexer
++from maay.localinfo import NODE_LOGIN
+ 
+ def _is_valid_directory(directory):
+     try:
+@@ -403,7 +404,11 @@
+         return d
+ 
+     def gotDataBack(self, rpcFriendlyData, nodeConfig, filename):
+-        fileData = rpcFriendlyData.data
++        if rpcFriendlyData:
++            fileData = rpcFriendlyData.data
++        else:
++            # this will trigger the errback in child_distantfile
++            raise Exception(&quot;File cannot be downloaded from this host&quot;)
+         print &quot; ... downloaded !&quot;
+         filepath = osp.join(self.download_dir, filename)
+         f = file(filepath,'wb')
+@@ -428,7 +433,7 @@
+             print &quot;[webapp] trying to donwload %r from %s:%s&quot; % (filename, nextHost, nextPort)
+             proxy = Proxy(str('<A HREF="http://%s:%s">http://%s:%s</A>' % (nextHost, nextPort)))
+             d = proxy.callRemote('downloadFile', docId, words)
+-            d.addCallback(self.gotDataBack, filename)
++            d.addCallback(self.gotDataBack, nodeConfig, filename)
+             d.addErrback(self.retryWithOtherProvider, nodeConfig, words, docId, filename)
+             return d
+         else:
+@@ -498,13 +503,13 @@
+         offset = self.query.offset
+         if (offset + 15) &lt; resultsCount:
+             return tags.xml('&lt;a href=&quot;javascript: browseResults(%s);&quot;&gt;Next&lt;/a&gt;' % (offset + 15))
+-        return ''
++        return tags.xml('&lt;span class=&quot;selectedCriterium&quot;&gt;Next&lt;/span&gt;')
+         
+     
+     def render_previous(self, context, data):
+         &quot;&quot;&quot;computes 'Previous' link&quot;&quot;&quot;
+         if self.query.offset &lt;= 0:
+-            return ''
++            return tags.xml('&lt;span class=&quot;selectedCriterium&quot;&gt;Previous&lt;/span&gt;')
+         offset = self.query.offset - 15
+         return tags.xml('&lt;a href=&quot;javascript: browseResults(%s);&quot;&gt;Previous&lt;/a&gt;' % (offset))
+     
+@@ -637,7 +642,8 @@
+             self.p2pQuery = p2pQuery
+             # purge old results
+             self.querier.purgeOldResults()
+-            self.querier.pushDocuments(self.qid, results, NODE_CONFIG.get_node_id(), provider=None)
++            provider = (NODE_LOGIN, NODE_CONFIG.get_node_id(), 'localhost', 0)
++            self.querier.pushDocuments(self.qid, results, provider)
+             self.results = self.querier.getQueryResults(self.query)
+             
+     # XXX (refactoring): provide a common base class for LivePages
+@@ -650,7 +656,7 @@
+         
+     def onNewResults(self, provider, results):
+         results = [ScoredDocument(**params) for params in results]
+-        self.querier.pushDocuments(self.qid, results, NODE_CONFIG.get_node_id(), provider)
++        self.querier.pushDocuments(self.qid, results, provider)
+         results = self.querier.getQueryResults(self.query,
+                                                onlyLocal=self.onlyLocal,
+                                                onlyDistant=self.onlyDistant)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000638.html">[Maay-svncheckins] r666 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000640.html">[Maay-svncheckins] r668 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#639">[ date ]</a>
+              <a href="thread.html#639">[ thread ]</a>
+              <a href="subject.html#639">[ subject ]</a>
+              <a href="author.html#639">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

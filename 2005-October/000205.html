@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r231 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r231%20-%20trunk/maay&In-Reply-To=%3C200510271150.j9RBoXT1004260%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000204.html">
+   <LINK REL="Next"  HREF="000206.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r231 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r231%20-%20trunk/maay&In-Reply-To=%3C200510271150.j9RBoXT1004260%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r231 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Oct 27 13:50:33 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000204.html">[Maay-svncheckins] r230 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000206.html">[Maay-svncheckins] r232 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#205">[ date ]</a>
+              <a href="thread.html#205">[ thread ]</a>
+              <a href="subject.html#205">[ subject ]</a>
+              <a href="author.html#205">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-27 13:50:31 +0200 (Thu, 27 Oct 2005)
+New Revision: 231
+
+Added:
+   trunk/maay/exif.py
+Modified:
+   trunk/maay/texttool.py
+Log:
+Additional support for EXIF information (now we actually get some).
+
+
+Added: trunk/maay/exif.py
+===================================================================
+--- trunk/maay/exif.py	2005-10-27 09:15:48 UTC (rev 230)
++++ trunk/maay/exif.py	2005-10-27 11:50:31 UTC (rev 231)
+@@ -0,0 +1,68 @@
++&quot;&quot;&quot;This module provides tools for
++   the exploitation of EXIF codes
++   embedded in image files.
++&quot;&quot;&quot;
++
++#XXX: robustify this against missing PIL
++import Image
++    
++    
++# Mapping from number to (descriptor, type)
++exif_dict = {
++    256 : ('ImageWidth', int),
++    257 : ('ImageLength', int),
++    258 : ('BitPerSample', int),
++    259 : ('Compression', int),
++    270 : ('ImageDescription', str),
++    271 : ('Make', str),
++    272 : ('Model', str),
++    274 : ('Orientation', int),
++    305 : ('Software', str),
++    306 : ('DateTime', str),
++    315 : ('Artist', str),
++
++
++    33434 : ('ExposureTime', (int, int)),
++
++    36864 : ('ExifVersion', None),
++    37122 : ('CompressedBitsPerPixel', (int, int)),
++
++#    37500 : ('MakerNote', None), too much garbage there
++
++    36867 : ('DateTimeOriginal', str),
++    36868 : ('DateTimeDigitized', str),
++
++    40962 : ('PixelXDimension', int),
++    40963 : ('PixelYDimension', int),
++    
++    }
++
++def raw_get_exif(file_path):
++    &quot;&quot;&quot;gets a mapping from exif codes to values&quot;&quot;&quot;
++    return Image.open(file_path)._getexif()
++
++def get_exif(file_path):
++    &quot;&quot;&quot;returns a mapping from exif attributes to values&quot;&quot;&quot;
++    res = {}
++    for k, v in raw_get_exif(file_path).items():
++        if exif_dict.has_key(k):
++            res[exif_dict[k][0]] = v
++    return res
++
++def get_string_from_exif(filepath):
++    &quot;&quot;&quot;returns a well formed string from
++       exif attributes to values&quot;&quot;&quot;
++    d = get_exif(filepath)
++    res = ''
++    for k, v in d.items():
++        res += k+' : '+str(v)+'\n'
++    return res
++
++def get_ustring_from_exif(filepath):
++    &quot;&quot;&quot;returns a well formed string from
++       exif attributes to values&quot;&quot;&quot;
++    d = get_exif(filepath)
++    res = u''
++    for k, v in d.items():
++        res += unicode(k)+u' : '+unicode(v)+u'\n'
++    return res
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-27 09:15:48 UTC (rev 230)
++++ trunk/maay/texttool.py	2005-10-27 11:50:31 UTC (rev 231)
+@@ -27,6 +27,8 @@
+ import gzip
+ import bz2
+ 
++from maay.exif import get_ustring_from_exif
++
+ WORD_MIN_LEN = 2
+ WORD_MAX_LEN = 50
+ MAX_STORED_SIZE = 65535
+@@ -116,11 +118,12 @@
+ 
+ class AbstractParser:
+     &quot;&quot;&quot;base-class for file parsers&quot;&quot;&quot;
++
+     def parseFile(self, filepath, pristineFilename, encoding=None):
+         &quot;&quot;&quot;returns a 4-uple (title, normalized_text, links, offset)
+         TODO: port original code from htmltotext
+         :param encoding: if None, then need to be guessed
+-
++        
+         When a title cannot be computed from file content,
+         the last component of the filepath is used instead
+         &quot;&quot;&quot;
+@@ -199,9 +202,21 @@
+ class ExifParser(AbstractParser):
+     &quot;&quot;&quot;A parser for Exif information found in image files&quot;&quot;&quot;
+ 
+-    def parseString(self, source):
+-        return u'', u'The image', [], 0
++    def parseFile(self, filepath, pristineFilename, encoding=None):
++        &quot;&quot;&quot;returns a 4-uple (title, normalized_text, links, offset)
++        TODO: port original code from htmltotext
++        :param encoding: if None, then need to be guessed
+ 
++        When a title cannot be computed from file content,
++        the last component of the filepath is used instead
++        &quot;&quot;&quot;
++        title = unicode(pristineFilename)
++        try:    
++            result = get_ustring_from_exif (filepath)
++            return title, result, [], 0
++        except:
++            return title, u'No EXIF information available', [], 0
++
+         
+ _table = {}
+ for i in xrange(32):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000204.html">[Maay-svncheckins] r230 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000206.html">[Maay-svncheckins] r232 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#205">[ date ]</a>
+              <a href="thread.html#205">[ thread ]</a>
+              <a href="subject.html#205">[ subject ]</a>
+              <a href="author.html#205">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

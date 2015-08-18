@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r501 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r501%20-%20trunk/maay&In-Reply-To=%3C200511151451.jAFEpRZi005724%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000471.html">
+   <LINK REL="Next"  HREF="000473.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r501 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r501%20-%20trunk/maay&In-Reply-To=%3C200511151451.jAFEpRZi005724%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r501 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 15:51:27 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000471.html">[Maay-svncheckins] r500 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000473.html">[Maay-svncheckins] r502 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#472">[ date ]</a>
+              <a href="thread.html#472">[ thread ]</a>
+              <a href="subject.html#472">[ subject ]</a>
+              <a href="author.html#472">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-15 15:51:24 +0100 (Tue, 15 Nov 2005)
+New Revision: 501
+
+Modified:
+   trunk/maay/webapplication.py
+Log:
+Restore indexation from webpage (missing import)
+
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-15 13:51:50 UTC (rev 500)
++++ trunk/maay/webapplication.py	2005-11-15 14:51:24 UTC (rev 501)
+@@ -35,7 +35,7 @@
+ from logilab.common.textutils import normalize_text
+ 
+ from maay.querier import WEB_AVATARID
+-from maay.configuration import get_path_of, NodeConfiguration
++from maay.configuration import get_path_of, NodeConfiguration, IndexerConfiguration
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+@@ -226,7 +226,6 @@
+             return [&quot;No skipped public directory.&quot;]
+         return self.indexerConfig.public_skip_dir
+ 
+-
+     def render_directory(self, context, name):
+         print &quot;directory = %s&quot; % name
+         context.fillSlots(&quot;name&quot;, name)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000471.html">[Maay-svncheckins] r500 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000473.html">[Maay-svncheckins] r502 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#472">[ date ]</a>
+              <a href="thread.html#472">[ thread ]</a>
+              <a href="subject.html#472">[ subject ]</a>
+              <a href="author.html#472">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r613 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r613%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511230857.jAN8voMI010510%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000584.html">
+   <LINK REL="Next"  HREF="000586.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r613 - in trunk/maay: . data</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r613%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511230857.jAN8voMI010510%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r613 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 09:57:50 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000584.html">[Maay-svncheckins] r612 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000586.html">[Maay-svncheckins] r614 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#585">[ date ]</a>
+              <a href="thread.html#585">[ thread ]</a>
+              <a href="subject.html#585">[ subject ]</a>
+              <a href="author.html#585">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-23 09:57:50 +0100 (Wed, 23 Nov 2005)
+New Revision: 613
+
+Modified:
+   trunk/maay/data/indexationpage.html
+   trunk/maay/webapplication.py
+Log:
+restored (more or less) the private / public documents counter auto update
+in the indexation page
+
+NOTE1: used context.remember() as a cleaner to store the querier reference
+NOTE2: had to merge all remote calls in one unique call to get it work. I
+       will have to fix that later
+
+
+
+Modified: trunk/maay/data/indexationpage.html
+===================================================================
+--- trunk/maay/data/indexationpage.html	2005-11-23 08:52:12 UTC (rev 612)
++++ trunk/maay/data/indexationpage.html	2005-11-23 08:57:50 UTC (rev 613)
+@@ -14,11 +14,6 @@
+   server.callRemote('live');
+ }
+ 
+-function updateStatus(msg) {
+-  elt = document.getElementById('statusMessage');
+-  elt.innerHTML = msg;
+-}
+-
+ function updatePrivateDocumentCount(count) {
+   elt = document.getElementById('privateDocumentCount');
+   elt.innerHTML = count;
+@@ -29,6 +24,14 @@
+   elt.innerHTML = count;
+ }
+ 
++function updateStatus(msg, private, public) {
++  elt = document.getElementById('statusMessage');
++  elt.innerHTML = msg;
++  updatePrivateDocumentCount(private);
++  updatePublicDocumentCount(public);
++}
++
++
+     &lt;/script&gt;
+   &lt;/head&gt;
+   &lt;body onload=&quot;live();&quot;&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-23 08:52:12 UTC (rev 612)
++++ trunk/maay/webapplication.py	2005-11-23 08:57:50 UTC (rev 613)
+@@ -1,4 +1,3 @@
+-#     Maay : a network of peers for document search
+ #
+ #     Copyright (C) 2005 France Telecom R&amp;D
+ #
+@@ -38,7 +37,7 @@
+ from logilab.common.textutils import normalize_text
+ from logilab.common.compat import set
+ 
+-from maay.querier import WEB_AVATARID
++from maay.querier import IQuerier, WEB_AVATARID
+ from maay.configuration import get_path_of
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
+@@ -133,17 +132,31 @@
+         if name in self._javascript:
+             return static.File(get_path_of(self._javascript[name]))
+ 
+-    def updateStatus(self, message):
+-        self.callRemote('updateStatus', message)
++    def updateStatus(self, message, private, public):
++        self.callRemote('updateStatus', message, private, public)
+ 
+-    def countersUpdated(self, old, new):
++    def countersUpdated(self, old, new, private, public):
+         self.updateStatus(u'Indexation in progress - %s new documents / %s total' %
+-                          (new, old + new))
++                          (new, old + new), private, public)
+ 
+-    def indexationCompleted(self):
++    def indexationCompleted(self, old, new, private, public):
+         self.updateStatus(u'Indexation finished - %s new documents / %s total'
+-            % (IndexationPage.indexedDocuments, IndexationPage.indexedDocuments + IndexationPage.untouchedDocuments))
++            % (new, old + new), private, public)
+ 
++    def updatePrivateDocumentCount(self, count):
++        self.callRemote('updatePrivateDocumentCount', count)
++
++    def updatePublicDocumentCount(self, count):
++        self.callRemote('updatePublicDocumentCount', count)
++
++    def render_privateDocumentCount(self, context, data):
++        querier = IQuerier(context)
++        return querier.getDocumentCount()[Document.PRIVATE_STATE]
++
++    def render_publicDocumentCount(self, context, data):
++        querier = IQuerier(context)
++        return querier.getDocumentCount()[Document.PUBLISHED_STATE]
++
+     def render_message(self, context, data):
+         return self.msg
+ 
+@@ -178,14 +191,25 @@
+         athena.LivePageFactory.__init__(self, pageFactory)
+         self.untouchedDocuments = 0
+         self.indexedDocuments = 0
+-
+-    def newDocumentIndexed(self, filename):
++        self.privateDocuments = 0
++        self.publicDocuments = 0
++    
++    def newDocumentIndexed(self, filename, state):
+         self.indexedDocuments += 1
++        print &quot;newDocument indexed&quot;, filename, state
++        if state == Document.PRIVATE_STATE:
++            self.privateDocuments += 1
++        else:
++            self.publicDocuments += 1
+         # refresh pages for each group of 10 indexed files
+         if (self.indexedDocuments % 10) == 0:
+             for webpage in self.clients.itervalues():
+                 webpage.countersUpdated(self.untouchedDocuments,
+-                                        self.indexedDocuments)
++                                        self.indexedDocuments,
++                                        self.privateDocuments,
++                                        self.publicDocuments)
++                # webpage.updatePrivateDocumentCount(self.privateDocuments)
++                # webpage.updatePublicDocumentCount(self.publicDocuments)
+         
+     def documentUntouched(self, filename):
+         self.untouchedDocuments += 1
+@@ -196,7 +220,12 @@
+     
+     def indexationCompleted(self):
+         for webpage in self.clients.itervalues():
+-            webpage.indexationCompleted()
++            webpage.indexationCompleted(self.untouchedDocuments,
++                                        self.indexedDocuments,
++                                        self.privateDocuments,
++                                        self.publicDocuments)
++            # webpage.updatePrivateDocumentCount(self.privateDocuments)
++            # webpage.updatePublicDocumentCount(self.publicDocuments)
+         # reset counters after indexation is finished
+         self.untouchedDocuments = 0
+         self.indexedDocuments = 0
+@@ -238,6 +267,7 @@
+ 
+     def child_indexation(self, context, _factory=IndexationPageFactory(IndexationPage)):
+         alertMsg = &quot;&quot;
++        context.remember(self.querier, IQuerier)
+         # TODO: check if the added folders are valid
+ 
+         # Actions (add/remove) on private folders
+@@ -295,10 +325,6 @@
+         start = int(context.arg('start', 0))
+         indexationPage = _factory.clientFactory(context)
+ 
+-        # FIXME: porky way to pass the querier ref to the indexationPage
+-        IndexationPage.querier = self.querier
+-        indexationPage.updateDocumentStats()
+-        
+ 	if start == 0:
+             if indexer.is_running():
+                 msg = &quot;Indexer running&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000584.html">[Maay-svncheckins] r612 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000586.html">[Maay-svncheckins] r614 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#585">[ date ]</a>
+              <a href="thread.html#585">[ thread ]</a>
+              <a href="subject.html#585">[ subject ]</a>
+              <a href="author.html#585">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

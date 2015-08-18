@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r533 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r533%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511161748.jAGHm08E012925%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000503.html">
+   <LINK REL="Next"  HREF="000505.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r533 - in trunk/maay: . test</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r533%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511161748.jAGHm08E012925%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r533 - in trunk/maay: . test">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov 16 18:48:00 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000503.html">[Maay-svncheckins] r532 - in tags: . release-0.2.1 release-0.2.1/maay
+</A></li>
+        <LI>Next message: <A HREF="000505.html">[Maay-svncheckins] r534 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#504">[ date ]</a>
+              <a href="thread.html#504">[ thread ]</a>
+              <a href="subject.html#504">[ subject ]</a>
+              <a href="author.html#504">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-16 18:47:56 +0100 (Wed, 16 Nov 2005)
+New Revision: 533
+
+Added:
+   trunk/maay/test/test_presenceserver.py
+Modified:
+   trunk/maay/presenceserver.py
+Log:
+Maintain a bijective relation bewteen nodeId and (ip, port) in presence server, plus tests
+
+
+Modified: trunk/maay/presenceserver.py
+===================================================================
+--- trunk/maay/presenceserver.py	2005-11-16 17:03:32 UTC (rev 532)
++++ trunk/maay/presenceserver.py	2005-11-16 17:47:56 UTC (rev 533)
+@@ -33,7 +33,8 @@
+ class PresenceServer(LineReceiver):
+     # define this as a static class member since a new instance of the class
+     # is created after each request
+-    _registeredUsers = {} 
++    _registeredUsers = {}
++    _ruReverseMap = {}
+     _ruTimestamp = {}
+     # TODO: auto logout after a given time to save memory
+ 
+@@ -47,9 +48,11 @@
+         for nodeId, values in PresenceServer._ruTimestamp.items():
+             dt = now - values
+             if dt.seconds &gt; self._autoExpirationDelayInSecs:
++                ip, port = PresenceServer._registeredUsers[nodeId] [2:3]
+                 if verbose:
+-                    print &quot;%s removed&quot; % str(PresenceServer._registeredUsers[nodeId])
++                    print &quot;%s:%s removed&quot; % (ip, port)
+                 del PresenceServer._registeredUsers[nodeId]
++                del PresenceServer._ruReverseMap[(ip, port)]
+                 del PresenceServer._ruTimestamp[nodeId]
+             elif verbose:
+                 print &quot;keep: %s (%s)&quot; % (str(PresenceServer._registeredUsers[nodeId]), str(values))
+@@ -90,11 +93,18 @@
+             print &quot;%s was already registered&quot; % (nodeId,)
+         lastseen = datetime.utcnow()
+         PresenceServer._ruTimestamp[nodeId] = lastseen
++        # check bijection betwen (ip, port) and nodeId
++        # same (ip, port) shouldn't be registered several times
++        if (ip, port) in PresenceServer._ruReverseMap:
++            oldId = PresenceServer._ruReverseMap[(ip, port)]
++            del PresenceServer._registeredUsers[oldId]
++            del PresenceServer._ruTimestamp[oldId]
+         PresenceServer._registeredUsers[nodeId] = (lastseen.isoformat(),
+                                          nodeId,
+                                          self.transport.getPeer().host,
+                                          port,
+                                          bandwidth)
++        PresenceServer._ruReverseMap[(ip, port)] = nodeId
+ 
+     def do_logout(self, nodeId):
+         try:
+
+Added: trunk/maay/test/test_presenceserver.py
+===================================================================
+--- trunk/maay/test/test_presenceserver.py	2005-11-16 17:03:32 UTC (rev 532)
++++ trunk/maay/test/test_presenceserver.py	2005-11-16 17:47:56 UTC (rev 533)
+@@ -0,0 +1,80 @@
++#     Maay : a network of peers for document search
++#
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This library is free software; you can redistribute it and/or
++#     modify it under the terms of the GNU Lesser General Public
++#     License as published by the Free Software Foundation; either
++#     version 2.1 of the License, or (at your option) any later version.
++#
++#     This library is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++#     Lesser General Public License for more details.
++#
++#     You should have received a copy of the GNU Lesser General Public
++#     License along with this library; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++&quot;&quot;&quot;unit tests for presenceserver.py
++&quot;&quot;&quot;
++__revision__ = '$Id: test_boilerplate.py 481 2005-11-15 08:10:46Z afayolle $'
++
++import unittest
++from maay.presenceserver import PresenceServer
++
++class MockTransport:
++
++    def __init__(self, host):
++        self.host = host
++
++    def getPeer(self):
++        return self
++
++
++class PresenceServerTC(unittest.TestCase):
++    &quot;&quot;&quot;test suite to be completed ...
++    &quot;&quot;&quot;
++    def setUp(self):
++        self.srv = PresenceServer()
++        
++    def tearDown(self):
++        PresenceServer._registeredUsers = {}
++        PresenceServer._ruReverseMap = {}
++        PresenceServer._ruTimestamp = {}
++        
++    def testSimpleNotify(self):
++        self.srv.transport = MockTransport('1.2.3.4')
++        self.assertEquals(self.srv._registeredUsers, {})
++        self.assertEquals(self.srv._ruReverseMap, {})
++        self.srv.lineReceived(&quot;notify:FOONODEA:1.2.3.4:5678:9&quot;)
++        # check first injection
++        self.assertEquals(self.srv._registeredUsers['FOONODEA'][1:],
++                          ('FOONODEA','1.2.3.4','5678','9'))
++        self.assertEquals(self.srv._ruReverseMap[('1.2.3.4','5678')],
++                          'FOONODEA')
++        # inject second
++        self.srv.lineReceived(&quot;notify:FOONODEB:1.2.3.4:567:8&quot;)        
++        # check both are still there
++        self.assertEquals(self.srv._registeredUsers['FOONODEA'][1:],
++                          ('FOONODEA','1.2.3.4','5678','9'))
++        self.assertEquals(self.srv._registeredUsers['FOONODEB'][1:],
++                          ('FOONODEB','1.2.3.4','567','8'))
++        self.assertEquals(self.srv._ruReverseMap, {('1.2.3.4', '5678') : 'FOONODEA',
++                                                   ('1.2.3.4', '567') : 'FOONODEB',})
++
++
++    def testNotifyTwice(self):
++        self.srv.transport = MockTransport('1.2.3.4')
++        self.assertEquals(self.srv._registeredUsers, {})
++        self.assertEquals(self.srv._ruReverseMap, {})
++        self.srv.lineReceived(&quot;notify:FOONODEA:1.2.3.4:5678:9&quot;)
++        self.srv.lineReceived(&quot;notify:FOONODEB:1.2.3.4:5678:9&quot;)
++        self.assertEquals(self.srv._registeredUsers['FOONODEB'][1:],
++                          ('FOONODEB','1.2.3.4','5678','9'))
++        self.assertEquals(self.srv._ruReverseMap[('1.2.3.4','5678')],
++                          'FOONODEB')
++        
++
++if __name__ == '__main__':
++    unittest.main()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000503.html">[Maay-svncheckins] r532 - in tags: . release-0.2.1 release-0.2.1/maay
+</A></li>
+	<LI>Next message: <A HREF="000505.html">[Maay-svncheckins] r534 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#504">[ date ]</a>
+              <a href="thread.html#504">[ thread ]</a>
+              <a href="subject.html#504">[ subject ]</a>
+              <a href="author.html#504">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

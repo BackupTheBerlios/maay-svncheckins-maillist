@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r679 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r679%20-%20trunk/maay&In-Reply-To=%3C200511281815.jASIF3JF026817%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000650.html">
+   <LINK REL="Next"  HREF="000652.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r679 - trunk/maay</H1>
+    <B>dnf at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r679%20-%20trunk/maay&In-Reply-To=%3C200511281815.jASIF3JF026817%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r679 - trunk/maay">dnf at berlios.de
+       </A><BR>
+    <I>Mon Nov 28 19:15:03 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000650.html">[Maay-svncheckins] r677 - maay-0.3.1
+</A></li>
+        <LI>Next message: <A HREF="000652.html">[Maay-svncheckins] r680 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#651">[ date ]</a>
+              <a href="thread.html#651">[ thread ]</a>
+              <a href="subject.html#651">[ subject ]</a>
+              <a href="author.html#651">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-28 19:15:02 +0100 (Mon, 28 Nov 2005)
+New Revision: 679
+
+Modified:
+   trunk/maay/node.py
+   trunk/maay/rpc.py
+Log:
+- Periodical fetching of peers list from presenceserver every 30mn
+- update peerlist when receiving a search request (remove comment)
+
+
+
+Modified: trunk/maay/node.py
+===================================================================
+--- trunk/maay/node.py	2005-11-28 17:32:13 UTC (rev 678)
++++ trunk/maay/node.py	2005-11-28 18:15:02 UTC (rev 679)
+@@ -38,7 +38,7 @@
+ from twisted.cred.checkers import AllowAnonymousAccess, \
+      ICredentialsChecker
+ from twisted.cred.credentials import IAnonymous, IUsernamePassword
+-from twisted.internet import reactor, defer
++from twisted.internet import reactor, defer, task
+ from twisted.web import server
+ from twisted.python import failure
+ from nevow import inevow, appserver, guard
+@@ -273,7 +273,19 @@
+                           NODE_HOST,
+                           NODE_PORT,
+                           NODE_CONFIG.bandwidth)
++
++    # update peer list from presence server every 30 mn
++    notifyTask = task.LoopingCall(presenceclient.notify,
++                                  NODE_CONFIG.presence_host,
++                                  NODE_CONFIG.presence_port,
++                                  maayPortal.webQuerier,
++                                  NODE_ID,
++                                  NODE_HOST,
++                                  NODE_PORT,
++                                  NODE_CONFIG.bandwidth)
+     
++    notifyTask.start(1800)
++
+     rpcserver = server.Site(MaayRPCServer(maayPortal))
+     reactor.listenTCP(NODE_CONFIG.webserver_port, website)
+     reactor.listenTCP(NODE_CONFIG.rpcserver_port, rpcserver)
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-28 17:32:13 UTC (rev 678)
++++ trunk/maay/rpc.py	2005-11-28 18:15:02 UTC (rev 679)
+@@ -168,12 +168,12 @@
+     ###### Peer stuff
+ 
+     def xmlrpc_distributedQuery(self, queryDict):
+-        &quot;&quot;&quot;On node has sent a p2p query (P2pQuerier.sendQuery)
++        &quot;&quot;&quot;One node has sent a p2p query (P2pQuerier.sendQuery)
+         &quot;&quot;&quot;
+-        #print &quot;MaayRPCServer distributedQuery : %s &quot; % queryDict['words']
++        print &quot;MaayRPCServer distributedQuery : %s &quot; % queryDict['words']
+         query = P2pQuery.fromDict(queryDict)
+         querier = self._sessions[ANONYMOUS_AVATARID]
+-        #querier.registerNode(query.sender, query.client_host, query.client_port)
++        querier.registerNode(query.sender, query.client_host, query.client_port)
+         # schedule the query for later processing and return immediately
+         # this enables the sender to query several nodes in a row
+         reactor.callLater(.01, getP2pQuerier().receiveQuery, query)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000650.html">[Maay-svncheckins] r677 - maay-0.3.1
+</A></li>
+	<LI>Next message: <A HREF="000652.html">[Maay-svncheckins] r680 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#651">[ date ]</a>
+              <a href="thread.html#651">[ thread ]</a>
+              <a href="subject.html#651">[ subject ]</a>
+              <a href="author.html#651">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

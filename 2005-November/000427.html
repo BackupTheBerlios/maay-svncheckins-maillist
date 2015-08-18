@@ -1,0 +1,402 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r456 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r456%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511141107.jAEB7B0r006274%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000426.html">
+   <LINK REL="Next"  HREF="000428.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r456 - in trunk/maay: . test</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r456%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511141107.jAEB7B0r006274%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r456 - in trunk/maay: . test">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov 14 12:07:11 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000426.html">[Maay-svncheckins] r455 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000428.html">[Maay-svncheckins] r457 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#427">[ date ]</a>
+              <a href="thread.html#427">[ thread ]</a>
+              <a href="subject.html#427">[ subject ]</a>
+              <a href="author.html#427">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-14 12:06:47 +0100 (Mon, 14 Nov 2005)
+New Revision: 456
+
+Modified:
+   trunk/maay/p2pquerier.py
+   trunk/maay/querier.py
+   trunk/maay/query.py
+   trunk/maay/test/test_p2p.py
+   trunk/maay/test/test_querier.py
+   trunk/maay/test/test_query.py
+   trunk/maay/webapplication.py
+Log:
+- query.words made a list of unicode strings (strongly enforced)
+- optional query version tracking
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-14 11:02:58 UTC (rev 455)
++++ trunk/maay/p2pquerier.py	2005-11-14 11:06:47 UTC (rev 456)
+@@ -41,8 +41,18 @@
+     hasher.update('%s' % time.time())
+     return hasher.hexdigest()
+ 
++class QueryVersionMismatch(Exception):
++    &quot;&quot;&quot;we beginning a versionning nightmare trip on queries
++       maybe I'll be shot for this, but who knows&quot;&quot;&quot;
++    def __init__(self, local_version, query_version):
++        self.local_version = local_version
++        self.query_version = query_version
++
+ # XXX should P2pQuery derive from query.Query? (auc : no)
+ class P2pQuery:
++
++    _version = 1
++    
+     def __init__(self, sender, port, query, ttl=5, qid=None, host=None):
+         &quot;&quot;&quot;
+         :param sender: really a nodeId
+@@ -89,10 +99,16 @@
+                 'ttl':self.ttl,
+                 'words': self.query.words,
+                 'mime_type': self.query.filetype or '',
++                'version' : P2pQuery._version
+                 }
+ 
+     def fromDict(dic):
+-        _query = Query(dic['words'], filetype=dic['mime_type'])
++        &quot;&quot;&quot;dual of asKwargs&quot;&quot;&quot;
++        if dic.has_key('version'):
++            if dic['version'] &gt; P2pQuery._version:
++                raise QueryVersionMismatch(query_version=dic['version'],
++                                           local_version=P2pQuery._version)
++        _query = Query(' '.join(dic['words']), filetype=dic['mime_type'])
+         return P2pQuery(qid=dic['qid'],
+                         sender=dic['sender'],
+                         port=dic['port'],
+@@ -101,7 +117,7 @@
+     fromDict = staticmethod(fromDict)
+     
+     def getWords(self):
+-        return self.query.words.split()
++        return self.query.words
+ 
+ 
+ class P2pAnswer:
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-14 11:02:58 UTC (rev 455)
++++ trunk/maay/querier.py	2005-11-14 11:06:47 UTC (rev 456)
+@@ -147,7 +147,9 @@
+     def findDocuments(self, query):
+         &quot;&quot;&quot;Find all indexed documents matching the query&quot;&quot;&quot;
+         # TODO: order results using document_scores information
+-        words = WORDS_RGX.findall(normalizeText(unicode(query.words)))
++        #words = [WORDS_RGX.findall(normalizeText(unicode(word))) #WORDS
++        #         for word in query.words]
++        words = query.words
+         self._updateQueryStatistics(words)
+         try:
+             cursor = self._cnx.cursor()
+@@ -213,7 +215,8 @@
+         self._cnx.commit()
+ 
+     def notifyDownload(self, document_id, words):
+-        words = WORDS_RGX.findall(normalizeText(unicode(words)))
++        #words = [WORDS_RGX.findall(normalizeText(unicode(word)))
++        #         for word in words]
+         print &quot;WORDS&quot;, words
+         try:
+             try:
+
+Modified: trunk/maay/query.py
+===================================================================
+--- trunk/maay/query.py	2005-11-14 11:02:58 UTC (rev 455)
++++ trunk/maay/query.py	2005-11-14 11:06:47 UTC (rev 456)
+@@ -20,6 +20,30 @@
+     import mimetypes
+     return mimetypes.types_map.get('.%s' % fileExtension)
+ 
++def parseWords(rawWords):
++    &quot;&quot;&quot;takes a (u)string
++       returns a list of ustrings and dict of restrictions
++    &quot;&quot;&quot;
++    assert(isinstance(rawWords, str) or isinstance(rawWords, unicode))
++    rawWords = rawWords.split()
++    words = []
++    restrictions = {}
++    for word in rawWords:
++        try:
++            restType, restValue = [s.strip() for s in word.split(':')]
++        except ValueError:
++            if isinstance(word, str):
++                word = unicode(word, 'utf-8')
++            words.append(word)
++        else:
++            if restType in Query.restrictions:
++                # Python does not support unicode keywords !
++                # (note: restType is pure ASCII, so no pb with str())
++                restrictions[str(restType)] = restValue
++            else:
++                words.append(word)
++    return words, restrictions
++
+ class Query(object):
+     restrictions = ('filetype', 'filename', 'searchtype')
+     def __init__(self, words, offset=0, filetype=None, filename=None):
+@@ -30,22 +54,8 @@
+ 
+     def fromRawQuery(rawQuery, offset=0):
+         &quot;&quot;&quot;:type rawQuery: str&quot;&quot;&quot;
+-        rawWords = rawQuery.split()
+-        words = []
+-        restrictions = {}
+-        for word in rawWords:
+-            try:
+-                restType, restValue = [s.strip() for s in word.split(':')]
+-            except ValueError:
+-                words.append(word)
+-            else:
+-                if restType in Query.restrictions:
+-                    # Python does not support unicode keywords !
+-                    # (note: restType is pure ASCII, so no pb with str())
+-                    restrictions[str(restType)] = restValue
+-                else:
+-                    words.append(word)
+-        return Query(u' '.join(words), offset, **restrictions)
++        _ , restrictions = parseWords(rawQuery)
++        return Query(rawQuery, offset, **restrictions)
+     fromRawQuery = staticmethod(fromRawQuery)
+ 
+     def fromContext(context):
+@@ -56,6 +66,19 @@
+         return Query.fromRawQuery(rawQuery, offset)
+     fromContext = staticmethod(fromContext)
+ 
++    ###### Words accessors
++    def getwords(self):
++        return getattr(self, '_words', None)
++    
++    def setwords(self, words):
++        self._words, _ = parseWords(words)
++
++    words = property(getwords, setwords)
++
++    def joinwords(self, join):
++        return join.join(self._words)
++
++    ###### Filetype accessors
+     def getFiletype(self):
+         return getattr(self, '_filetype', None)
+ 
+
+Modified: trunk/maay/test/test_p2p.py
+===================================================================
+--- trunk/maay/test/test_p2p.py	2005-11-14 11:02:58 UTC (rev 455)
++++ trunk/maay/test/test_p2p.py	2005-11-14 11:06:47 UTC (rev 456)
+@@ -52,7 +52,8 @@
+                            'sender' : '<A HREF="http://localhost:3423">http://localhost:3423</A>',
+                            'port' : 3423,
+                            'ttl' : 5, # default value
+-                           'words' : 'foo',
++                           'words' : [u'foo'],
++                           'version' : 1,
+                            'mime_type' : ''})
+ 
+     def testComplexQueryAsKwargs(self):
+@@ -66,7 +67,8 @@
+                            'sender' : '<A HREF="http://localhost:3423">http://localhost:3423</A>',
+                            'port' : 3423,
+                            'ttl' : 2,
+-                           'words' : 'foo bar',
++                           'words' : [u'foo', u'bar'],
++                           'version' : 1,
+                            'mime_type' : 'application/pdf'})
+         
+     
+
+Modified: trunk/maay/test/test_querier.py
+===================================================================
+--- trunk/maay/test/test_querier.py	2005-11-14 11:02:58 UTC (rev 455)
++++ trunk/maay/test/test_querier.py	2005-11-14 11:06:47 UTC (rev 456)
+@@ -34,7 +34,7 @@
+                                   password='maay')
+         self.querier = MaayQuerier(connection=self.cnx)
+         self.nodeId = '0'*40
+-        self.querier.registerNode(self.nodeId, &quot;127.0.0.1&quot;, 6789, 10)
++        self.querier.registerNode(self.nodeId, &quot;192.168.0.123&quot;, 6789, 10)
+ 
+     def tearDown(self):
+         cursor = self.cnx.cursor()
+
+Modified: trunk/maay/test/test_query.py
+===================================================================
+--- trunk/maay/test/test_query.py	2005-11-14 11:02:58 UTC (rev 455)
++++ trunk/maay/test/test_query.py	2005-11-14 11:06:47 UTC (rev 456)
+@@ -22,45 +22,53 @@
+ 
+     def testBasicQuery(self):
+         query = Query.fromRawQuery(u&quot;hello&quot;)
+-        self.assertEquals(query.words, u&quot;hello&quot;)
++        self.assertEquals(query.words, [u&quot;hello&quot;])
+         # excplitly check for unicode-ness ('hello' == u'hello')
+-        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(type(query.words), list)
++        self.assertEquals(type(query.words[0]), unicode)
+         self.assertEquals(query.filename, None)
+         self.assertEquals(query.filetype, None)
+         self.assertEquals(query.offset, 0)
+         
+     def testBasicQueryWithSeveralWords(self):
+         query = Query.fromRawQuery(u&quot;hello world&quot;)
+-        self.assertEquals(query.words, u&quot;hello world&quot;)
++        self.assertEquals(query.words, [u&quot;hello&quot;,u&quot;world&quot;])
+         # excplitly check for unicode-ness ('hello' == u'hello')
+-        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(type(query.words), list)
++        self.assertEquals(type(query.words[0]), unicode)
++        self.assertEquals(type(query.words[1]), unicode)
+         self.assertEquals(query.filename, None)
+         self.assertEquals(query.filetype, None)
+         self.assertEquals(query.offset, 0)
+         
+     def testOneWordRestrictedQuery(self):
+         query = Query.fromRawQuery(u&quot;hello filetype:pdf&quot;)
+-        self.assertEquals(query.words, u&quot;hello&quot;)
++        self.assertEquals(query.words, [u&quot;hello&quot;])
+         # excplitly check for unicode-ness ('hello' == u'hello')
+-        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(type(query.words), list)
++        self.assertEquals(type(query.words[0]), unicode)
+         self.assertEquals(query.filename, None)
+         self.assertEquals(query.filetype, 'application/pdf')
+         self.assertEquals(query.offset, 0)
+ 
+     def testTwoWordsRestrictedQuery(self):
+         query = Query.fromRawQuery(u&quot;hello filetype:pdf world&quot;)
+-        self.assertEquals(query.words, u&quot;hello world&quot;)
++        self.assertEquals(query.words, [u&quot;hello&quot;, u&quot;world&quot;])
+         # excplitly check for unicode-ness ('hello' == u'hello')
+-        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(type(query.words), list)
++        self.assertEquals(type(query.words[0]), unicode)
++        self.assertEquals(type(query.words[1]), unicode)
+         self.assertEquals(query.filename, None)
+         self.assertEquals(query.filetype, 'application/pdf')
+         self.assertEquals(query.offset, 0)
+ 
+     def testTwoWordsRestrictedQueryAndOffset(self):
+         query = Query.fromRawQuery(u&quot;hello filetype:pdf world&quot;, 12)
+-        self.assertEquals(query.words, u&quot;hello world&quot;)
++        self.assertEquals(query.words, [u&quot;hello&quot;, u&quot;world&quot;])
+         # excplitly check for unicode-ness ('hello' == u'hello')
+-        self.assertEquals(type(query.words), unicode)
++        self.assertEquals(type(query.words), list)
++        self.assertEquals(type(query.words[0]), unicode)
++        self.assertEquals(type(query.words[1]), unicode)
+         self.assertEquals(query.filename, None)
+         self.assertEquals(query.filetype, 'application/pdf')
+         self.assertEquals(query.offset, 12)
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-14 11:02:58 UTC (rev 455)
++++ trunk/maay/webapplication.py	2005-11-14 11:06:47 UTC (rev 456)
+@@ -140,6 +140,7 @@
+     # XXX make sure that the requested document is really in the database
+     # XXX don't forget to update the download statistics of the document
+     def child_download(self, context):
++        print &quot;I HOPE WE NEVER GET THERE&quot;
+         docid = context.arg('docid')
+         query = Query.fromRawQuery(unicode(context.arg('words'), 'utf-8'))
+         docurl = self.querier.notifyDownload(docid, query.words)
+@@ -204,13 +205,13 @@
+         return loaders.xmlfile(get_path_of('footer.html'))
+ 
+     def render_title(self, context, data):
+-        context.fillSlots('words', self.query.words)
++        context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         context.fillSlots('start_result', min(len(self.results), self.offset + 1))
+         context.fillSlots('end_result', self.offset + len(self.results))
+         return context.tag
+ 
+     def render_searchfield(self, context, data):
+-        context.fillSlots('words', self.query.words)
++        context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         return context.tag
+ 
+     def render_prevset_url(self, context, data):
+@@ -227,7 +228,7 @@
+ 
+     def render_row(self, context, data):
+         document = data
+-        words = self.query.words.split()
++        words = self.query.words #WORDS (was .split())
+         context.fillSlots('mime_type', re.sub(&quot;/&quot;, &quot;_&quot;, document.mime_type))
+         context.fillSlots('doctitle',
+                           tags.xml(boldifyText(document.title, words)))
+@@ -243,7 +244,7 @@
+         context.fillSlots('abstract', tags.xml(abstract))
+         context.fillSlots('docid', document.db_document_id)
+         context.fillSlots('docurl', tags.xml(boldifyText(document.url, words)))
+-        context.fillSlots('words', self.query.words)
++        context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         context.fillSlots('readable_size', document.readable_size())
+         date = datetime.fromtimestamp(document.publication_time)
+         context.fillSlots('publication_date', date.strftime('%d %b %Y'))
+@@ -371,9 +372,9 @@
+         else:
+             baseurl = '/distantfile?docid=%s' % (document.document_id,)
+             context.fillSlots('linkClass', &quot;distantDocTitle&quot;)
+-        if document.port:
+             baseurl += '&amp;port=%s' % (document.port,)
+         baseurl += '&amp;filename=%s' % osp.basename(document.url)
++        baseurl += '&amp;words=%s' % '+'.join(self.query.words)
+         context.fillSlots('url', baseurl)
+         return context.tag
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000426.html">[Maay-svncheckins] r455 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000428.html">[Maay-svncheckins] r457 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#427">[ date ]</a>
+              <a href="thread.html#427">[ thread ]</a>
+              <a href="subject.html#427">[ subject ]</a>
+              <a href="author.html#427">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r282 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r282%20-%20trunk/maay&In-Reply-To=%3C200511031104.jA3B4A6D011477%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000256.html">
+   <LINK REL="Next"  HREF="000257.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r282 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r282%20-%20trunk/maay&In-Reply-To=%3C200511031104.jA3B4A6D011477%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r282 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov  3 12:04:10 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000256.html">[Maay-svncheckins] r281 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000257.html">[Maay-svncheckins] r283 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#255">[ date ]</a>
+              <a href="thread.html#255">[ thread ]</a>
+              <a href="subject.html#255">[ subject ]</a>
+              <a href="author.html#255">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-03 12:03:25 +0100 (Thu, 03 Nov 2005)
+New Revision: 282
+
+Modified:
+   trunk/maay/registrationclient.py
+Log:
+Typo and a few more fat prints.
+
+
+Modified: trunk/maay/registrationclient.py
+===================================================================
+--- trunk/maay/registrationclient.py	2005-11-03 11:00:56 UTC (rev 281)
++++ trunk/maay/registrationclient.py	2005-11-03 11:03:25 UTC (rev 282)
+@@ -24,12 +24,13 @@
+         self.__callback = nodeRegistrationCallback
+         
+     def login(self, nodeId, ip, port, bandwidth) :
+-        print &quot;login to registration server&quot;
++        print &quot;login to registration server (node %s at %s:%s)&quot; % (nodeId, ip, port)
+         self.transport.write('login:%s:%s:%s:%s\r\n' % (nodeId, ip,
+                                                      port, bandwidth))
+         return self
+ 
+     def logout(self, nodeId):
++        print &quot;logout from registration server (node %s)&quot; % nodeId
+         self.transport.write('logout:%s\r\n' % nodeId)
+         self.transport.loseConnection()
+ 
+@@ -66,7 +67,7 @@
+ 
+ 
+ def logout(reactor, regIp, regPort, nodeId):
++    print &quot;Registration@%s:%s (node %s) wants to log out.&quot; % (regIp, regPort, nodeId)
+     c = ClientCreator(reactor, RegistrationClient, None)
+-    d = c.connectTCP(regIP, regPort)
++    d = c.connectTCP(regIp, regPort)
+     d.addCallback(RegistrationClient.logout)
+-
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000256.html">[Maay-svncheckins] r281 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000257.html">[Maay-svncheckins] r283 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#255">[ date ]</a>
+              <a href="thread.html#255">[ thread ]</a>
+              <a href="subject.html#255">[ subject ]</a>
+              <a href="author.html#255">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

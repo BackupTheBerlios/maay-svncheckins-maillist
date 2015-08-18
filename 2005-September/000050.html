@@ -1,0 +1,282 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r77 - in trunk/maay/test: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r77%20-%20in%20trunk/maay/test%3A%20.%20data&In-Reply-To=%3C200509271030.j8RAUo69009933%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000049.html">
+   <LINK REL="Next"  HREF="000051.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r77 - in trunk/maay/test: . data</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r77%20-%20in%20trunk/maay/test%3A%20.%20data&In-Reply-To=%3C200509271030.j8RAUo69009933%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r77 - in trunk/maay/test: . data">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Sep 27 12:30:50 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000049.html">[Maay-svncheckins] r76 - trunk/maay/sql
+</A></li>
+        <LI>Next message: <A HREF="000051.html">[Maay-svncheckins] r78 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-27 12:30:49 +0200 (Tue, 27 Sep 2005)
+New Revision: 77
+
+Added:
+   trunk/maay/test/data/node22.html
+Modified:
+   trunk/maay/test/test_texttool.py
+Log:
+Added failing high-level test case
+
+
+Added: trunk/maay/test/data/node22.html
+===================================================================
+--- trunk/maay/test/data/node22.html	2005-09-27 09:33:39 UTC (rev 76)
++++ trunk/maay/test/data/node22.html	2005-09-27 10:30:49 UTC (rev 77)
+@@ -0,0 +1,187 @@
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;
++&lt;html&gt;
++&lt;head&gt;
++&lt;link rel=&quot;STYLESHEET&quot; href=&quot;whatsnew23.css&quot; type='text/css'&gt;
++&lt;link rel=&quot;SHORTCUT ICON&quot; href=&quot;../icons/pyfav.gif&quot;&gt;
++&lt;link rel='start' href='../index.html' title='Python Documentation Index'&gt;
++&lt;link rel=&quot;first&quot; href=&quot;whatsnew23.html&quot; title='What's New in Python 2.3'&gt;
++&lt;link rel='contents' href='contents.html' title=&quot;Contents&quot;&gt;
++&lt;link rel='last' href='about.html' title='About this document...'&gt;
++&lt;link rel='help' href='about.html' title='About this document...'&gt;
++&lt;LINK REL=&quot;next&quot; href=&quot;acks.html&quot;&gt;
++&lt;LINK REL=&quot;prev&quot; href=&quot;section-other.html&quot;&gt;
++&lt;LINK REL=&quot;parent&quot; HREF=&quot;whatsnew23.html&quot;&gt;
++&lt;LINK REL=&quot;next&quot; href=&quot;acks.html&quot;&gt;
++&lt;meta name='aesop' content='information'&gt;
++&lt;META NAME=&quot;description&quot; CONTENT=&quot;Porting to Python 2.3&quot;&gt;
++&lt;META NAME=&quot;keywords&quot; CONTENT=&quot;whatsnew23&quot;&gt;
++&lt;META NAME=&quot;resource-type&quot; CONTENT=&quot;document&quot;&gt;
++&lt;META NAME=&quot;distribution&quot; CONTENT=&quot;global&quot;&gt;
++&lt;title&gt;21 Porting to Python 2.3&lt;/title&gt;
++&lt;/head&gt;
++&lt;body&gt;
++&lt;DIV CLASS=&quot;navigation&quot;&gt;
++&lt;table align=&quot;center&quot; width=&quot;100%&quot; cellpadding=&quot;0&quot; cellspacing=&quot;2&quot;&gt;
++&lt;tr&gt;
++&lt;td&gt;&lt;a rel=&quot;prev&quot; title=&quot;20 Other Changes and&quot; 
++  href=&quot;section-other.html&quot;&gt;&lt;img src='../icons/previous.gif'
++  border='0' height='32'  alt='Previous Page' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td&gt;&lt;a rel=&quot;parent&quot; title=&quot;What's New in Python&quot; 
++  HREF=&quot;whatsnew23.html&quot;&gt;&lt;img src='../icons/up.gif'
++  border='0' height='32'  alt='Up One Level' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td&gt;&lt;a rel=&quot;next&quot; title=&quot;22 Acknowledgements&quot; 
++  href=&quot;acks.html&quot;&gt;&lt;img src='../icons/next.gif'
++  border='0' height='32'  alt='Next Page' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td align=&quot;center&quot; width=&quot;100%&quot;&gt;What's New in Python 2.3&lt;/td&gt;
++&lt;td&gt;&lt;a rel=&quot;contents&quot; title=&quot;Table of Contents&quot; 
++  href=&quot;contents.html&quot;&gt;&lt;img src='../icons/contents.gif'
++  border='0' height='32'  alt='Contents' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td&gt;&lt;img src='../icons/blank.gif'
++  border='0' height='32'  alt='' width='32'&gt;&lt;/td&gt;
++&lt;/tr&gt;&lt;/table&gt;
++&lt;b class=&quot;navlabel&quot;&gt;Previous:&lt;/b&gt;
++&lt;a class=&quot;sectref&quot; rel=&quot;prev&quot; href=&quot;section-other.html&quot;&gt;20 Other Changes and&lt;/A&gt;
++&lt;b class=&quot;navlabel&quot;&gt;Up:&lt;/b&gt;
++&lt;a class=&quot;sectref&quot; rel=&quot;parent&quot; HREF=&quot;whatsnew23.html&quot;&gt;What's New in Python&lt;/A&gt;
++&lt;b class=&quot;navlabel&quot;&gt;Next:&lt;/b&gt;
++&lt;a class=&quot;sectref&quot; rel=&quot;next&quot; href=&quot;acks.html&quot;&gt;22 Acknowledgements&lt;/A&gt;
++&lt;br&gt;&lt;hr&gt;
++&lt;/DIV&gt;
++&lt;!--End of Navigation Panel--&gt;
++
++&lt;H1&gt;&lt;A NAME=&quot;SECTION0002200000000000000000&quot;&gt;
++21 Porting to Python 2.3&lt;/A&gt;
++&lt;/H1&gt;
++
++&lt;P&gt;
++This section lists previously described changes that may require
++changes to your code:
++
++&lt;P&gt;
++
++&lt;UL&gt;
++&lt;LI&gt;&lt;tt class=&quot;keyword&quot;&gt;yield&lt;/tt&gt; is now always a keyword; if it's used as a
++variable name in your code, a different name must be chosen.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;For strings &lt;var&gt;X&lt;/var&gt; and &lt;var&gt;Y&lt;/var&gt;, &lt;code&gt;&lt;var&gt;X&lt;/var&gt; in &lt;var&gt;Y&lt;/var&gt;&lt;/code&gt; now works
++if &lt;var&gt;X&lt;/var&gt; is more than one character long.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;The &lt;tt class=&quot;function&quot;&gt;int()&lt;/tt&gt; type constructor will now return a long
++integer instead of raising an &lt;tt class=&quot;exception&quot;&gt;OverflowError&lt;/tt&gt; when a string
++or floating-point number is too large to fit into an integer.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;If you have Unicode strings that contain 8-bit characters, you
++must declare the file's encoding (UTF-8, Latin-1, or whatever) by
++adding a comment to the top of the file.  See
++section&nbsp;&lt;A href=&quot;section-encodings.html#section-encodings&quot;&gt;3&lt;/A&gt; for more information.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;Calling Tcl methods through &lt;tt class=&quot;module&quot;&gt;_tkinter&lt;/tt&gt; no longer 
++returns only strings. Instead, if Tcl returns other objects those
++objects are converted to their Python equivalent, if one exists, or
++wrapped with a &lt;tt class=&quot;class&quot;&gt;_tkinter.Tcl_Obj&lt;/tt&gt; object if no Python equivalent
++exists.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;Large octal and hex literals such as
++&lt;code&gt;0xffffffff&lt;/code&gt; now trigger a &lt;tt class=&quot;exception&quot;&gt;FutureWarning&lt;/tt&gt;. Currently
++they're stored as 32-bit numbers and result in a negative value, but
++in Python 2.4 they'll become positive long integers. 
++
++&lt;P&gt;
++There are a few ways to fix this warning.  If you really need a
++positive number, just add an &quot;&lt;tt class=&quot;samp&quot;&gt;L&lt;/tt&gt;&quot; to the end of the literal.  If
++you're trying to get a 32-bit integer with low bits set and have
++previously used an expression such as &lt;code&gt;~(1 &lt;&lt; 31)&lt;/code&gt;,
++it's probably
++clearest to start with all bits set and clear the desired upper bits.
++For example, to clear just the top bit (bit 31), you could write
++&lt;code&gt;0xffffffffL &amp;~(1L&lt;&lt;31)&lt;/code&gt;.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;You can no longer disable assertions by assigning to &lt;code&gt;__debug__&lt;/code&gt;.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;The Distutils &lt;tt class=&quot;function&quot;&gt;setup()&lt;/tt&gt; function has gained various new
++keyword arguments such as &lt;var&gt;depends&lt;/var&gt;.  Old versions of the
++Distutils will abort if passed unknown keywords.  A solution is to check
++for the presence of the new &lt;tt class=&quot;function&quot;&gt;get_distutil_options()&lt;/tt&gt; function
++in your &lt;span class=&quot;file&quot;&gt;setup.py&lt;/span&gt; and only uses the new keywords
++with a version of the Distutils that supports them:
++
++&lt;P&gt;
++&lt;div class=&quot;verbatim&quot;&gt;&lt;pre&gt;
++from distutils import core
++
++kw = {'sources': 'foo.c', ...}
++if hasattr(core, 'get_distutil_options'):
++    kw['depends'] = ['foo.h']
++ext = Extension(**kw)
++&lt;/pre&gt;&lt;/div&gt;
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;Using &lt;code&gt;None&lt;/code&gt; as a variable name will now result in a
++&lt;tt class=&quot;exception&quot;&gt;SyntaxWarning&lt;/tt&gt; warning.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;LI&gt;Names of extension types defined by the modules included with
++Python now contain the module and a &quot;&lt;tt class=&quot;character&quot;&gt;.&lt;/tt&gt;&quot; in front of the type
++name.
++
++&lt;P&gt;
++&lt;/LI&gt;
++&lt;/UL&gt;
++
++&lt;P&gt;
++
++&lt;DIV CLASS=&quot;navigation&quot;&gt;
++&lt;p&gt;&lt;hr&gt;
++&lt;table align=&quot;center&quot; width=&quot;100%&quot; cellpadding=&quot;0&quot; cellspacing=&quot;2&quot;&gt;
++&lt;tr&gt;
++&lt;td&gt;&lt;a rel=&quot;prev&quot; title=&quot;20 Other Changes and&quot; 
++  rel=&quot;prev&quot; title=&quot;20 Other Changes and&quot; 
++  href=&quot;section-other.html&quot;&gt;&lt;img src='../icons/previous.gif'
++  border='0' height='32'  alt='Previous Page' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td&gt;&lt;a rel=&quot;parent&quot; title=&quot;What's New in Python&quot; 
++  rel=&quot;parent&quot; title=&quot;What's New in Python&quot; 
++  HREF=&quot;whatsnew23.html&quot;&gt;&lt;img src='../icons/up.gif'
++  border='0' height='32'  alt='Up One Level' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td&gt;&lt;a rel=&quot;next&quot; title=&quot;22 Acknowledgements&quot; 
++  rel=&quot;next&quot; title=&quot;22 Acknowledgements&quot; 
++  href=&quot;acks.html&quot;&gt;&lt;img src='../icons/next.gif'
++  border='0' height='32'  alt='Next Page' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td align=&quot;center&quot; width=&quot;100%&quot;&gt;What's New in Python 2.3&lt;/td&gt;
++&lt;td&gt;&lt;a rel=&quot;contents&quot; title=&quot;Table of Contents&quot; 
++  rel=&quot;contents&quot; title=&quot;Table of Contents&quot; 
++  href=&quot;contents.html&quot;&gt;&lt;img src='../icons/contents.gif'
++  border='0' height='32'  alt='Contents' width='32'&gt;&lt;/A&gt;&lt;/td&gt;
++&lt;td&gt;&lt;img src='../icons/blank.gif'
++  border='0' height='32'  alt='' width='32'&gt;&lt;/td&gt;
++&lt;/tr&gt;&lt;/table&gt;
++&lt;b class=&quot;navlabel&quot;&gt;Previous:&lt;/b&gt;
++&lt;a class=&quot;sectref&quot; rel=&quot;prev&quot; href=&quot;section-other.html&quot;&gt;20 Other Changes and&lt;/A&gt;
++&lt;b class=&quot;navlabel&quot;&gt;Up:&lt;/b&gt;
++&lt;a class=&quot;sectref&quot; rel=&quot;parent&quot; HREF=&quot;whatsnew23.html&quot;&gt;What's New in Python&lt;/A&gt;
++&lt;b class=&quot;navlabel&quot;&gt;Next:&lt;/b&gt;
++&lt;a class=&quot;sectref&quot; rel=&quot;next&quot; href=&quot;acks.html&quot;&gt;22 Acknowledgements&lt;/A&gt;
++&lt;hr&gt;
++&lt;span class=&quot;release-info&quot;&gt;Release 1.01.&lt;/span&gt;
++&lt;/DIV&gt;
++&lt;!--End of Navigation Panel--&gt;
++&lt;ADDRESS&gt;
++See &lt;i&gt;&lt;a href=&quot;about.html&quot;&gt;About this document...&lt;/a&gt;&lt;/i&gt; for information on suggesting changes.
++&lt;/ADDRESS&gt;
++&lt;/BODY&gt;
++&lt;/HTML&gt;
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-09-27 09:33:39 UTC (rev 76)
++++ trunk/maay/test/test_texttool.py	2005-09-27 10:30:49 UTC (rev 77)
+@@ -70,5 +70,10 @@
+             
+             ]
+ 
++    def test_parseDifficultFile(self):
++        filename = join(DATADIR, 'node22.html')
++        title, text, links, offset = self.parser.parseFile(filename)
++        self.assertEquals(type(text), unicode)
++
+ if __name__ == '__main__':
+     unittest.main()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000049.html">[Maay-svncheckins] r76 - trunk/maay/sql
+</A></li>
+	<LI>Next message: <A HREF="000051.html">[Maay-svncheckins] r78 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#50">[ date ]</a>
+              <a href="thread.html#50">[ thread ]</a>
+              <a href="subject.html#50">[ subject ]</a>
+              <a href="author.html#50">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

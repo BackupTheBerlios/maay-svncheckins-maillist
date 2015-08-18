@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r200 - trunk/maay/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r200%20-%20trunk/maay/test&In-Reply-To=%3C200510191532.j9JFWQhu027721%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000170.html">
+   <LINK REL="Next"  HREF="000172.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r200 - trunk/maay/test</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r200%20-%20trunk/maay/test&In-Reply-To=%3C200510191532.j9JFWQhu027721%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r200 - trunk/maay/test">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Oct 19 17:32:26 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000170.html">[Maay-svncheckins] r199 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000172.html">[Maay-svncheckins] r201 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#171">[ date ]</a>
+              <a href="thread.html#171">[ thread ]</a>
+              <a href="subject.html#171">[ subject ]</a>
+              <a href="author.html#171">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-19 17:32:26 +0200 (Wed, 19 Oct 2005)
+New Revision: 200
+
+Modified:
+   trunk/maay/test/test_fileiteration.py
+Log:
+- test made independant of invocation path
+
+
+Modified: trunk/maay/test/test_fileiteration.py
+===================================================================
+--- trunk/maay/test/test_fileiteration.py	2005-10-19 15:30:56 UTC (rev 199)
++++ trunk/maay/test/test_fileiteration.py	2005-10-19 15:32:26 UTC (rev 200)
+@@ -64,13 +64,14 @@
+     def testNothingSkipped(self):
+         it = FileIterator(['a', 'b', 'c'])
+         self.assertEquals(list(it), [])
+-        it = FileIterator(['data/a', 'data/b', 'data/c'])
+-        expected = Set([abspath(join(u'data', 'a', 'b', 'c', 'bar')),
+-                        abspath(join(u'data', 'a', 'b', 'c', 'foo')),
+-                        abspath(join(u'data', 'b', 'c', 'd', 'baz')),
+-                        abspath(join(u'data', 'b', 'c', 'd', 'spam')),
+-                        abspath(join(u'data', 'b', 'c', 'e', 'bazbar')),
+-                        abspath(join(u'data', 'b', 'c', 'e', 'foobar')),
++        it = FileIterator([join(DATADIR, 'a'), join(DATADIR, 'b'),
++                           join(DATADIR, 'c')])
++        expected = Set([abspath(join(DATADIR, 'a', 'b', 'c', 'bar')),
++                        abspath(join(DATADIR, 'a', 'b', 'c', 'foo')),
++                        abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
++                        abspath(join(DATADIR, 'b', 'c', 'd', 'spam')),
++                        abspath(join(DATADIR, 'b', 'c', 'e', 'bazbar')),
++                        abspath(join(DATADIR, 'b', 'c', 'e', 'foobar')),
+                         ])
+         self.assertEquals(Set(it), expected)
+ 
+@@ -81,12 +82,13 @@
+ 
+ 
+     def testSkippingSomething(self):
+-        everything = ['data/a', 'data/b', 'data/c']
+-        skipped = ['data/a', 'data/b/c/e']
++        everything = [join(DATADIR, 'a'), join(DATADIR, 'b'),
++                      join(DATADIR, 'c')]
++        skipped = [join(DATADIR, 'a'), join(DATADIR, 'b', 'c', 'e')]
+         it = FileIterator(everything, skipped)
+-        expected = Set([abspath(join(u'data', 'b', 'c', 'd', 'baz')),
+-                    abspath(join(u'data', 'b', 'c', 'd', 'spam')),
+-                    ])
++        expected = Set([abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
++                        abspath(join(DATADIR, 'b', 'c', 'd', 'spam')),
++                        ])
+         self.assertEquals(expected, Set(it))
+ 
+     def testRelativePathConversion(self):
+@@ -103,13 +105,14 @@
+     def testSkipNonAllowed(self):
+         &quot;&quot;&quot;tests that files that don't have 'read' permission are skipped&quot;&quot;&quot;
+         # these two files should be skipped
+-        os.chmod('data/a/b/c/foo', 0)
+-        os.chmod('data/b/c/d/spam', 0)
+-        it = FileIterator(['data/a', 'data/b', 'data/c'])
+-        expected = Set([abspath(join(u'data', 'a', 'b', 'c', 'bar')),
+-                        abspath(join(u'data', 'b', 'c', 'd', 'baz')),
+-                        abspath(join(u'data', 'b', 'c', 'e', 'bazbar')),
+-                        abspath(join(u'data', 'b', 'c', 'e', 'foobar')),
++        os.chmod(join(DATADIR, 'a/b/c/foo'), 0)
++        os.chmod(join(DATADIR, 'b/c/d/spam'), 0)
++        it = FileIterator([join(DATADIR, 'a'), join(DATADIR, 'b'),
++                           join(DATADIR, 'c')])
++        expected = Set([abspath(join(DATADIR, 'a', 'b', 'c', 'bar')),
++                        abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
++                        abspath(join(DATADIR, 'b', 'c', 'e', 'bazbar')),
++                        abspath(join(DATADIR, 'b', 'c', 'e', 'foobar')),
+                         ])
+         self.assertEquals(Set(it), expected)
+         
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000170.html">[Maay-svncheckins] r199 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000172.html">[Maay-svncheckins] r201 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#171">[ date ]</a>
+              <a href="thread.html#171">[ thread ]</a>
+              <a href="subject.html#171">[ subject ]</a>
+              <a href="author.html#171">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

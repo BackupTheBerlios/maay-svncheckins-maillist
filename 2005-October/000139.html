@@ -1,0 +1,261 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r166 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r166%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510070850.j978o59F031676%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000138.html">
+   <LINK REL="Next"  HREF="000140.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r166 - in trunk/maay: . test</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r166%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510070850.j978o59F031676%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r166 - in trunk/maay: . test">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Oct  7 10:50:05 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000138.html">[Maay-svncheckins] r165 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000140.html">[Maay-svncheckins] r167 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#139">[ date ]</a>
+              <a href="thread.html#139">[ thread ]</a>
+              <a href="subject.html#139">[ subject ]</a>
+              <a href="author.html#139">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-07 10:49:58 +0200 (Fri, 07 Oct 2005)
+New Revision: 166
+
+Modified:
+   trunk/maay/querier.py
+   trunk/maay/registrationclient.py
+   trunk/maay/server.py
+   trunk/maay/test/test_rpc.py
+Log:
+Better handling of case where anonymous querier could not be created :
+  - force login for web application
+  - rpc server refuses anonymous connections in this case
+  - do not register
+ 
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-07 08:21:03 UTC (rev 165)
++++ trunk/maay/querier.py	2005-10-07 08:49:58 UTC (rev 166)
+@@ -39,7 +39,6 @@
+     &quot;&quot;&quot;raised on db authentication failure&quot;&quot;&quot;
+ 
+ ANONYMOUS_AVATARID = '__anonymous__'
+-
+     
+ class IQuerier(Interface):
+     &quot;&quot;&quot;defines the High-Level interface to Maay SQL database&quot;&quot;&quot;
+
+Modified: trunk/maay/registrationclient.py
+===================================================================
+--- trunk/maay/registrationclient.py	2005-10-07 08:21:03 UTC (rev 165)
++++ trunk/maay/registrationclient.py	2005-10-07 08:49:58 UTC (rev 166)
+@@ -55,11 +55,15 @@
+ 
+ 
+ def login(reactor, regIP, regPort, querier, nodeId, nodeIP, xmlrpcPort, bandwidth):
+-    c = ClientCreator(reactor, RegistrationClient, querier.registerNode)
+-    d = c.connectTCP(regIP, regPort)
+-    d.addCallback(RegistrationClient.login, nodeId, nodeIP, xmlrpcPort, bandwidth)
+-    d.addCallback(RegistrationClient.who)
++    if querier is not None:
++        c = ClientCreator(reactor, RegistrationClient, querier.registerNode)
++        d = c.connectTCP(regIP, regPort)
++        d.addCallback(RegistrationClient.login, nodeId, nodeIP, xmlrpcPort, bandwidth)
++        d.addCallback(RegistrationClient.who)
++    else:
++        print &quot;No querier found =&gt; no registration / no P2P&quot;
+ 
++
+ def logout(reactor, nodeId):
+     c = ClientCreator(reactor, RegistrationClient, None)
+     d = c.connectTCP(regIP, regPort)
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-07 08:21:03 UTC (rev 165)
++++ trunk/maay/server.py	2005-10-07 08:49:58 UTC (rev 166)
+@@ -67,7 +67,7 @@
+     child_maaycss = static.File(get_path_of('maay.css'))
+     child_images = static.File(get_path_of('images/'))
+ 
+-    def __init__(self, maayId):
++    def __init__(self, maayId=ANONYMOUS_AVATARID):
+         rend.Page.__init__(self)
+         self.maayId = maayId
+ 
+@@ -297,14 +297,15 @@
+         return querier
+ 
+ 
+-class MaayPortal(portal.Portal):
++class MaayPortal(object, portal.Portal):
+     &quot;&quot;&quot;Portal for Maay authentication system&quot;&quot;&quot;
+     def __init__(self, webappConfig):
+         realm = MaayRealm()
+         checker = DBAuthChecker(realm, webappConfig.db_host,
+                                 webappConfig.db_name)
+         portal.Portal.__init__(self, realm, (checker,))
+-        self.registerChecker(MaayAnonymousChecker(), IAnonymous)
++        self.anonymousChecker = MaayAnonymousChecker()
++        self.registerChecker(self.anonymousChecker, IAnonymous)
+         self.config = webappConfig
+         # Create default anonymous querier, based on local configuration
+         try:
+@@ -328,10 +329,30 @@
+                                           port=6789, bandwidth=10)
+         self.anonymousQuerier = anonymousQuerier
+ 
++    def getAnonymousQuerier(self):
++        return getattr(self, '_anonymousQuerier', None)
++
++    def setAnonymousQuerier(self, value):
++        &quot;&quot;&quot;used to set 'anonymousAllowed' flag in anonymous checker&quot;&quot;&quot;
++        if value is not None:
++            self.anonymousChecker.anonymousAllowed = True
++        self._anonymousQuerier = value
++
++    anonymousQuerier = property(getAnonymousQuerier, setAnonymousQuerier,
++                                doc=&quot;anonymous querier&quot;)
++
++
+ class MaayAnonymousChecker(AllowAnonymousAccess):
+     &quot;&quot;&quot;don't use default twisted.cred anonymous avatarId&quot;&quot;&quot;
++    def __init__(self):
++        self.anonymousAllowed = False
++        
+     def requestAvatarId(self, credentials):
+-        return ANONYMOUS_AVATARID
++        if self.anonymousAllowed:
++            return ANONYMOUS_AVATARID
++        else:
++            return failure.Failure(error.UnauthorizedLogin(
++                &quot;No anonymous querier available !&quot;))
+ 
+ 
+ class DBAuthChecker:
+@@ -459,16 +480,32 @@
+             except IOError:
+                 continue
+         raise ValueError('Unable to find a writable directory to store the node id')
+-                
++
++
++class MaaySessionWrapper(guard.SessionWrapper):
++    &quot;&quot;&quot;override guard.SessionWrapper to add an explicit errBack on
++    portal.login()
++
++    XXX: TODO check if we could not use SessionWrapper.incorrectLoginError()
++    &quot;&quot;&quot;
++    def login(self, request, session, credentials, segments):
++        mind = self.mindFactory(request, credentials)
++        session.mind = mind
++        d = self.portal.login(credentials, mind, self.credInterface)
++        d.addCallback(self._cbLoginSuccess, session, segments)
++        d.addErrback(self._forceLoginPage)
++        return d
++
++    def _forceLoginPage(self, *args):
++        return LoginForm(), ''
+     
+     
+-    
+ def run():
+     webappConfig = WebappConfiguration()
+     webappConfig.load()
+     maayPortal = MaayPortal(webappConfig)
+-    website = appserver.NevowSite(guard.SessionWrapper(maayPortal,
+-                                                       mindFactory=MaayMindFactory))
++    website = appserver.NevowSite(MaaySessionWrapper(maayPortal,
++                                                     mindFactory=MaayMindFactory))
+     website.remember(Maay404(), inevow.ICanHandleNotFound)
+     registrationclient.login(reactor,
+                              webappConfig.registration_host, webappConfig.registration_port,
+
+Modified: trunk/maay/test/test_rpc.py
+===================================================================
+--- trunk/maay/test/test_rpc.py	2005-10-07 08:21:03 UTC (rev 165)
++++ trunk/maay/test/test_rpc.py	2005-10-07 08:49:58 UTC (rev 166)
+@@ -30,6 +30,7 @@
+ from twisted.trial import unittest
+ from twisted.cred.checkers import ICredentialsChecker
+ from twisted.cred.credentials import IUsernamePassword
++from twisted.python.failure import Failure
+ 
+ from maay import rpc
+ from maay.querier import MaayQuerier, AnonymousQuerier, ANONYMOUS_AVATARID
+@@ -72,6 +73,7 @@
+     def setUp(self):
+         portal = MaayPortal(WebappConfiguration())
+         portal.registerChecker(FakeChecker(portal.realm))
++        self.portal = portal
+         rpcserver = server.Site(rpc.MaayRPCServer(portal))
+         self.p = reactor.listenTCP(0, rpcserver, interface=&quot;127.0.0.1&quot;)
+         self.port = self.p.getHost().port
+@@ -86,11 +88,22 @@
+         return proxy.callRemote(methName, *args)        
+     
+     def testAnonymousAuthentication(self):
++        self.portal.anonymousQuerier = object() # could be anything but None
+         digest = self._callRemote('authenticate', '', '')
+         got, _ = unittest.deferredResult(digest)
+         self.assertEquals(_, '')
+         self.assertEquals(got, ANONYMOUS_AVATARID)
+ 
++    def testAnonymousAuthenticationFailure(self):
++        &quot;&quot;&quot;when portal.anonymousQuerier is None, anonymous login is not allowed&quot;&quot;&quot;
++        self.portal.anonymousQuerier = None
++        digest = self._callRemote('authenticate', '', '')
++        got, err = unittest.deferredResult(digest)
++        self.assertEquals(got, '')
++        # XXX: need a better check
++        self.assertNotEquals(err, '')
++        
++
+     def testRawAuthentication(self):
+         for user, passwd in [('adim', 'adim'), ('foo', 'bar')]:
+             digest = self._callRemote('authenticate', user, passwd)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000138.html">[Maay-svncheckins] r165 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000140.html">[Maay-svncheckins] r167 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#139">[ date ]</a>
+              <a href="thread.html#139">[ thread ]</a>
+              <a href="subject.html#139">[ subject ]</a>
+              <a href="author.html#139">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

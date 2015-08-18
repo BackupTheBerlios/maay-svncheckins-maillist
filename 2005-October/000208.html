@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r234 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r234%20-%20trunk/maay&In-Reply-To=%3C200510271157.j9RBvMwS006963%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000207.html">
+   <LINK REL="Next"  HREF="000209.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r234 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r234%20-%20trunk/maay&In-Reply-To=%3C200510271157.j9RBvMwS006963%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r234 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Oct 27 13:57:22 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000207.html">[Maay-svncheckins] r233 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000209.html">[Maay-svncheckins] r235 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#208">[ date ]</a>
+              <a href="thread.html#208">[ thread ]</a>
+              <a href="subject.html#208">[ subject ]</a>
+              <a href="author.html#208">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-27 13:56:58 +0200 (Thu, 27 Oct 2005)
+New Revision: 234
+
+Modified:
+   trunk/maay/server.py
+Log:
+&quot;fixes&quot; (!) (to be seriously reviewed) to make web connection work again (after the previous WEB_AVATARID fix)
+
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-27 11:55:37 UTC (rev 233)
++++ trunk/maay/server.py	2005-10-27 11:56:58 UTC (rev 234)
+@@ -64,7 +64,6 @@
+ from maay import registrationclient
+ from maay.query import Query
+ 
+-ANONYMOUS_AVATARID = '__anonymous__'
+ WEB_AVATARID = 'maay' 
+ 
+ 
+@@ -283,7 +282,7 @@
+     def createUserSession(self, avatarId, querier):
+         &quot;&quot;&quot;associate a querier to an avatarId.
+         Use avatarId=None for the internal private database connection&quot;&quot;&quot;
+-        print &quot;Maay Realm : creating session for avatar&quot;, avatarId,
++        print &quot;MaayRealm : creating session for avatar&quot;, avatarId,
+         print &quot;with a&quot;, type(querier), &quot;querier.&quot;
+         self._sessions[avatarId] = querier
+ 
+@@ -317,7 +316,7 @@
+         try:
+             querier = self._sessions[avatarId]
+             print &quot;MaayRealm : querier of type&quot;, type(querier), &quot;for avatar&quot;,
+-            print avatarId, &quot;was in the cache.&quot;
++            print avatarId, &quot;was in the session cache.&quot;
+         except KeyError:
+             print &quot;MaayRealm : no querier in cache for&quot;, str(avatarId)+ \
+                   &quot;. What are we supposed to do ?&quot;
+@@ -383,8 +382,9 @@
+         self.anonymousAllowed = False
+         
+     def requestAvatarId(self, credentials):
++        print &quot;AnonymousChecker : requestAvatarId&quot;, credentials
+         if self.anonymousAllowed:
+-            return ANONYMOUS_AVATARID
++            return WEB_AVATARID #XXX: FIXME
+         else:
+             return failure.Failure(error.UnauthorizedLogin(
+                 &quot;No anonymous querier available !&quot;))
+@@ -560,11 +560,12 @@
+     def login(self, request, session, credentials, segments):
+         # d = SessionWrapper.login()
+         # d.addErrback(..)
++        print &quot;MaaySessionWrapper login&quot;, credentials, session, request, segments
+         mind = self.mindFactory(request, credentials)
+         session.mind = mind
+         d = self.portal.login(credentials, mind, self.credInterface)
+         d.addCallback(self._cbLoginSuccess, session, segments)
+-        d.addErrback(self._forceLoginPage)
++        #d.addErrback(self._forceLoginPage)
+         return d
+ 
+     def _forceLoginPage(self, *args):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000207.html">[Maay-svncheckins] r233 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000209.html">[Maay-svncheckins] r235 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#208">[ date ]</a>
+              <a href="thread.html#208">[ thread ]</a>
+              <a href="subject.html#208">[ subject ]</a>
+              <a href="author.html#208">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

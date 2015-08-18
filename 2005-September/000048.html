@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r74 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r74%20-%20trunk/maay&In-Reply-To=%3C200509261416.j8QEGdTo008265%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000047.html">
+   <LINK REL="Next"  HREF="000049.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r74 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r74%20-%20trunk/maay&In-Reply-To=%3C200509261416.j8QEGdTo008265%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r74 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Mon Sep 26 16:16:39 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000047.html">[Maay-svncheckins] r73 - trunk/maay/sql
+</A></li>
+        <LI>Next message: <A HREF="000049.html">[Maay-svncheckins] r76 - trunk/maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#48">[ date ]</a>
+              <a href="thread.html#48">[ thread ]</a>
+              <a href="subject.html#48">[ subject ]</a>
+              <a href="author.html#48">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-26 16:16:39 +0200 (Mon, 26 Sep 2005)
+New Revision: 74
+
+Modified:
+   trunk/maay/querier.py
+Log:
+explained the HAVING clause
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-26 14:15:49 UTC (rev 73)
++++ trunk/maay/querier.py	2005-09-26 14:16:39 UTC (rev 74)
+@@ -99,7 +99,10 @@
+         args = {# 'words' : words, # '(' + ','.join([repr(word) for word in words]) + ')',
+                 'lenwords' : len(words)}
+         strwords = '(' + ','.join([repr(word) for word in words]) + ')'
+-        # XXX: what is the HAVING clause supposed to do ?
++        # what is the HAVING clause supposed to do ?
++        # Answer: we select all documents containing one of the words that we are looking for, 
++        # group them by their identifier, and only keep those identifier which appeared
++        # once for each word we were looking for. 
+         query = &quot;&quot;&quot;SELECT %s
+                     FROM documents D, document_scores DS 
+                     WHERE DS.db_document_id=D.db_document_id AND DS.word IN %s
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000047.html">[Maay-svncheckins] r73 - trunk/maay/sql
+</A></li>
+	<LI>Next message: <A HREF="000049.html">[Maay-svncheckins] r76 - trunk/maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#48">[ date ]</a>
+              <a href="thread.html#48">[ thread ]</a>
+              <a href="subject.html#48">[ subject ]</a>
+              <a href="author.html#48">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

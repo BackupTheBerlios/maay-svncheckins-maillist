@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r296 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r296%20-%20trunk/maay&In-Reply-To=%3C20051104100131.GB1219%40logilab.fr%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000269.html">
+   <LINK REL="Next"  HREF="000270.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r296 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r296%20-%20trunk/maay&In-Reply-To=%3C20051104100131.GB1219%40logilab.fr%3E"
+       TITLE="[Maay-svncheckins] r296 - trunk/maay">aurelien.campeas at logilab.fr
+       </A><BR>
+    <I>Fri Nov  4 11:01:32 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000269.html">[Maay-svncheckins] r296 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000270.html">[Maay-svncheckins] r297 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#273">[ date ]</a>
+              <a href="thread.html#273">[ thread ]</a>
+              <a href="subject.html#273">[ subject ]</a>
+              <a href="author.html#273">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Thu, Nov 03, 2005 at 07:25:35PM +0100, Fr&#233;d&#233;ric DANG NGOC at BerliOS wrote:
+&gt;<i> Author: dnf
+</I>&gt;<i> Date: 2005-11-03 19:25:18 +0100 (Thu, 03 Nov 2005)
+</I>&gt;<i> New Revision: 296
+</I>&gt;<i> 
+</I>&gt;<i> Modified:
+</I>&gt;<i>    trunk/maay/indexer.py
+</I>&gt;<i> Log:
+</I>&gt;<i> Ugly patch in FileIterator to check if the filename should be
+</I>encoded in utf-8 or iso-8859-1. A better solution is welcome...
+
+A better solution was to remove *all* the bogus unicode conversions :)
+
+&gt;<i> (This avoids the FileIterator to crash when encounter the special
+</I>  file in /usr/share/doc/console-tools/examples/)
+
+I've added the file with a garbled name to test/data. Now, have to write a test.
+
+Aur&#233;lien.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000269.html">[Maay-svncheckins] r296 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000270.html">[Maay-svncheckins] r297 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#273">[ date ]</a>
+              <a href="thread.html#273">[ thread ]</a>
+              <a href="subject.html#273">[ subject ]</a>
+              <a href="author.html#273">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

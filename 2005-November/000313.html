@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r337 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r337%20-%20trunk/maay&In-Reply-To=%3C200511081116.jA8BGqCV022789%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000312.html">
+   <LINK REL="Next"  HREF="000314.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r337 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r337%20-%20trunk/maay&In-Reply-To=%3C200511081116.jA8BGqCV022789%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r337 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 12:16:52 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000312.html">[Maay-svncheckins] r336 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000314.html">[Maay-svncheckins] r338 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#313">[ date ]</a>
+              <a href="thread.html#313">[ thread ]</a>
+              <a href="subject.html#313">[ subject ]</a>
+              <a href="author.html#313">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-08 12:16:51 +0100 (Tue, 08 Nov 2005)
+New Revision: 337
+
+Modified:
+   trunk/maay/rpc.py
+   trunk/maay/server.py
+   trunk/maay/webapplication.py
+Log:
+Mainly propagate p2p querier knowledge downto were it is used (the webapp).
+
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-08 11:14:36 UTC (rev 336)
++++ trunk/maay/rpc.py	2005-11-08 11:16:51 UTC (rev 337)
+@@ -36,17 +36,23 @@
+ 
+ 
+ class MaayRPCServer(XMLRPC):
++    theP2pQuerier = None
+ 
+     def __init__(self, nodeId, portal):
+         XMLRPC.__init__(self)
+-        print &quot;init of MaayRPCServer, nodeId = &quot;, nodeId
++        print &quot;MaayRPCServer init %s %s&quot; % (nodeId, portal)
+         assert nodeId == portal.config.get_node_id ()
+         self._sessions = {}
+         self.portal = portal
+         self.nodeId = portal.config.get_node_id() 
+         self._sessions[WEB_AVATARID] = portal.webQuerier 
+         self._sessions[ANONYMOUS_AVATARID] = portal.anonymousQuerier
+-        self._p2pQuerier = P2pQuerier(nodeId, portal.webQuerier)
++        #self._p2pQuerier = P2pQuerier(nodeId, portal.webQuerier)
++        MaayRPCServer.theP2pQuerier = P2pQuerier(nodeId, portal.webQuerier)
++
++    def getP2pQuerier(self):
++        assert (MaayRPCServer.theP2pQuerier) is not None
++        return MaayRPCServer.theP2pQuerier
+         
+     def _attachUser(self, (interface, querier, logout), username, password):
+         print &quot;MaayRPCServer _attachUser&quot;, username, type(querier)
+@@ -55,7 +61,7 @@
+             print errmsg
+             return '',  errmsg # raise UnauthorizedLogin()
+         digest = make_uid(username, password)
+-        print &quot;Registering querier for %s (digest=%s)&quot; % (username, digest)
++        print &quot; ... registering querier for %s (digest=%s)&quot; % (username, digest)
+         self._sessions[digest] = querier
+         return digest, ''
+ 
+@@ -133,23 +139,23 @@
+ 
+         return 0
+ 
+-    def xmlrpc_distributedQuery(self, queryId, sender, ttl, words, mime_type):
+-        print &quot;MaayRPCServer distributedQuery : %s %s %s %s %s&quot; % \
+-              (queryId, sender, ttl, words, mime_type)
+-        query = P2pQuery(queryId,
+-                         sender,
+-                         ttl,
+-                         Query(words, filetype=mime_type))
++    #def xmlrpc_distributedQuery(self, queryId, sender, ttl, words, mime_type):
++    def xmlrpc_distributedQuery(self, queryDict):
++        print &quot;MaayRPCServer distributedQuery : %s &quot; % queryDict
++        query = P2pQuery(queryDict['id'],
++                         queryDict['sender'],
++                         queryDict['ttl'],
++                         Query(queryDict['words'], filetype=queryDict['mime_type']))
+         # schedule the query for later processing and return immediately
+         # this enables the sender to query several nodes in a row
+-        d = reactor.callLater(.01, self._p2pQuerier.receiveQuery, query)
++        d = reactor.callLater(.01, self.getP2pQuerier().receiveQuery, query)
+         return self.nodeId
+ 
+     def xmlrpc_distributedQueryAnswer(self, queryId, senderId, documents):
+         print &quot;MaayRPCServer distributedQueryAnswer : %s %s %s&quot; % \
+               (queryId, senderId, documents)
+-        answer = P2pAnswer() # FIXME: fill in objects
+-        d = reactor.callLater(.01, self._p2pQuerier.receiveAnswer,answer)
++        answer = P2pAnswer(queryId, documents)
++        d = reactor.callLater(.01, self.getP2pQuerier().sendAnswer, answer)
+         return self.nodeId
+                          
+     
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-11-08 11:14:36 UTC (rev 336)
++++ trunk/maay/server.py	2005-11-08 11:16:51 UTC (rev 337)
+@@ -84,12 +84,13 @@
+ 
+         Both kind of avatars rely on a querier instance
+         &quot;&quot;&quot;
++        print &quot;MaayRealm requestAvatar %s&quot; % avatarId
+         for iface in interfaces:
+             # if we were asked for a web resource
+             if iface is inevow.IResource:
+                 querier = self._getQuerier(avatarId)
+-                print &quot;Building search form for&quot;, avatarId
+-                resc = SearchForm(avatarId, querier)
++                assert(MaayRPCServer.theP2pQuerier is not None)
++                resc = SearchForm(avatarId, querier, MaayRPCServer.theP2pQuerier)
+                 return inevow.IResource, resc, resc.logout
+             # if we were asked for a querier
+             elif iface is IQuerier:
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-08 11:14:36 UTC (rev 336)
++++ trunk/maay/webapplication.py	2005-11-08 11:16:51 UTC (rev 337)
+@@ -90,10 +90,10 @@
+     bodyFactory = loaders.xmlfile(get_path_of('searchform.html'))
+     addSlash = True
+ 
+-    def __init__(self, maayId, querier):
++    def __init__(self, maayId, querier, p2pquerier=None):
+         MaayPage.__init__(self, maayId)
+         self.querier = querier
+-        self.p2pquerier = None # no webappconfig yet to get our node_id
++        self.p2pquerier = p2pquerier
+ 
+     def logout(self):
+         print &quot;Bye %s !&quot; % (self.maayId,)
+@@ -111,7 +111,8 @@
+         webappConfig = IServerConfiguration(context)
+         nodeId = webappConfig.get_node_id()
+         if not self.p2pquerier:
+-            self.p2pquerier = P2pQuerier(nodeId, self.querier)
++            print &quot;BUG ? We don't have a P2pQuerier&quot;
++            return
+         theDistributedQuery = P2pQuery(123, nodeId, 3, query)
+         self.p2pquerier.sendQuery(theDistributedQuery)
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000312.html">[Maay-svncheckins] r336 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000314.html">[Maay-svncheckins] r338 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#313">[ date ]</a>
+              <a href="thread.html#313">[ thread ]</a>
+              <a href="subject.html#313">[ subject ]</a>
+              <a href="author.html#313">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

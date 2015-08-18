@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r90 - trunk/maay/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r90%20-%20trunk/maay/test&In-Reply-To=%3C200509281503.j8SF3htb017346%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000062.html">
+   <LINK REL="Next"  HREF="000064.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r90 - trunk/maay/test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r90%20-%20trunk/maay/test&In-Reply-To=%3C200509281503.j8SF3htb017346%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r90 - trunk/maay/test">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Sep 28 17:03:43 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000062.html">[Maay-svncheckins] r89 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000064.html">[Maay-svncheckins] r91 - in trunk/maay: . test test/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#63">[ date ]</a>
+              <a href="thread.html#63">[ thread ]</a>
+              <a href="subject.html#63">[ subject ]</a>
+              <a href="author.html#63">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-28 17:03:43 +0200 (Wed, 28 Sep 2005)
+New Revision: 90
+
+Added:
+   trunk/maay/test/test_codecs.py
+Log:
+fun with codecs
+
+
+Added: trunk/maay/test/test_codecs.py
+===================================================================
+--- trunk/maay/test/test_codecs.py	2005-09-28 14:06:13 UTC (rev 89)
++++ trunk/maay/test/test_codecs.py	2005-09-28 15:03:43 UTC (rev 90)
+@@ -0,0 +1,21 @@
++
++import unittest
++import codecs
++import gzip
++import bz2
++import os
++
++class CodecsTC(unittest.TestCase):
++    def test_readCompressed(self):
++        f = gzip.open('toto.gz', 'wb')
++        for i in range(10):
++            f.write(('%d'%i)*50+'\n')
++        f.close()
++
++        c = codecs.open('toto.gz', 'rb', 'zlib_codec')
++        data = c.read()
++        c.close
++        self.failUnless(data.startswith('0000'))
++
++if __name__ == '__main__':
++    unittest.main()
+
+
+Property changes on: trunk/maay/test/test_codecs.py
+___________________________________________________________________
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000062.html">[Maay-svncheckins] r89 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000064.html">[Maay-svncheckins] r91 - in trunk/maay: . test test/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#63">[ date ]</a>
+              <a href="thread.html#63">[ thread ]</a>
+              <a href="subject.html#63">[ subject ]</a>
+              <a href="author.html#63">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

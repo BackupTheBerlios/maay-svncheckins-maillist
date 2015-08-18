@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r443 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r443%20-%20trunk/maay&In-Reply-To=%3C200511121523.jACFN5MK001985%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000413.html">
+   <LINK REL="Next"  HREF="000415.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r443 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r443%20-%20trunk/maay&In-Reply-To=%3C200511121523.jACFN5MK001985%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r443 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Sat Nov 12 16:23:05 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000413.html">[Maay-svncheckins] r442 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000415.html">[Maay-svncheckins] r444 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#414">[ date ]</a>
+              <a href="thread.html#414">[ thread ]</a>
+              <a href="subject.html#414">[ subject ]</a>
+              <a href="author.html#414">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-12 16:23:05 +0100 (Sat, 12 Nov 2005)
+New Revision: 443
+
+Modified:
+   trunk/maay/querier.py
+   trunk/maay/webapplication.py
+Log:
+a bit of refactoring for what will arrive later (i.e. prev/next mangement
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-12 15:16:47 UTC (rev 442)
++++ trunk/maay/querier.py	2005-11-12 15:23:05 UTC (rev 443)
+@@ -262,7 +262,7 @@
+     def registerNode(self, nodeId, ip, port, bandwidth=None, lastSeenTime=None):
+         &quot;&quot;&quot;this will be used as a callback in registrationclient/login&quot;&quot;&quot;
+         print &quot;AnonymousQuerier registerNode (callback) %s %s:%s&quot; % \
+-                                                             (nodeId, ip, port)
++            (nodeId, ip, port)
+         lastSeenTime = lastSeenTime or int(time.time())
+         cursor = self._cnx.cursor()
+         node = Node.selectOrInsertWhere(cursor, node_id=nodeId)[0]
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-12 15:16:47 UTC (rev 442)
++++ trunk/maay/webapplication.py	2005-11-12 15:23:05 UTC (rev 443)
+@@ -171,46 +171,7 @@
+     def render_message(self, context, data):
+         return self._msg
+ 
+-from nevow import athena, inevow
+-from twisted.python import log
+-
+-class ResultsPage(athena.LivePage):
+-    &quot;&quot;&quot;default results page&quot;&quot;&quot;
+-    child_maaycss = static.File(get_path_of('maay.css'))
+-    child_images = static.File(get_path_of('images/'))
+-    docFactory = loaders.xmlfile(get_path_of('liveresults.html'))
+-    addSlash = False
+-
+-    def __init__(self, context, querier, p2pquerier):
+-        athena.LivePage.__init__(self)
+-        # XXX: nevow/livepage related trick (version 0.6.0) :
+-        # This resource is instanciated several times when rendering the
+-        # results page (each time the browser tries to load
+-        # ROOT/search/athena.js, ROOT/search/MochiKit.js, etc.) because
+-        # the Livepage-Id is not yet set in the request. In these particuliar
+-        # cases, we don't want to start new queries, so we do an ugly check
+-        # to test whether or not we're instanciating the *real* live page
+-        # (or if we're just trying to download JS files)
+-        # NOTE: At the time this comment is written, athena/LivePages are handled
+-        #       differently in nevow SVN. It's now possible to insantiate directly
+-        #       LivePage instances (which is great !), so we'll have to change
+-        #       the implementation for next nevow release.
+-        # NOTE2: another way to be sure that only the appopriate resource
+-        #        starts the p2pquery (and registers callbacks) would be
+-        #        to launch the query in the remote_conect() method
+-        if len(inevow.IRemainingSegments(context)) &lt; 2:
+-            self.query = Query.fromContext(context)
+-            self.offset = self.query.offset
+-            #TODO: very soon, the line below will also be the p2pquerier's job
+-            self.results = querier.findDocuments(self.query)
+-            webappConfig = INodeConfiguration(context)
+-            p2pQuery = P2pQuery(webappConfig.get_node_id(),
+-                                webappConfig.rpcserver_port,
+-                                self.query)
+-            p2pquerier.sendQuery(p2pQuery)
+-            p2pquerier.addAnswerCallback(p2pQuery.qid, self.onNewResults)
+-            self.queryId = p2pQuery.qid
+-            self.querier = querier
++class ResultsPageMixIn:
+             
+     def data_results(self, context, data):
+         return self.results
+@@ -263,12 +224,59 @@
+         date = datetime.fromtimestamp(document.publication_time)
+         context.fillSlots('publication_date', date.strftime('%d %b %Y'))
+         return context.tag
++    
++class StaticResultsPage(MaayPage, ResultsPageMixIn):
++    bodyFactory = loaders.xmlfile(get_path_of('resultpage.html'))
+ 
++    def __init__(self, results):
++        self.results = results
++
++from nevow import athena, inevow
++from twisted.python import log
++
++class ResultsPage(athena.LivePage, ResultsPageMixIn):
++    &quot;&quot;&quot;default results page&quot;&quot;&quot;
++    child_maaycss = static.File(get_path_of('maay.css'))
++    child_images = static.File(get_path_of('images/'))
++    docFactory = loaders.xmlfile(get_path_of('liveresults.html'))
++    addSlash = False
++
++    def __init__(self, context, querier, p2pquerier):
++        athena.LivePage.__init__(self)
++        # XXX: nevow/livepage related trick (version 0.6.0) :
++        # This resource is instanciated several times when rendering the
++        # results page (each time the browser tries to load
++        # ROOT/search/athena.js, ROOT/search/MochiKit.js, etc.) because
++        # the Livepage-Id is not yet set in the request. In these particuliar
++        # cases, we don't want to start new queries, so we do an ugly check
++        # to test whether or not we're instanciating the *real* live page
++        # (or if we're just trying to download JS files)
++        # NOTE: At the time this comment is written, athena/LivePages are handled
++        #       differently in nevow SVN. It's now possible to insantiate directly
++        #       LivePage instances (which is great !), so we'll have to change
++        #       the implementation for next nevow release.
++        # NOTE2: another way to be sure that only the appopriate resource
++        #        starts the p2pquery (and registers callbacks) would be
++        #        to launch the query in the remote_conect() method
++        if len(inevow.IRemainingSegments(context)) &lt; 2:
++            self.query = Query.fromContext(context)
++            self.offset = self.query.offset
++            #TODO: very soon, the line below will also be the p2pquerier's job
++            self.results = querier.findDocuments(self.query)
++            webappConfig = INodeConfiguration(context)
++            p2pQuery = P2pQuery(webappConfig.get_node_id(),
++                                webappConfig.rpcserver_port,
++                                self.query)
++            p2pquerier.sendQuery(p2pQuery)
++            p2pquerier.addAnswerCallback(p2pQuery.qid, self.onNewResults)
++            self.queryId = p2pQuery.qid
++            self.querier = querier
++            
+     def onNewResults(self, provider, results):
+         results = [Document(**params) for params in results]
+         self.querier.pushDocuments(self.queryId, results, provider)
+         results = self.querier.getQueryResults(self.queryId) # XXX offset, limit ?
+-        page = PleaseCloseYourEyes(results, provider, self.query).renderSynchronously()
++        page = PleaseCloseYourEyes(results, provider, self.query, self.queryId).renderSynchronously()
+         self.callRemote('updateResults', u'&lt;div&gt;%s&lt;/div&gt;' % page)
+ 
+     def remote_connect(self, context):
+@@ -277,7 +285,7 @@
+         return 0
+ 
+ 
+-class PleaseCloseYourEyes(ResultsPage):
++class PleaseCloseYourEyes(rend.Page, ResultsPageMixIn):
+     &quot;&quot;&quot;This resource and the way it is called is kind of ugly.
+     It will be refactored later. The idea is to have something working
+     quickly.
+@@ -304,25 +312,42 @@
+         &lt;/td&gt;
+       &lt;/tr&gt;
+     &lt;/table&gt;
++    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
++    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
++    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+     &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
+   &lt;/div&gt;
+     &quot;&quot;&quot;)
+     
+-    def __init__(self, results, provider, query):
++    def __init__(self, results, provider, query, queryId):
+         self.results = results
+         self.peerLogin, self.peerHost, self.peerPort = provider
+         self.query = query
++        self.queryId = queryId
+ 
+     def render_peer(self, context, data):
+         return '%s (%s:%s)' % (self.peerLogin, self.peerHost, self.peerPort)
+ 
+     def render_row(self, context, data):
+         document = data
+-        ResultsPage.render_row(self, context, data)
++        ResultsPageMixIn.render_row(self, context, data)
+         context.fillSlots('distanturl', '/distantfile?filepath=%s&amp;host=%s&amp;port=%s' % (document.url, self.peerHost, self.peerPort))
+         return context.tag
+ 
++    def render_nextset_url(self, context, data):
++        # XXX find a better implementation later
++        return 'search?words=%s&amp;offset=%s&amp;qid=%s' % ('+'.join(self.query.words),
++                                                     self.query.offset + 15,
++                                                     self.queryId)
++    def render_prevset_url(self, context, data):
++        offset = self.query.offset
++        if offset:
++            offset -= 15
++        return 'search?words=%s&amp;offset=%s&amp;qid=%s' % ('+'.join(self.query.words),
++                                                     offset,
++                                                     self.queryId)
+ 
++
+ class ResultsPageFactory(athena.LivePageFactory):
+     def getLivePage(self, context):
+         livepageId = inevow.IRequest(context).getHeader('Livepage-Id')
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000413.html">[Maay-svncheckins] r442 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000415.html">[Maay-svncheckins] r444 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#414">[ date ]</a>
+              <a href="thread.html#414">[ thread ]</a>
+              <a href="subject.html#414">[ subject ]</a>
+              <a href="author.html#414">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

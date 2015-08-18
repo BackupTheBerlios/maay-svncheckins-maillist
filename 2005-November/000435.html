@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r464 - trunk/doc
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r464%20-%20trunk/doc&In-Reply-To=%3C200511141422.jAEEM710025371%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000434.html">
+   <LINK REL="Next"  HREF="000436.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r464 - trunk/doc</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r464%20-%20trunk/doc&In-Reply-To=%3C200511141422.jAEEM710025371%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r464 - trunk/doc">afayolle at berlios.de
+       </A><BR>
+    <I>Mon Nov 14 15:22:07 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000434.html">[Maay-svncheckins] r463 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000436.html">[Maay-svncheckins] r465 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#435">[ date ]</a>
+              <a href="thread.html#435">[ thread ]</a>
+              <a href="subject.html#435">[ subject ]</a>
+              <a href="author.html#435">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-14 15:22:06 +0100 (Mon, 14 Nov 2005)
+New Revision: 464
+
+Added:
+   trunk/doc/CR_20051114.rest
+Log:
+meeting minutes
+
+Added: trunk/doc/CR_20051114.rest
+===================================================================
+--- trunk/doc/CR_20051114.rest	2005-11-14 13:40:11 UTC (rev 463)
++++ trunk/doc/CR_20051114.rest	2005-11-14 14:22:06 UTC (rev 464)
+@@ -0,0 +1,93 @@
++==========================================
++Compte rendu de la r&#233;union du 14 Nov. 2005
++==========================================
++
++Participants
++~~~~~~~~~~~~
++
++Joaquin Keller (FTRD)
++Fr&#233;d&#233;ric Dang Ngoc (FTRD)
++Alexandre Fayolle (Logilab)
++
++But de la r&#233;union
++~~~~~~~~~~~~~~~~~
++
++Point sur les d&#233;veloppements depuis la pr&#233;c&#233;dente r&#233;union.
++
++&#201;ch&#233;ances
++~~~~~~~~~~
++
++D&#233;monstration publique le 30 Nov. 
++
++On a besoin d'une version distribuable le 15 Nov.
++
++Points abord&#233;s
++~~~~~~~~~~~~~~
++
++&#201;tat des d&#233;veloppements
++-----------------------
++
++La recherche distante et le t&#233;l&#233;chargement distant sont fonctionnels
++sous Linux. Des tests sont en cours sous Windows pour v&#233;rifier que le
++logiciel est utilisable avec Internet Explorer.
++
++L'installation sous Windows d'un service pour le noeud Maay est en
++cours de d&#233;veloppement.
++
++Information des utilisateurs
++----------------------------
++
++Il faut faire appara&#238;tre clairement sur la page d'indexation
++(<A HREF="http://localhost:7777/indexation">http://localhost:7777/indexation</A>) quels sont les r&#233;pertoires qui
++seront trait&#233;s par l'indexeur. 
++
++Gestion des fichiers t&#233;l&#233;charg&#233;s
++--------------------------------
++
++Lorsqu'un fichier est t&#233;l&#233;charg&#233; depuis un serveur distant, il faut
++qu'il soit plac&#233; dans un r&#233;pertoire qui sera trait&#233; par l'indexeur
++publique lors du prochain passage. 
++
++Si &#231;a ne co&#251;te pas trop en temps de d&#233;veloppement, il faut
++imm&#233;diatement indexer le nouveau document. 
++
++Configuration par d&#233;faut
++------------------------
++
++Au moment de l'installation sous Windows, l'installeur doit d&#233;terminer
++si la machine fait partie de l'intranet de FT R&amp;D, et si oui,
++configurer l'adresse IP du serveur de pr&#233;sence en cons&#233;quence.
++
++Filtrage des r&#233;ponses locales/distantes
++---------------------------------------
++
++Si &#231;a ne co&#251;te pas trop en temps de d&#233;veloppement, il faut ajouter sur
++la page des r&#233;sultats un moyen de n'afficher que les documents locaux,
++ou que les documents distants, ou tous les documents. Si c'est trop
++long &#224; d&#233;velopper, ce sera pour plus tard. 
++
++Installation sur machine partag&#233;e
++---------------------------------
++
++Fayolle signale que l'installeur Windows configure Maay pour
++l'utilisateur courant, ce qui peut poser probl&#232;me pour une machine
++partag&#233;e, ou si l'utilisateur courant ne dispose pas de privil&#232;ges
++administratifs suffisants. Keller dit que ce n'est pas un probl&#232;me
++pour le moment.
++
++
++
++Conclusion de la r&#233;union
++~~~~~~~~~~~~~~~~~~~~~~~~
++
++Logilab fournira pour le 15 Nov. une livraison en status beta de
++l'application avec un installeur Windows. Cette livraison sera
++d&#233;ploy&#233;e dans un cercle restreint chez FT pour obtenir des retours
++rapides sur l'utilisabilit&#233; de l'application. 
++
++
++ -- Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;  Mon, 14 Nov 2005 15:18:57 +0100
++
++
++
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000434.html">[Maay-svncheckins] r463 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000436.html">[Maay-svncheckins] r465 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#435">[ date ]</a>
+              <a href="thread.html#435">[ thread ]</a>
+              <a href="subject.html#435">[ subject ]</a>
+              <a href="author.html#435">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

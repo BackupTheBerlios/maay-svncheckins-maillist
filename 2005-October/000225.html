@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r251 - trunk/maay/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r251%20-%20trunk/maay/test&In-Reply-To=%3C200510281314.j9SDEYKk015324%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000224.html">
+   <LINK REL="Next"  HREF="000226.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r251 - trunk/maay/test</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r251%20-%20trunk/maay/test&In-Reply-To=%3C200510281314.j9SDEYKk015324%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r251 - trunk/maay/test">dnf at berlios.de
+       </A><BR>
+    <I>Fri Oct 28 15:14:34 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000224.html">[Maay-svncheckins] r250 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000226.html">[Maay-svncheckins] r252 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#225">[ date ]</a>
+              <a href="thread.html#225">[ thread ]</a>
+              <a href="subject.html#225">[ subject ]</a>
+              <a href="author.html#225">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-10-28 15:14:33 +0200 (Fri, 28 Oct 2005)
+New Revision: 251
+
+Modified:
+   trunk/maay/test/test_texttool.py
+Log:
+- add some unit test for texttools.makeAbstract (to complete)
+
+
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-10-28 13:13:47 UTC (rev 250)
++++ trunk/maay/test/test_texttool.py	2005-10-28 13:14:33 UTC (rev 251)
+@@ -23,7 +23,7 @@
+ from os.path import join, dirname
+ 
+ from maay.texttool import MaayHTMLParser, TextParser, guessEncoding, \
+-     universalOpen, untagText, normalizeText, removeControlChar
++     universalOpen, untagText, normalizeText, removeControlChar, makeAbstract
+ 
+ RAW_TEXT = u&quot;foo &#233;t&#233; bar baz top bim bam boum&quot;
+ 
+@@ -181,5 +181,27 @@
+         self.assertEquals(u&quot;\t\n\r\uFFEFtoto\U00011234&quot;, norm)
+         self.assertEquals(unicode, type(norm))
+ 
++class AbstractTC(unittest.TestCase):
++    def testMakeAbstract(self):
++        text = &quot;&quot;&quot;This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA&quot;&quot;&quot;
++
++        # Check excerpt at the beginning of the text
++
++        abstract = makeAbstract(text, [u&quot;free&quot;])
++        self.assertEquals(u'This program is &lt;b&gt;free&lt;/b&gt; software; you can redistribute it and/or modify it under the terms of &lt;b&gt;...&lt;/b&gt;  Public License as published by the &lt;b&gt;Free&lt;/b&gt; Software Foundation; either version 2 of the License, or (at your &lt;b&gt;...&lt;/b&gt;  this program; if not, write to the &lt;b&gt;Free&lt;/b&gt; Software Foundation, Inc., 51 &lt;b&gt;...&lt;/b&gt;', abstract)
++
++        abstract = makeAbstract(text, [u&quot;pUrPoSe&quot;])
++        self.assertEquals(' &lt;b&gt;...&lt;/b&gt;  or FITNESS FOR A PARTICULAR &lt;b&gt;PURPOSE&lt;/b&gt;.  See the GNU General Public &lt;b&gt;...&lt;/b&gt;', abstract)
++
++        # unknown word
++        abstract = makeAbstract(text, [u&quot;FOOBAR&quot;])
++        self.assertEquals('This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, &lt;b&gt;...&lt;/b&gt;', abstract)
++
++        # word at the end of the text
++        abstract = makeAbstract(text, [u&quot;Boston&quot;])
++        self.assertEquals(' &lt;b&gt;...&lt;/b&gt;  Inc., 51 Franklin St, Fifth Floor, &lt;b&gt;Boston&lt;/b&gt;, MA  02110-1301 USA', abstract)
++
++
+ if __name__ == '__main__':
+     unittest.main()
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000224.html">[Maay-svncheckins] r250 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000226.html">[Maay-svncheckins] r252 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#225">[ date ]</a>
+              <a href="thread.html#225">[ thread ]</a>
+              <a href="subject.html#225">[ subject ]</a>
+              <a href="author.html#225">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

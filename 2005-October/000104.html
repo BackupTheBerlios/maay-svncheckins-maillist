@@ -1,0 +1,289 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r131 - in trunk: . debian
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r131%20-%20in%20trunk%3A%20.%20debian&In-Reply-To=%3C200510050947.j959lxL5006893%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000103.html">
+   <LINK REL="Next"  HREF="000105.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r131 - in trunk: . debian</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r131%20-%20in%20trunk%3A%20.%20debian&In-Reply-To=%3C200510050947.j959lxL5006893%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r131 - in trunk: . debian">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Oct  5 11:47:59 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000103.html">[Maay-svncheckins] r130 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000105.html">[Maay-svncheckins] r132 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#104">[ date ]</a>
+              <a href="thread.html#104">[ thread ]</a>
+              <a href="subject.html#104">[ subject ]</a>
+              <a href="author.html#104">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-05 11:47:59 +0200 (Wed, 05 Oct 2005)
+New Revision: 131
+
+Added:
+   trunk/debian/
+   trunk/debian/README.Debian
+   trunk/debian/changelog
+   trunk/debian/compat
+   trunk/debian/control
+   trunk/debian/copyright
+   trunk/debian/dirs
+   trunk/debian/docs
+   trunk/debian/examples
+   trunk/debian/install
+   trunk/debian/rules
+Log:
+first attempt at debian packaging
+
+Added: trunk/debian/README.Debian
+===================================================================
+--- trunk/debian/README.Debian	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/README.Debian	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1,6 @@
++maay for Debian
++---------------
++
++&lt;possible notes regarding this package - if none, delete this file&gt;
++
++ -- Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">afayolle at debian.org</A>&gt;, Wed,  5 Oct 2005 11:16:23 +0200
+
+Added: trunk/debian/changelog
+===================================================================
+--- trunk/debian/changelog	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/changelog	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1,6 @@
++maay (0.1.0-1) unstable; urgency=low
++
++  * First release
++
++ -- Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">afayolle at debian.org</A>&gt;  Wed,  5 Oct 2005 11:16:23 +0200
++
+
+Added: trunk/debian/compat
+===================================================================
+--- trunk/debian/compat	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/compat	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1 @@
++4
+
+Added: trunk/debian/control
+===================================================================
+--- trunk/debian/control	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/control	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1,26 @@
++Source: maay
++Section: unknown
++Priority: optional
++Maintainer: Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">afayolle at debian.org</A>&gt;
++Build-Depends: debhelper (&gt;= 4.0.0), python-dev, python
++Standards-Version: 3.6.2
++
++Package: maay
++Architecture: all
++Depends: ${shlibs:Depends}, ${misc:Depends}, mysql-server-4.1, python, python-mysql, python-nevow, python-twisted
++Recommends: antiword, unrtf, pdftohtml, 
++Description: peer to peer indexation and search engine
++ Maay can index files on your computer, and export them to other
++ members of the Maay P2P network. You can also issue searches which
++ will look for documents on your computer as well as on other nodes of
++ the P2P network.
++ .
++ Maay can index raw text, html, pdf, ms word and rtf documents. Other
++ formats are planned for a future release.
++ .
++ Queries are issued using a web interface. In the current version
++ queries are ontly dispatched on the current node, i.e. the P2P
++ functionnality is not available for now.
++ . 
++ Homepage: <A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>
++
+
+Added: trunk/debian/copyright
+===================================================================
+--- trunk/debian/copyright	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/copyright	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1,26 @@
++This package was debianized by Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">afayolle at debian.org</A>&gt; on
++Wed,  5 Oct 2005 11:16:23 +0200.
++
++It was downloaded from <A HREF="http://download.berlios.de/maay/">http://download.berlios.de/maay/</A>
++
++Copyright Holder: copyright (c) 2004-2005 France Telecom R&amp;D
++
++License:
++
++   This package is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 2 of the License, or
++   (at your option) any later version.
++
++   This package is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this package; if not, write to the Free Software
++   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++On Debian systems, the complete text of the GNU General
++Public License can be found in `/usr/share/common-licenses/GPL'.
++
+
+Added: trunk/debian/dirs
+===================================================================
+--- trunk/debian/dirs	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/dirs	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1,5 @@
++usr/bin
++usr/share/doc/maay/examples
++usr/lib/python2.3/site-packages/maay
++usr/share/maay
++etc/maay
+
+Added: trunk/debian/docs
+===================================================================
+--- trunk/debian/docs	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/docs	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1 @@
++README.txt
+
+Added: trunk/debian/examples
+===================================================================
+--- trunk/debian/examples	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/examples	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1 @@
++maay/configuration/*.ini
+
+Added: trunk/debian/install
+===================================================================
+--- trunk/debian/install	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/install	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1 @@
++maay/data/* usr/share/maay
+
+Added: trunk/debian/rules
+===================================================================
+--- trunk/debian/rules	2005-10-05 08:17:30 UTC (rev 130)
++++ trunk/debian/rules	2005-10-05 09:47:59 UTC (rev 131)
+@@ -0,0 +1,70 @@
++#!/usr/bin/make -f
++# -*- makefile -*-
++# Sample debian/rules that uses debhelper.
++# This file was originally written by Joey Hess and Craig Small.
++# As a special exception, when this file is copied by dh-make into a
++# dh-make output file, you may use that output file without restriction.
++# This special exception was added by Craig Small in version 0.37 of dh-make.
++
++# Uncomment this to turn on verbose mode.
++#export DH_VERBOSE=1
++
++
++
++
++CFLAGS = -Wall -g
++
++ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
++	CFLAGS += -O0
++else
++	CFLAGS += -O2
++endif
++
++configure: configure-stamp
++configure-stamp:
++	dh_testdir
++	touch configure-stamp
++
++
++build: build-stamp
++
++build-stamp: configure-stamp 
++	dh_testdir
++	python setup.py build
++	touch build-stamp
++
++clean:
++	dh_testdir
++	dh_testroot
++	rm -f build-stamp configure-stamp
++	rm -rf build dist
++	dh_clean 
++
++install: build
++	dh_testdir
++	dh_testroot
++	dh_clean -k 
++	dh_installdirs
++
++	python setup.py install --prefix=$(CURDIR)/debian/maay
++
++
++binary-indep: build install
++	dh_testdir
++	dh_testroot
++	dh_installchangelogs ChangeLog
++	dh_installdocs
++	dh_installexamples
++	dh_install
++	dh_installman
++	dh_compress
++	dh_fixperms
++	dh_python
++	dh_installdeb
++	dh_shlibdeps
++	dh_gencontrol
++	dh_md5sums
++	dh_builddeb
++
++binary: binary-indep 
++.PHONY: build clean binary-indep binary-arch binary install configure
+
+
+Property changes on: trunk/debian/rules
+___________________________________________________________________
+Name: svn:executable
+   + *
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000103.html">[Maay-svncheckins] r130 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000105.html">[Maay-svncheckins] r132 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#104">[ date ]</a>
+              <a href="thread.html#104">[ thread ]</a>
+              <a href="subject.html#104">[ subject ]</a>
+              <a href="author.html#104">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r236 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r236%20-%20trunk/maay&In-Reply-To=%3C200510271312.j9RDCv7U020132%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000209.html">
+   <LINK REL="Next"  HREF="000215.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r236 - trunk/maay</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r236%20-%20trunk/maay&In-Reply-To=%3C200510271312.j9RDCv7U020132%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r236 - trunk/maay">dnf at berlios.de
+       </A><BR>
+    <I>Thu Oct 27 15:12:57 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000209.html">[Maay-svncheckins] r235 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000215.html">[Maay-svncheckins] r237 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#214">[ date ]</a>
+              <a href="thread.html#214">[ thread ]</a>
+              <a href="subject.html#214">[ subject ]</a>
+              <a href="author.html#214">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-10-27 15:12:55 +0200 (Thu, 27 Oct 2005)
+New Revision: 236
+
+Modified:
+   trunk/maay/texttool.py
+Log:
+Rewrite makeAbstract function.
+
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-27 12:39:42 UTC (rev 235)
++++ trunk/maay/texttool.py	2005-10-27 13:12:55 UTC (rev 236)
+@@ -302,26 +302,76 @@
+     return text.translate(table)
+ del _table2
+     
++def boldifyText(text, words):
++    rgx = re.compile('|'.join(words), re.I)
++    s = StringIO.StringIO()
++    lastStart = 0
++    for occurence in rgx.finditer(text):
++        wordFound = occurence.group(0)
++        start, end = occurence.start(), occurence.end()
++	s.write(text[lastStart:start])
++	s.write(&quot;&lt;b&gt;%s&lt;/b&gt;&quot; % wordFound)
++	lastStart = end
+ 
++    s.write(text[end:])
++    return s.getvalue()
++
+ def makeAbstract(text, words):
+-    &quot;&quot;&quot;return the original text with HTML emphasis tags
+-    around &lt;words&gt; occurences
+-    XXX: this is a quick and dirty implementation
++    &quot;&quot;&quot;return excerpts of the original text surrounding the word occurrences
++    XXX: this is a less quick and dirty implementation
+     &quot;&quot;&quot;
+-    rgx = re.compile('|'.join(words), re.I)
++
++    # To build the abstract, we only display the first occurrence of each
++    # word in the text.
++    # Each occurrence is shown in an excerpt (approx 60 caracters).
++    # If two excerpts are close, we merge them into one.
++
++    # excerptPositions = [(word,position)]
++    excerptPositions = []
++
+     text = untagText(text)
+-    buf = []
+-    size = 0
+-    for occurence in rgx.finditer(text):
+-        wordFound = occurence.group(0)
+-        start, end = occurence.start(), occurence.end()
+-        before = text[start-30:start-1]
+-        after = text[end+1:end+30]
+-        size += len(wordFound) + 60
+-        buf.append('%s &lt;b&gt;%s&lt;/b&gt; %s' % (before, wordFound, after))
+-        if size &gt;= 200:
+-            break
+-    else:
+-        # case where we have less than 200 characters to display
++    text_length = len(text)
++
++    for word in words:
++        m = re.search(word, text, re.I)
++	if m:
++	        excerptPositions.append((word, m.start()))
++
++    if not excerptPositions:
+         return text[:200]
+-    return u' &lt;b&gt;[...]&lt;/b&gt; '.join(buf)
++
++    # sort by position
++    excerptPositions.sort(lambda x, y: x[1] - y [1])
++
++    s = StringIO.StringIO()
++    start = -1
++    last_position = -100
++    last_word = 0
++
++    for word, position in excerptPositions:
++        if position - last_position &lt; 30:
++            last_position = position
++	    last_word = word
++	    continue
++	    
++	if start !=-1:
++            end = min(last_position + 30 + len(last_word), text_length - 1)
++            while not text[end].isspace(): end -= 1
++            s.write(&quot; &lt;b&gt;...&lt;/b&gt;&quot;)
++            s.write(boldifyText(text[start:end], words))
++            print &quot;repl = %s&quot; % str('|'.join(words))
++
++        start = max(0, position - 30)
++        while not text[start].isspace(): start += 1
++
++        last_position = position
++        last_word = word
++
++    end = min(last_position + 30 + len(word), text_length - 1)
++    while not text[end].isspace(): end -= 1
++    s.write(&quot;&lt;b&gt;...&lt;/b&gt;&quot;)
++    s.write(boldifyText(text[start:end], words))
++    s.write(&quot;&lt;b&gt;...&lt;/b&gt;&quot;)
++
++    return u&quot;%s&quot; % s.getvalue()
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000209.html">[Maay-svncheckins] r235 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000215.html">[Maay-svncheckins] r237 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#214">[ date ]</a>
+              <a href="thread.html#214">[ thread ]</a>
+              <a href="subject.html#214">[ subject ]</a>
+              <a href="author.html#214">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

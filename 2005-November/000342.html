@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r366 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r366%20-%20trunk/maay&In-Reply-To=%3C200511091145.jA9BjXKU020045%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000341.html">
+   <LINK REL="Next"  HREF="000343.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r366 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r366%20-%20trunk/maay&In-Reply-To=%3C200511091145.jA9BjXKU020045%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r366 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 12:45:33 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000341.html">[Maay-svncheckins] r365 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000343.html">[Maay-svncheckins] r367 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#342">[ date ]</a>
+              <a href="thread.html#342">[ thread ]</a>
+              <a href="subject.html#342">[ subject ]</a>
+              <a href="author.html#342">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 12:45:18 +0100 (Wed, 09 Nov 2005)
+New Revision: 366
+
+Modified:
+   trunk/maay/rpc.py
+Log:
+use anonymous querier for P2P requests
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-09 10:45:05 UTC (rev 365)
++++ trunk/maay/rpc.py	2005-11-09 11:45:18 UTC (rev 366)
+@@ -51,7 +51,7 @@
+         self._sessions[ANONYMOUS_AVATARID] = portal.anonymousQuerier
+         self._lastClient = None
+         #self._p2pQuerier = P2pQuerier(nodeId, portal.webQuerier)
+-        MaayRPCServer.theP2pQuerier = P2pQuerier(nodeId, portal.webQuerier)
++        MaayRPCServer.theP2pQuerier = P2pQuerier(nodeId, portal.anonymousQuerier)
+ 
+     def render(self, request):
+         #XXX: check the correctness of this stuff
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000341.html">[Maay-svncheckins] r365 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000343.html">[Maay-svncheckins] r367 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#342">[ date ]</a>
+              <a href="thread.html#342">[ thread ]</a>
+              <a href="subject.html#342">[ subject ]</a>
+              <a href="author.html#342">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

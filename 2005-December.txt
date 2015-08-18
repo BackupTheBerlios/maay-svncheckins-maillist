@@ -1,0 +1,238 @@
+From aurelienc at berlios.de  Thu Dec  1 12:23:48 2005
+From: aurelienc at berlios.de (aurelienc at BerliOS)
+Date: Thu, 1 Dec 2005 12:23:48 +0100
+Subject: [Maay-svncheckins] r685 - trunk/maay
+Message-ID: <200512011123.jB1BNm37027591@sheep.berlios.de>
+
+Author: aurelienc
+Date: 2005-12-01 12:23:47 +0100 (Thu, 01 Dec 2005)
+New Revision: 685
+
+Modified:
+   trunk/maay/node.py
+Log:
+Remove double talk with presence server at startup
+
+
+Modified: trunk/maay/node.py
+===================================================================
+--- trunk/maay/node.py	2005-11-29 16:50:40 UTC (rev 684)
++++ trunk/maay/node.py	2005-12-01 11:23:47 UTC (rev 685)
+@@ -266,13 +266,13 @@
+                                                      mindFactory=MaayMindFactory))
+     website.remember(Maay404(), inevow.ICanHandleNotFound)
+     website.remember(NODE_CONFIG, INodeConfiguration)
+-    presenceclient.notify(NODE_CONFIG.presence_host,
+-                          NODE_CONFIG.presence_port,
+-                          maayPortal.webQuerier,
+-                          NODE_ID,
+-                          NODE_HOST,
+-                          NODE_PORT,
+-                          NODE_CONFIG.bandwidth)
++##     presenceclient.notify(NODE_CONFIG.presence_host,
++##                           NODE_CONFIG.presence_port,
++##                           maayPortal.webQuerier,
++##                           NODE_ID,
++##                           NODE_HOST,
++##                           NODE_PORT,
++##                           NODE_CONFIG.bandwidth)
+ 
+     # update peer list from presence server every 30 mn
+     notifyTask = task.LoopingCall(presenceclient.notify,
+
+
+
+From aurelienc at berlios.de  Thu Dec  1 14:52:56 2005
+From: aurelienc at berlios.de (aurelienc at BerliOS)
+Date: Thu, 1 Dec 2005 14:52:56 +0100
+Subject: [Maay-svncheckins] r688 - trunk/maay
+Message-ID: <200512011352.jB1Dqu25010836@sheep.berlios.de>
+
+Author: aurelienc
+Date: 2005-12-01 14:52:54 +0100 (Thu, 01 Dec 2005)
+New Revision: 688
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+Don't forget to decode/recode in base64 before applying basename on url.
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-12-01 11:38:04 UTC (rev 687)
++++ trunk/maay/p2pquerier.py	2005-12-01 13:52:54 UTC (rev 688)
+@@ -27,6 +27,7 @@
+ import time
+ import os
+ import socket
++import base64
+ from threading import Thread
+ 
+ from logilab.common.compat import set
+@@ -308,19 +309,16 @@
+         for document in answer.documents:
+             if not isinstance(document, dict):
+                 document = document.__dict__
+-                if 'url' in document:
+-                    document['url'] = os.path.basename(document['url'])
++            # only node-local docs will exhibit their full pathname
++            if 'url' in document:
++                doc_url = base64.decodestring(document['url'])
++                document['url'] = base64.encodestring(os.path.basename(doc_url))
+             # TODO: record answer in database if local is False
+             # auc : to have them in Document with state == KNOWN
+-            #if not query.isKnown(document):
+             abstract = makeAbstract(document['text'], query.getWords())
+             document['text'] = untagText(removeSpace(abstract))
+             query.addMatch(document)
+             toSend.append(document)
+-            ## else:
+-##                 #FIXME: shouldn't we add all documents regardless
+-##                 #       of duplicates, so as to add a new provider entry ?
+-##                 print "we already know this doc !!!@~^#{"
+ 
+         if query.sender != NODE_CONFIG.get_node_id():
+             self.querier.registerNodeActivity(answer.provider[1])
+
+
+
+From aurelienc at berlios.de  Thu Dec  1 15:01:05 2005
+From: aurelienc at berlios.de (aurelienc at BerliOS)
+Date: Thu, 1 Dec 2005 15:01:05 +0100
+Subject: [Maay-svncheckins] r689 - trunk
+Message-ID: <200512011401.jB1E15id015668@sheep.berlios.de>
+
+Author: aurelienc
+Date: 2005-12-01 15:01:04 +0100 (Thu, 01 Dec 2005)
+New Revision: 689
+
+Modified:
+   trunk/ChangeLog
+   trunk/ReleaseNotes.txt
+   trunk/maay.iss
+Log:
+Bump version number to 3.2 for next release.
+
+
+Modified: trunk/ChangeLog
+===================================================================
+--- trunk/ChangeLog	2005-12-01 13:52:54 UTC (rev 688)
++++ trunk/ChangeLog	2005-12-01 14:01:04 UTC (rev 689)
+@@ -1,6 +1,8 @@
++Maay-0.3.2 2005-12-01
++	* ensure proper indexing/download of document regardless of the filename encoding and origin
++
+ Maay-0.3.1 2005-11-28
+ 	* win32 bug fixes (systray, indexing)
+-
+ 	
+ Maay-0.3.0 2005-11-25
+ 	* Ergonomic improvements
+
+Modified: trunk/ReleaseNotes.txt
+===================================================================
+--- trunk/ReleaseNotes.txt	2005-12-01 13:52:54 UTC (rev 688)
++++ trunk/ReleaseNotes.txt	2005-12-01 14:01:04 UTC (rev 689)
+@@ -1,9 +1,9 @@
+-Release Notes for version 0.3.1
++Release Notes for version 0.3.2
+ 
+ See README.txt for installation and quick start instructions. 
+ 
+-This release is beta-level software, which contains several bug fixes
+-over 0.3.0.
++This release is beta-level software, which contains one important fix
++over 0.3.1
+ 
+ If you encounter any problem with the web interface (like 
+ never ending requests, pages not updated), please notify us and
+@@ -12,6 +12,4 @@
+ 
+ The windows installer will install and set up all the required
+ dependencies (including mysql and twisted). It uses Inno Setup and
+-Py2exe.
+-
+-
++Py2exe.
+\ No newline at end of file
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-12-01 13:52:54 UTC (rev 688)
++++ trunk/maay.iss	2005-12-01 14:01:04 UTC (rev 689)
+@@ -6,7 +6,7 @@
+ 
+ [Setup]
+ AppName=Maay
+-AppVerName=Maay-0.3.1
++AppVerName=Maay-0.3.2
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+ UninstallDisplayIcon={app}\maay_node.exe
+
+
+
+From aurelienc at berlios.de  Thu Dec  1 15:07:37 2005
+From: aurelienc at berlios.de (aurelienc at BerliOS)
+Date: Thu, 1 Dec 2005 15:07:37 +0100
+Subject: [Maay-svncheckins] r690 - in trunk: . maay
+Message-ID: <200512011407.jB1E7blg019991@sheep.berlios.de>
+
+Author: aurelienc
+Date: 2005-12-01 15:07:36 +0100 (Thu, 01 Dec 2005)
+New Revision: 690
+
+Modified:
+   trunk/maay/__init__.py
+   trunk/setup.py
+Log:
+Version number++
+
+
+Modified: trunk/maay/__init__.py
+===================================================================
+--- trunk/maay/__init__.py	2005-12-01 14:01:04 UTC (rev 689)
++++ trunk/maay/__init__.py	2005-12-01 14:07:36 UTC (rev 690)
+@@ -22,5 +22,5 @@
+ """MAAY project
+ """
+ 
+-VERSION = '0.3.1'
++VERSION = '0.3.2'
+ __revision__ = '$Id$'
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-12-01 14:01:04 UTC (rev 689)
++++ trunk/setup.py	2005-12-01 14:07:36 UTC (rev 690)
+@@ -23,7 +23,7 @@
+ import sys
+ from glob import glob
+ 
+-version = '0.3.0' # This should be imported from the maay package
++version = '0.3.2' # This should be imported from the maay package
+ author = "France Telecom R&D"
+ author_email = "maay-dev at lists.berlios.de"
+ copyright = "Copyright (c)2004-2005 France Telecom R&D"
+
+
+
+From aurelienc at berlios.de  Thu Dec  1 15:14:39 2005
+From: aurelienc at berlios.de (aurelienc at BerliOS)
+Date: Thu, 1 Dec 2005 15:14:39 +0100
+Subject: [Maay-svncheckins] r691 - tags
+Message-ID: <200512011414.jB1EEdRM023321@sheep.berlios.de>
+
+Author: aurelienc
+Date: 2005-12-01 15:14:38 +0100 (Thu, 01 Dec 2005)
+New Revision: 691
+
+Added:
+   tags/release-0.3.2/
+Log:
+Important fix over 0.3.1
+
+Copied: tags/release-0.3.2 (from rev 690, trunk)
+
+
+

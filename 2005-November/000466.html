@@ -1,0 +1,284 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r495 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r495%20-%20trunk/maay&In-Reply-To=%3C200511151127.jAFBRgTN024065%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000465.html">
+   <LINK REL="Next"  HREF="000467.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r495 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r495%20-%20trunk/maay&In-Reply-To=%3C200511151127.jAFBRgTN024065%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r495 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 12:27:42 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000465.html">[Maay-svncheckins] r494 - trunk/maay/data
+</A></li>
+        <LI>Next message: <A HREF="000467.html">[Maay-svncheckins] r496 - trunk/maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#466">[ date ]</a>
+              <a href="thread.html#466">[ thread ]</a>
+              <a href="subject.html#466">[ subject ]</a>
+              <a href="author.html#466">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-15 12:27:38 +0100 (Tue, 15 Nov 2005)
+New Revision: 495
+
+Modified:
+   trunk/maay/configuration.py
+   trunk/maay/webapplication.py
+Log:
+-new configuration option : download_index_dir, in which distant docs shall be automagically placed
+-place any downloaded distant doc in the above `download_index_dir`
+
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-15 10:25:52 UTC (rev 494)
++++ trunk/maay/configuration.py	2005-11-15 11:27:38 UTC (rev 495)
+@@ -252,8 +252,18 @@
+                 continue
+         raise ValueError('Unable to find a writable directory to store the node id')
+ 
+-################ Indexer stuff 
++################ Indexer stuff
+ 
++    
++def _download_index_dir():
++    if sys.platform == 'win32':
++        theDir = &quot;C:\Documents and Settings\All Users\Documents\MaayDownloads&quot;
++    else:
++        theDir = osp.expanduser('~/maay-downloads/')
++    if not osp.exists(theDir):
++        os.makedirs(theDir)
++    return theDir
++
+ class IndexerConfiguration(Configuration):
+     options = Configuration.options + [
+         ('host',
+@@ -301,14 +311,19 @@
+           'help': 'index this directory with the public indexer',
+           'default' : []
+           }),
+-         
+         ('public-skip-dir',
+          {'type': 'csv',
+           'metavar': '&lt;csv&gt;', 'short': 'S',
+           'help': 'the public indexer will skip this directory',
+           'default' : []
+           }),
+-
++        ('download-index-dir',
++         {'type': 'string',
++          'metavar': '&lt;downloads&gt;',
++          'help': 'downloaded files will go there and be immediately indexed',
++          'default' : _download_index_dir()
++          }),
++        
+         ('verbose',
+          {'type': 'yn',
+           'metavar': '&lt;y or n&gt;', 'short': 'v',
+@@ -320,7 +335,7 @@
+           'help' : 'purge the set of indexed documents and returns immediately',
+           'metavar' : '&lt;y or n&gt;',
+           'default' : False,
+-          }),
++          })
+         ]
+ 
+     config_file = 'indexer.ini'
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-15 10:25:52 UTC (rev 494)
++++ trunk/maay/webapplication.py	2005-11-15 11:27:38 UTC (rev 495)
+@@ -106,46 +106,49 @@
+             context.fillSlots(attrname, getattr(peerNode, attrname, 'N/A'))
+         return context.tag
+ 
+-class DownloadedDocs:
+-    &quot;&quot;&quot;manage automatic removal of locally downloaded
+-       documents in a clunky way
+-       note : tmpdirs should contain exactly one file
+-              and last no longer than the file
+-    &quot;&quot;&quot;
++## class DownloadedDocs:
++##     &quot;&quot;&quot;manage automatic removal of locally downloaded
++##        documents in a clunky way
++##        note : tmpdirs should contain exactly one file
++##               and last no longer than the file
++##     &quot;&quot;&quot;
+     
+-    DIRS = {}
++##     DIRS = {}
+ 
+-    def makeTmpDir():
+-        tempdir = mkdtemp()
+-        DownloadedDocs.DIRS[tempdir] = []
+-        print &quot;DownaloadedDocs makeTmpDir : created %s&quot; % tempdir
+-        return tempdir
+-    makeTmpDir = staticmethod(makeTmpDir)
++##     def makeTmpDir():
++##         tempdir = mkdtemp()
++##         DownloadedDocs.DIRS[tempdir] = []
++##         print &quot;DownaloadedDocs makeTmpDir : created %s&quot; % tempdir
++##         return tempdir
++##     makeTmpDir = staticmethod(makeTmpDir)
+ 
+-    def addFile(tempdir, thefile):
+-        DownloadedDocs.DIRS[tempdir].append(thefile)
+-        print &quot;DownaloadedDocs makeTmpDir : added %s to %s&quot; \
+-              % (osp.basename(thefile), tempdir)
+-        reactor.callLater(30, DownloadedDocs.cleanup)
+-    addFile = staticmethod(addFile)
++##     def addFile(tempdir, thefile):
++##         DownloadedDocs.DIRS[tempdir].append(thefile)
++##         print &quot;DownaloadedDocs makeTmpDir : added %s to %s&quot; \
++##               % (osp.basename(thefile), tempdir)
++##         reactor.callLater(30, DownloadedDocs.cleanup)
++##     addFile = staticmethod(addFile)
+ 
+-    def cleanup():
+-        for tmpdir in DownloadedDocs.DIRS:
+-            files = DownloadedDocs.DIRS[tmpdir]
+-            for fil in files:
+-                try:
+-                    os.unlink(fil)
+-                    print &quot;DownloadedDocs cleanup : removing %s&quot; % fil
+-                except:
+-                    import traceback
+-                    traceback.print_exc()
+-            try:
+-                os.rmdir(tmpdir)
+-                print &quot;DownloadedDocs cleanup : removing %s&quot; % tmpdir
+-            except:
+-                import traceback
+-                traceback.print_exc()
+-    cleanup = staticmethod(cleanup)
++##     def cleanup():
++##         for tmpdir in DownloadedDocs.DIRS:
++##             files = DownloadedDocs.DIRS[tmpdir]
++##             for fil in files:
++##                 try:
++##                     os.unlink(fil)
++##                     print &quot;DownloadedDocs cleanup : removing %s&quot; % fil
++##                 except:
++##                     import traceback
++##                     traceback.print_exc()
++##             try:
++##                 os.rmdir(tmpdir)
++##                 print &quot;DownloadedDocs cleanup : removing %s&quot; % tmpdir
++##             except:
++##                 import traceback
++##                 traceback.print_exc()
++##     cleanup = staticmethod(cleanup)
++
++_idxcfg = IndexerConfiguration()
++_idxcfg.load()
+                     
+ class SearchForm(MaayPage):
+     &quot;&quot;&quot;default search form&quot;&quot;&quot;
+@@ -156,6 +159,7 @@
+         MaayPage.__init__(self, maayId)
+         self.querier = querier
+         self.p2pquerier = p2pquerier
++        self.download_dir = _idxcfg.download_index_dir
+         
+     def logout(self):
+         print &quot;Bye %s !&quot; % (self.maayId,)
+@@ -186,15 +190,15 @@
+     
+     # XXX make sure that the requested document is really in the database
+     # XXX don't forget to update the download statistics of the document
+-    def child_download(self, context):
+-        print &quot;I HOPE WE NEVER GET THERE&quot;
+-        docid = context.arg('docid')
+-        query = Query.fromRawQuery(unicode(context.arg('words'), 'utf-8'))
+-        docurl = self.querier.notifyDownload(docid, query.words)
+-        if docurl:
+-            return static.File(docurl)
+-        else:
+-            return Maay404()
++##     def child_download(self, context):
++##         print &quot;I HOPE WE NEVER GET THERE&quot;
++##         docid = context.arg('docid')
++##         query = Query.fromRawQuery(unicode(context.arg('words'), 'utf-8'))
++##         docurl = self.querier.notifyDownload(docid, query.words)
++##         if docurl:
++##             return static.File(docurl)
++##         else:
++##             return Maay404()
+ 
+     def child_distantfile(self, context):
+         host = context.arg('host')
+@@ -214,27 +218,21 @@
+     def gotDataBack(self, rpcFriendlyData, filename):
+         fileData = rpcFriendlyData.data
+         print &quot; ... downloaded !&quot;
+-        tmpdir = DownloadedDocs.makeTmpDir()
+-        filepath = osp.join(tmpdir, filename)
++        filepath = osp.join(self.download_dir, filename)
+         f=file(filepath,'wb')
+         f.write(fileData)
+         f.close()
+-        return DistantFilePage(tmpdir, filepath)
++        return DistantFilePage(filepath)
+ 
+     def onDownloadFileError(self, error, filename):
+         msg = &quot;Error while downloading file: %s&quot; % (filename,)
+         return Maay404(msg)
+     
+ class DistantFilePage(static.File):
+-    def __init__(self, tmpdir, filepath):
++    def __init__(self, filepath):
+         static.File.__init__(self, filepath)
+-        self.tmpdir = tmpdir
+         self.filepath = filepath
+         
+-    def __del__(self):
+-        DownloadedDocs.addFile(self.tmpdir, self.filepath)
+-    
+-
+ class IndexationPage(MaayPage):
+     # just for the demo. Should be moved to a adminpanel interface later.
+     &quot;&quot;&quot;index page&quot;&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000465.html">[Maay-svncheckins] r494 - trunk/maay/data
+</A></li>
+	<LI>Next message: <A HREF="000467.html">[Maay-svncheckins] r496 - trunk/maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#466">[ date ]</a>
+              <a href="thread.html#466">[ thread ]</a>
+              <a href="subject.html#466">[ subject ]</a>
+              <a href="author.html#466">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

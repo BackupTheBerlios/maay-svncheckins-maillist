@@ -1,0 +1,319 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r133 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r133%20-%20trunk/maay&In-Reply-To=%3C200510051053.j95ArQne031940%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000105.html">
+   <LINK REL="Next"  HREF="000107.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r133 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r133%20-%20trunk/maay&In-Reply-To=%3C200510051053.j95ArQne031940%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r133 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Oct  5 12:53:26 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000105.html">[Maay-svncheckins] r132 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000107.html">[Maay-svncheckins] r134 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#106">[ date ]</a>
+              <a href="thread.html#106">[ thread ]</a>
+              <a href="subject.html#106">[ subject ]</a>
+              <a href="author.html#106">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-05 12:53:24 +0200 (Wed, 05 Oct 2005)
+New Revision: 133
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+   trunk/maay/server.py
+   trunk/maay/texttool.py
+Log:
+- add optional restrictions for search queries
+  (e.g. : &quot;python filetype:pdf&quot; only looks for PDFs files)
+- insert mimetypes at indexation time
+
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-10-05 10:50:43 UTC (rev 132)
++++ trunk/maay/dbentity.py	2005-10-05 10:53:24 UTC (rev 133)
+@@ -193,18 +193,26 @@
+     abstract = property(get_abstract)
+ 
+ 
+-    def _selectContainingQuery(cls, words):
++    def _selectContainingQuery(cls, words, mimetype=None, offset=0):
+         words = [normalizeText(unicode(w))
+                  for w in words
+                  if WORD_MIN_LEN &lt;= len(w) &lt;= WORD_MAX_LEN]
+         if not words:
+             return ''
+-
++        # XXX mimetype handling is a HACK. It needs to be integrated
++        #     nicely in order to handle any kind of restrictions easily
++        if mimetype is not None:
++            restriction = &quot; AND D.mime_type=%s &quot;
++            restrictionParams = [mimetype]
++        else:
++            restriction = &quot;&quot;
++            restrictionParams = []
+         # Question: what is the HAVING clause supposed to do ?
+         # Answer: we select all documents containing one of the words
+         # that we are looking for, group them by their identifier, and
+         # only keep those identifier which appeared once for each word
+         # we were looking for.
++        # XXX: LIMIT clause should be optional
+         query = (&quot;SELECT D.db_document_id, &quot;
+                         &quot;D.document_id, &quot;
+                         &quot;D.title, &quot;
+@@ -215,18 +223,21 @@
+                         &quot;D.publication_time &quot;
+                  &quot;FROM documents D, document_scores DS &quot;
+                  &quot;WHERE DS.db_document_id=D.db_document_id &quot;
+-                     &quot;AND DS.word IN (%s) &quot;
+-                   &quot;GROUP BY DS.db_document_id &quot;
+-                   &quot;HAVING count(DS.db_document_id) = %%s&quot; % \
+-                   (', '.join(['%s'] * len(words))))
++                 &quot;AND DS.word IN (%s) &quot;
++                 &quot; %s &quot;
++                 &quot;GROUP BY DS.db_document_id &quot;
++                 &quot;HAVING count(DS.db_document_id) = %%s &quot;
++                 &quot;LIMIT 15 OFFSET %s&quot; % \
++                 (', '.join(['%s'] * len(words)), restriction, offset))
+ 
+-        return query, words + [len(words)]
++        return query, words + restrictionParams + [len(words)]
+ 
+     _selectContainingQuery = classmethod(_selectContainingQuery)
+ 
+-    def selectContaining(cls, cursor, words):
+-        query, params= cls._selectContainingQuery(words)
++    def selectContaining(cls, cursor, words, mimetype=None, offset=0):
++        query, params= cls._selectContainingQuery(words, mimetype, offset=offset)
+         if query:
++            print &quot;QUERY =&quot;, query, &quot;params =&quot;, params
+             cursor.execute(query, params)
+             results = cursor.fetchall()
+             return [cls(**dict(zip(['db_document_id', 'document_id', 'title', 'size', 'text', 'url', 'mime_type', 'publication_time'],
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-05 10:50:43 UTC (rev 132)
++++ trunk/maay/querier.py	2005-10-05 10:53:24 UTC (rev 133)
+@@ -117,11 +117,11 @@
+     
+     def findDocuments(self, query):
+         &quot;&quot;&quot;Find all indexed documents matching the query&quot;&quot;&quot;
+-        words = WORDS_RGX.findall(normalizeText(query))
++        words = WORDS_RGX.findall(normalizeText(query.words))
+         self._updateQueryStatistics(words)
+         try:
+             cursor = self._cnx.cursor()
+-            return Document.selectContaining(cursor, words)
++            return Document.selectContaining(cursor, words, query.filetype)
+         finally:
+             cursor.close()
+ 
+@@ -195,6 +195,7 @@
+                                            fileSize,
+                                            lastModifiedOn,
+                                            filename,
++                                           mime_type,
+                                            state)
+                 fileinfo.db_document_id = doc.db_document_id
+             else:
+@@ -220,6 +221,7 @@
+                                            fileSize,
+                                            lastModifiedOn,
+                                            filename,
++                                           mime_type,
+                                            state)
+                 doc = Document.selectWhere(cursor, document_id=content_hash)[0]
+ 
+@@ -243,7 +245,7 @@
+         self._cnx.commit()        
+         
+     def _createDocument(self, cursor, content_hash, title, text, fileSize,
+-                        lastModifiedOn, filename, state):
++                        lastModifiedOn, filename, mime_type, state):
+         doc = Document(document_id=content_hash,
+                        title=title,
+                        text=text,
+@@ -251,6 +253,7 @@
+                        publication_time=lastModifiedOn,
+                        download_count=0.,
+                        url=filename,
++                       mime_type=mime_type,
+                        matching=0.,
+                        indexed='1',
+                        state=state)
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-05 10:50:43 UTC (rev 132)
++++ trunk/maay/server.py	2005-10-05 10:53:24 UTC (rev 133)
+@@ -38,7 +38,7 @@
+ from maay.querier import MaayQuerier, IQuerier, MaayAuthenticationError
+ from maay.rpc import MaayRPCServer
+ from maay.configuration import get_path_of, Configuration
+-from maay.texttool import makeAbstract
++from maay.texttool import makeAbstract, WORDS_RGX, normalizeText
+ 
+ class MaayPage(rend.Page):
+     child_maaycss = static.File(get_path_of('maay.css'))
+@@ -73,7 +73,42 @@
+             ]
+         )
+     
++def normalizeMimetype(fileExtension):
++    import mimetypes
++    return mimetypes.types_map.get('.%s' % fileExtension)
+ 
++class Query(object):
++    restrictions = ('filetype', 'filename')
++
++    def __init__(self, words, offset=0, filetype=None, filename=None):
++        self.words = words # unicode string 
++        self.offset = offset
++        self.filetype = normalizeMimetype(filetype)
++        self.filename = filename
++
++    def fromRawQuery(rawQuery, offset=0):
++        rawWords = rawQuery.split()
++        words = []
++        restrictions = {}
++        for word in rawWords:
++            try:
++                restType, restValue = [s.strip() for s in word.split(':')]
++            except ValueError:
++                words.append(word)
++            else:
++                if restType in Query.restrictions:
++                    # Python does not support unicode keywords !
++                    # (note: restType is pure ASCII, so no pb with str())
++                    restrictions[str(restType)] = restValue
++                else:
++                    words.append(word)
++        return Query(u' '.join(words), offset, **restrictions)
++    fromRawQuery = staticmethod(fromRawQuery)
++
++    def __repr__(self):
++        return 'Query Object (%s, %s, %s)' % (self.words, self.filetype,
++                                              self.filename)
++
+ class SearchForm(MaayPage):
+     &quot;&quot;&quot;default search form&quot;&quot;&quot;
+     docFactory = loaders.xmlfile(get_path_of('searchform.html'))
+@@ -90,7 +125,9 @@
+         return None
+ 
+     def child_search(self, context):
+-        query = unicode(context.arg('words'))
++        # query = unicode(context.arg('words'))
++        offset = int(context.arg('offset', 0))
++        query = Query.fromRawQuery(unicode(context.arg('words')), offset)
+         results = self.querier.findDocuments(query)
+         return ResultsPage(results, query)
+ 
+@@ -98,10 +135,11 @@
+     # XXX don't forget to update the download statistics of the document
+     def child_download(self, context):
+         docid = context.arg('docid')
+-        query = unicode(context.arg('words'))
+-        docurl = self.querier.notifyDownload(docid, query)
++        # query = unicode(context.arg('words'))
++        query = Query.fromRawQuery(unicode(context.arg('words')))
++        docurl = self.querier.notifyDownload(docid, query.words)
+         if docurl:
+-            return  static.File(docurl)
++            return static.File(docurl)
+         else:
+             return PageNotFound()
+ 
+@@ -113,14 +151,27 @@
+     def __init__(self, results, query):
+         MaayPage.__init__(self)
+         self.results = results
+-        self.query = unicode(query)
++        self.query = query.words # unicode(query)
+ 
+-    def data_results(self, context, data):        
++    def data_results(self, context, data):
+         return self.results
+ 
+     def render_title(self, context, data):
+         context.fillSlots('words', self.query)
+         return context.tag
++
++    def render_prevset_url(self, context, data):
++        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'))))
++        offset = int(context.arg('offset', 0))
++        if offset:
++            offset -= 15
++        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
++
++    def render_nextset_url(self, context, data):
++        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'))))
++        offset = int(context.arg('offset', 0)) + 15
++        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
++
+     
+     def render_row(self, context, data):
+         document = data
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-05 10:50:43 UTC (rev 132)
++++ trunk/maay/texttool.py	2005-10-05 10:53:24 UTC (rev 133)
+@@ -219,7 +219,7 @@
+ 
+     :param text: **unicode** string to normalize
+     &quot;&quot;&quot;
+-    assert type(text) is unicode
++    assert type(text) is unicode, &quot;got %s instead of unicode !&quot; % type(text)
+     text = text.lower().translate(table)
+     return ' '.join(text.split())
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000105.html">[Maay-svncheckins] r132 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000107.html">[Maay-svncheckins] r134 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#106">[ date ]</a>
+              <a href="thread.html#106">[ thread ]</a>
+              <a href="subject.html#106">[ subject ]</a>
+              <a href="author.html#106">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

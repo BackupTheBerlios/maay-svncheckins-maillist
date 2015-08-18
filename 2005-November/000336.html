@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r360 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r360%20-%20trunk/maay&In-Reply-To=%3C200511090952.jA99qBoS022726%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000335.html">
+   <LINK REL="Next"  HREF="000337.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r360 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r360%20-%20trunk/maay&In-Reply-To=%3C200511090952.jA99qBoS022726%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r360 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 10:52:11 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000335.html">[Maay-svncheckins] r359 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000337.html">[Maay-svncheckins] r361 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#336">[ date ]</a>
+              <a href="thread.html#336">[ thread ]</a>
+              <a href="subject.html#336">[ subject ]</a>
+              <a href="author.html#336">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 10:52:10 +0100 (Wed, 09 Nov 2005)
+New Revision: 360
+
+Modified:
+   trunk/maay/indexer.py
+   trunk/maay/texttool.py
+Log:
+used filesystem encoding to handle file names
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-09 09:51:22 UTC (rev 359)
++++ trunk/maay/indexer.py	2005-11-09 09:52:10 UTC (rev 360)
+@@ -68,6 +68,7 @@
+         password = self.indexerConfig.password
+         host = self.indexerConfig.host
+         port = self.indexerConfig.port
++        self.filesystemEncoding = sys.getfilesystemencoding()
+         print &quot;Indexer connecting to server %s:%s&quot; % (host, port)
+         self.serverProxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port),
+                                        allow_none=True,
+@@ -102,7 +103,9 @@
+         for filename in fileset:
+             if self.verbose:
+                 print &quot;Requesting unindexation of %s&quot; % filename
+-            self.serverProxy.removeFileInfo(self.cnxId, filename)
++            self.serverProxy.removeFileInfo(self.cnxId,
++                                            unicode(filename,
++                                                    self.filesystemEncoding))
+         if self.verbose:
+             print &quot;Requesting cleanup of unreferenced documents&quot;
+         self.serverProxy.removeUnreferencedDocuments(self.cnxId)
+@@ -128,6 +131,7 @@
+             state = Document.PUBLISHED_STATE
+             
+         for filename in self.getFileIterator(isPrivate):
++            print filename
+             existingFiles.add(filename)
+             if not self.isIndexable(filename):
+                 continue
+@@ -148,7 +152,9 @@
+                 docId = makeDocumentId(filename)
+                 mime_type = mimetypes.guess_type(filename)[0]
+ 
+-                self.indexDocument(FutureDocument(filename=filename, title=title, text=text,
++                self.indexDocument(FutureDocument(filename=unicode(filename,
++                                                                   self.filesystemEncoding),
++                                                  title=title, text=text,
+                                                   fileSize=fileSize,
+                                                   lastModificationTime=lastModificationTime,
+                                                   content_hash=docId, mime_type=mime_type,
+@@ -156,6 +162,7 @@
+         return existingFiles
+         
+     def getLastIndexationTimeAndState(self, filename):
++        filename = unicode(filename, self.filesystemEncoding)
+         answer = self.serverProxy.lastIndexationTimeAndState(self.cnxId, filename)
+         if answer is None:
+             raise MaayAuthenticationError(&quot;Bad cnxId sent to the server&quot;)
+@@ -204,10 +211,10 @@
+             # test path not in self.skipped (dummy config files)
+             if path not in self.skipped:
+                 for dirpath, dirnames, filenames in os.walk(path):
+-##                     print &quot;looking in&quot;, dirpath
++                    print &quot;looking in&quot;, dirpath
+                     self._removeSkippedDirnames(dirpath, dirnames)
+                     for filename in filenames:
+-                        if os.access(os.path.join(dirpath, filename), os.R_OK): # Can we open it ?
++                        if os.access(os.path.join(dirpath, filename), os.R_OK): 
+                             yield os.path.join(dirpath, filename)
+                     
+     def _removeSkippedDirnames(self, dirpath, dirnames):
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-11-09 09:51:22 UTC (rev 359)
++++ trunk/maay/texttool.py	2005-11-09 09:52:10 UTC (rev 360)
+@@ -23,6 +23,7 @@
+ from HTMLParser import HTMLParser, HTMLParseError
+ import codecs
+ import re
++import sys
+ import mimetypes
+ import gzip
+ import bz2
+@@ -143,7 +144,7 @@
+         try:
+             title, result, links, offset = self.parseString(stream.read())
+             if not title:
+-                title = unicode(pristineFilename) 
++                title = unicode(pristineFilename, sys.getfilesystemencoding()) 
+             return title, result, links, offset 
+         finally:
+             stream.close()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000335.html">[Maay-svncheckins] r359 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000337.html">[Maay-svncheckins] r361 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#336">[ date ]</a>
+              <a href="thread.html#336">[ thread ]</a>
+              <a href="subject.html#336">[ subject ]</a>
+              <a href="author.html#336">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

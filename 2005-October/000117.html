@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r144 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r144%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510060747.j967l65h002426%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000116.html">
+   <LINK REL="Next"  HREF="000118.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r144 - in trunk/maay: . test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r144%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510060747.j967l65h002426%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r144 - in trunk/maay: . test">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Oct  6 09:47:06 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000116.html">[Maay-svncheckins] r143 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000118.html">[Maay-svncheckins] r145 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#117">[ date ]</a>
+              <a href="thread.html#117">[ thread ]</a>
+              <a href="subject.html#117">[ subject ]</a>
+              <a href="author.html#117">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-06 09:47:06 +0200 (Thu, 06 Oct 2005)
+New Revision: 144
+
+Modified:
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+Parsers no longer return normalized text
+Fixed translation table of normalizeText()
+
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-10-06 07:44:39 UTC (rev 143)
++++ trunk/maay/test/test_texttool.py	2005-10-06 07:47:06 UTC (rev 144)
+@@ -4,9 +4,9 @@
+ import unittest
+ from os.path import join, dirname
+ 
+-from maay.texttool import MaayHTMLParser, guessEncoding, open, untagText
++from maay.texttool import MaayHTMLParser, guessEncoding, open, untagText, normalizeText
+ 
+-ROW_TEXT = u&quot;foo &#233;t&#233; bar baz top bim bam boum&quot;
++RAW_TEXT = u&quot;foo &#233;t&#233; bar baz top bim bam boum&quot;
+ 
+ SIMPLE_HTML = u&quot;&quot;&quot;&lt;html&gt;
+ &lt;head&gt;&lt;title&gt;maille Maay&lt;/title&gt;&lt;/head&gt;
+@@ -19,22 +19,26 @@
+ 
+ DATADIR = join(dirname(__file__), 'data')
+ 
++    
++
+ class HTMLParserTC(unittest.TestCase):
+ 
+     def setUp(self):
+         self.parser = MaayHTMLParser()
+ 
+     def testParseRaw(self):
+-        html = '&lt;body&gt;%s&lt;/body&gt;' % ROW_TEXT
++        html = '&lt;body&gt;%s&lt;/body&gt;' % RAW_TEXT
+         title, text, links, offset = self.parser.parseString(html)
+-        self.assertEquals(title, '')
+-        self.assertEquals(text, ROW_TEXT.replace(u'&#233;', 'e'))
++        self.assertEquals(title, RAW_TEXT)
++        self.assertEquals(normalizeText(text),
++                          RAW_TEXT.replace(u'&#233;', 'e'))
+         self.assertEquals(links, [])
+ 
+     def testParseSimpleHtml(self):
+         title, text, links, offset = self.parser.parseString(SIMPLE_HTML)
+         self.assertEquals(title, 'maille Maay')
+-        self.assertEquals(text, 'hello ete world this is a link and this is another link')
++        self.assertEquals(normalizeText(text),
++                          'hello ete world this is a link and this is another link')
+         self.assertEquals(links, ['something.com', 'somethingelse.com'])
+     
+ 
+@@ -42,14 +46,16 @@
+         filename = join(DATADIR, 'encoded.html')
+         title, text, links, offset = self.parser.parseFile(filename, 'iso-8859-1')
+         self.assertEquals(title, 'maille Maay')
+-        self.assertEquals(text, 'hello ete world this is a link and this is another link')
++        self.assertEquals(normalizeText(text),
++                          'hello ete world this is a link and this is another link')
+         self.assertEquals(links, ['something.com', 'somethingelse.com'])
+         
+     def testParseHtmlFileAndGuessEncoding(self):
+         filename = join(DATADIR, 'encoded.html')
+         title, text, links, offset = self.parser.parseFile(filename)
+         self.assertEquals(title, 'maille Maay')
+-        self.assertEquals(text, 'hello ete world this is a link and this is another link')
++        self.assertEquals(normalizeText(text),
++                          'hello ete world this is a link and this is another link')
+         self.assertEquals(links, ['something.com', 'somethingelse.com'])
+         
+     def test_normalizeHTMLEncoding(self):
+@@ -60,6 +66,7 @@
+             ]
+ 
+     def test_parseDifficultFile(self):
++        &quot;&quot;&quot;test_parseDifficultFile: This test fails for now&quot;&quot;&quot;
+         # This file has got some weird, non HTML compliant content
+         # and is not handled properly by HTMLParser 
+         stream = file(join(DATADIR, 'node22.html'))
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-06 07:44:39 UTC (rev 143)
++++ trunk/maay/texttool.py	2005-10-06 07:47:06 UTC (rev 144)
+@@ -12,9 +12,7 @@
+ 
+ WORD_MIN_LEN = 2
+ WORD_MAX_LEN = 50
+-MAX_STORED_SIZE = 65535 # not actually used in the code for now,
+-                        # because the db engine does the truncation
+-                        # for us
++MAX_STORED_SIZE = 65535
+ 
+ WORDS_RGX = re.compile(r'\w{%s,%s}' % (WORD_MIN_LEN, WORD_MAX_LEN)) 
+ 
+@@ -123,8 +121,9 @@
+ class TextParser(AbstractParser):
+ 
+     def parseString(self, source):
+-        result = normalizeText(source)
+-        title = result[:60]
++        result = source
++        first_line = min(80, result.find('\n'))
++        title = result[:first_line]
+         return title, result, [], 0
+         
+ 
+@@ -151,6 +150,7 @@
+     def handle_endtag(self, tag):
+         if tag == 'title':
+             self.parsingTitle = False
++        self.textbuf.append(u' ') # handle cases such as &lt;b&gt;titi&lt;/b&gt;&lt;i&gt;tutu&lt;/i&gt;
+ 
+     def handle_data(self, data):
+         if self.parsingTitle:
+@@ -163,15 +163,21 @@
+             self.feed(source)
+         except HTMLParseError, exc:
+             print &quot;Error parsing document: %s&quot; % exc
+-        result = normalizeText(u''.join(self.textbuf))
++        result = u'\n'.join(self.textbuf)
++        if not self.title:
++            first_line = min(80, result.find('\n'))
++            self.title = result[:first_line]
+         return self.title, result, self.links, 0
+ 
+ 
+         
+-from string import maketrans
+-_table = maketrans(
+-    ''.join([chr(i) for i in xrange(32)]) + 
+-    '\xc0\xc1\xc2\xc3\xc4\xc5'
++_table = {}
++for i in xrange(32):
++    _table[i] = ord(' ')
++
++
++
++for s, d in zip(    list('\xc0\xc1\xc2\xc3\xc4\xc5'
+     '\xc7'
+     '\xc8\xc9\xca\xcb'
+     '\xcc\xcd\xce\xcf'
+@@ -188,10 +194,9 @@
+     '\xf1'
+     '\xf2\xf3\xf4\xf5\xf6\xf8'
+     '\xf9\xfa\xfb\xfc'
+-    '\xff'
++    '\xff')
+     ,
+-    ' ' * 32 +
+-    'aaaaaa'
++    list('aaaaaa'
+     'c'
+     'eeee'
+     'iiii'
+@@ -209,9 +214,8 @@
+     'oooooo'
+     'uuuu'
+     'y'
+-    )
+-_table = [ord(c) for c in _table]
+-del maketrans
++    )):
++    _table[ord(s)] = ord(d)
+ 
+ def normalizeText(text, table=_table):
+     &quot;&quot;&quot;turns everything to lowercase, and converts accentuated
+@@ -220,7 +224,7 @@
+     :param text: **unicode** string to normalize
+     &quot;&quot;&quot;
+     assert type(text) is unicode, &quot;got %s instead of unicode !&quot; % type(text)
+-    text = text.lower().translate(table)
++    text = text.translate(table).lower()
+     return ' '.join(text.split())
+ 
+ del _table
+@@ -255,5 +259,5 @@
+             break
+     else:
+         # case where we have less than 200 characters to display
+-        print &quot;should do something sensible here&quot;
+-    return ' &lt;b&gt;[...]&lt;/b&gt; '.join(buf)
++        return text[:200]
++    return u' &lt;b&gt;[...]&lt;/b&gt; '.join(buf)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000116.html">[Maay-svncheckins] r143 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000118.html">[Maay-svncheckins] r145 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#117">[ date ]</a>
+              <a href="thread.html#117">[ thread ]</a>
+              <a href="subject.html#117">[ subject ]</a>
+              <a href="author.html#117">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

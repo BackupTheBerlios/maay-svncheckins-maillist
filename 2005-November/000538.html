@@ -1,0 +1,239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r566 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r566%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511181427.jAIERJ0B018025%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000537.html">
+   <LINK REL="Next"  HREF="000539.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r566 - in trunk/maay: . test</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r566%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511181427.jAIERJ0B018025%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r566 - in trunk/maay: . test">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 15:27:19 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000537.html">[Maay-svncheckins] r565 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000539.html">[Maay-svncheckins] r567 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#538">[ date ]</a>
+              <a href="thread.html#538">[ thread ]</a>
+              <a href="subject.html#538">[ subject ]</a>
+              <a href="author.html#538">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-18 15:27:18 +0100 (Fri, 18 Nov 2005)
+New Revision: 566
+
+Modified:
+   trunk/maay/indexer.py
+   trunk/maay/test/test_fileiteration.py
+Log:
+- fixed windows specific bug for paths management
+- updated tests to make them pass on Windows
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-18 14:00:25 UTC (rev 565)
++++ trunk/maay/indexer.py	2005-11-18 14:27:18 UTC (rev 566)
+@@ -272,6 +272,7 @@
+         self.indexed = [os.path.abspath(os.path.expanduser(p)) for p in indexed]
+         self.skipped = [os.path.abspath(os.path.expanduser(p)) for p in skipped]
+         self.skipped = [normalizeCase(p) for p in self.skipped]
++        self.indexed = [normalizeCase(p) for p in self.indexed]
+         
+     def __iter__(self):
+         for path in self.indexed:
+
+Modified: trunk/maay/test/test_fileiteration.py
+===================================================================
+--- trunk/maay/test/test_fileiteration.py	2005-11-18 14:00:25 UTC (rev 565)
++++ trunk/maay/test/test_fileiteration.py	2005-11-18 14:27:18 UTC (rev 566)
+@@ -21,11 +21,14 @@
+ __revision__ = '$Id$'
+ 
+ import unittest
++import sys
+ import os
++import stat
+ from os.path import join, abspath, dirname, exists
+-from sets import Set
++from logilab.common.compat import set
++from logilab.common.testlib import TestCase
+ 
+-from maay.indexer import FileIterator
++from maay.indexer import FileIterator, normalizeCase
+ 
+ HERE = dirname(__file__)
+ DATADIR = join(HERE, 'data')
+@@ -36,13 +39,14 @@
+     fp = file(filename, 'w')
+     fp.close()
+ 
+-class FileIterationTC(unittest.TestCase):
++class FileIterationTC(TestCase):
+     def setUp(self):
+         self.pathList = [
+-            ('a/b/c', ['foo', 'bar']),
+-            ('a/c/d', []), ('a/b/e', []),
+-            ('b/c/d', ['baz', 'spam']),
+-            ('b/c/e', ['foobar', 'bazbar']),
++            (join('a', 'b', 'c'), ['foo', 'bar']),
++            (join('a', 'c', 'd'), []),
++            (join('a', 'b', 'e'), []),
++            (join('b', 'c', 'd'), ['baz', 'spam']),
++            (join('b', 'c', 'e'), ['foobar', 'bazbar']),
+             ]
+         for dirpath, filenames in self.pathList:
+             realpath = join(DATADIR, dirpath)
+@@ -67,12 +71,28 @@
+         f.close()
+         
+ 
++    def assertPathEquals(self, path1, path2):
++        &quot;&quot;&quot;compares normalized versions of &lt;path1&gt; and &lt;path2&gt;&quot;&quot;&quot;
++        self.assertEquals(normalizeCase(path1), normalizeCase(path2))
++
++    def assertPathsEqual(self, list1, list2):
++        &quot;&quot;&quot;comapres list of paths&quot;&quot;&quot;
++        for path1, path2 in zip(list1, list2):
++            self.assertPathEquals(path1, path2)
+         
++    def assertSetOfPathsEqual(self, list1, list2):
++        &quot;&quot;&quot;comapres order-free list of paths&quot;&quot;&quot;
++        set1 = set([normalizeCase(path) for path in list1])
++        set2 = set([normalizeCase(path) for path in list2])
++        self.assertSetEqual(set1, set2)
++    
+     def tearDown(self):
+         for dirpath, filenames in self.pathList:
+             realpath = join(DATADIR, dirpath)
+             for filename in filenames:
+-                os.remove(join(realpath, filename))
++                filepath = join(realpath, filename)
++                os.chmod(filepath, stat.S_IWRITE)
++                os.remove(filepath)
+             os.removedirs(realpath)
+         os.remove(join(DATADIR, '\xe2\x99\xaa\xe2\x99\xac'))
+ 
+@@ -87,17 +107,19 @@
+         self.assertEquals(list(it), [])
+         it = FileIterator([join(DATADIR, 'a'), join(DATADIR, 'b'),
+                            join(DATADIR, 'c')])
+-        expected = Set([abspath(join(DATADIR, 'a', 'b', 'c', 'bar')),
+-                        abspath(join(DATADIR, 'a', 'b', 'c', 'foo')),
+-                        abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
+-                        abspath(join(DATADIR, 'b', 'c', 'd', 'spam')),
+-                        abspath(join(DATADIR, 'b', 'c', 'e', 'bazbar')),
+-                        abspath(join(DATADIR, 'b', 'c', 'e', 'foobar')),
+-                        ])
+-        self.assertEquals(Set(it), expected)
++        expected = [abspath(join(DATADIR, 'a', 'b', 'c', 'bar')),
++                    abspath(join(DATADIR, 'a', 'b', 'c', 'foo')),
++                    abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
++                    abspath(join(DATADIR, 'b', 'c', 'd', 'spam')),
++                    abspath(join(DATADIR, 'b', 'c', 'e', 'bazbar')),
++                    abspath(join(DATADIR, 'b', 'c', 'e', 'foobar')),
++                    ]
++        self.assertSetOfPathsEqual(it, expected)
+ 
+     def testEverythingSkipped(self):
+-        everything = ['data/a', 'data/b', 'data/c']
++        everything = [join('data', 'a'),
++                      join('data', 'b'),
++                      join('data', 'c')]
+         it = FileIterator(everything, everything)
+         self.assertEquals(list(it), [])
+ 
+@@ -107,15 +129,17 @@
+                       join(DATADIR, 'c')]
+         skipped = [join(DATADIR, 'a'), join(DATADIR, 'b', 'c', 'e')]
+         it = FileIterator(everything, skipped)
+-        expected = Set([abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
+-                        abspath(join(DATADIR, 'b', 'c', 'd', 'spam')),
+-                        ])
+-        self.assertEquals(expected, Set(it))
++        expected = [abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
++                    abspath(join(DATADIR, 'b', 'c', 'd', 'spam')),
++                    ]
++        self.assertSetOfPathsEqual(it, expected)
+ 
+     def testRelativePathConversion(self):
+         &quot;&quot;&quot;FileIterator should automatically convert relative paths&quot;&quot;&quot;
+-        paths = [(['data/a'], ['data/b']),
+-                 (['/data/a'], ['/data/b', 'data/c'])]
++        paths = [([join('data', 'a')], [join('data', 'b')]),
++                 ([join(os.sep, 'data', 'a')],
++                  [join(os.sep, 'data', 'b'),
++                   join(os.sep, 'data', 'c'),])]
+         for indexed, skipped in paths:
+             onRelatives = list(FileIterator(indexed, skipped))
+             absIndexed = [abspath(path) for path in indexed]
+@@ -125,17 +149,20 @@
+ 
+     def testSkipNonAllowed(self):
+         &quot;&quot;&quot;tests that files that don't have 'read' permission are skipped&quot;&quot;&quot;
+-        # these two files should be skipped
+-        os.chmod(join(DATADIR, 'a/b/c/foo'), 0)
+-        os.chmod(join(DATADIR, 'b/c/d/spam'), 0)
+-        it = FileIterator([join(DATADIR, 'a'), join(DATADIR, 'b'),
+-                           join(DATADIR, 'c')])
+-        expected = Set([abspath(join(DATADIR, 'a', 'b', 'c', 'bar')),
++        if sys.platform == 'win32':
++            print &quot;os.chmod() is very limited on windows platforms, I skip this test&quot;
++        else:
++            # these two files should be skipped
++            os.chmod(join(DATADIR, 'a', 'b', 'c', 'foo'), 0)
++            os.chmod(join(DATADIR, 'b', 'c', 'd', 'spam'), 0)
++            it = FileIterator([join(DATADIR, 'a'), join(DATADIR, 'b'),
++                               join(DATADIR, 'c')])
++            expected = [abspath(join(DATADIR, 'a', 'b', 'c', 'bar')),
+                         abspath(join(DATADIR, 'b', 'c', 'd', 'baz')),
+                         abspath(join(DATADIR, 'b', 'c', 'e', 'bazbar')),
+                         abspath(join(DATADIR, 'b', 'c', 'e', 'foobar')),
+-                        ])
+-        self.assertEquals(Set(it), expected)
++                        ]
++            self.assertSetOfPathsEqual(it, expected)
+ 
+     def testDontChokeOnWeirdFilename(self):
+         &quot;&quot;&quot;we should iter without pain on everything in DATADIR, including
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000537.html">[Maay-svncheckins] r565 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000539.html">[Maay-svncheckins] r567 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#538">[ date ]</a>
+              <a href="thread.html#538">[ thread ]</a>
+              <a href="subject.html#538">[ subject ]</a>
+              <a href="author.html#538">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

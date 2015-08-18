@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r470 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r470%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511141648.jAEGmDOK012018%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000440.html">
+   <LINK REL="Next"  HREF="000442.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r470 - in trunk/maay: . data</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r470%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511141648.jAEGmDOK012018%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r470 - in trunk/maay: . data">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov 14 17:48:13 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000440.html">[Maay-svncheckins] r469 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000442.html">[Maay-svncheckins] r471 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#441">[ date ]</a>
+              <a href="thread.html#441">[ thread ]</a>
+              <a href="subject.html#441">[ subject ]</a>
+              <a href="author.html#441">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-14 17:48:05 +0100 (Mon, 14 Nov 2005)
+New Revision: 470
+
+Modified:
+   trunk/maay/data/liveresults.html
+   trunk/maay/webapplication.py
+Log:
+-add prev/next on otp of the page
+-make download work asynchronously
+
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-14 16:45:39 UTC (rev 469)
++++ trunk/maay/data/liveresults.html	2005-11-14 16:48:05 UTC (rev 470)
+@@ -41,7 +41,9 @@
+   --&gt;
+   &lt;div id=&quot;resultsDiv&quot;&gt;
+    &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; (&lt;nevow:slot name=&quot;count&quot; /&gt;) for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
+-  &lt;span id=&quot;count&quot;&gt;0&lt;/span&gt;
++    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
++    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
++    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+     &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+       &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+         &lt;td&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-14 16:45:39 UTC (rev 469)
++++ trunk/maay/webapplication.py	2005-11-14 16:48:05 UTC (rev 470)
+@@ -20,13 +20,14 @@
+ __revision__ = '$Id: server.py 281 2005-11-03 11:00:56Z aurelienc $'
+ 
+ from datetime import datetime
+-from xmlrpclib import ServerProxy
++#from xmlrpclib import ServerProxy
+ from itertools import cycle
+ from tempfile import mkdtemp
+-import os.path as osp
++import os, os.path as osp
+ 
+ from zope.interface import Interface
+ from twisted.web import static
++from twisted.web.xmlrpc import Proxy
+ from twisted.internet import reactor
+ from nevow import rend, tags, loaders
+ 
+@@ -123,14 +124,14 @@
+                     os.unlink(fil)
+                     print &quot;DownloadedDocs cleanup : removing %s&quot; % fil
+                 except:
+-                    print &quot;DownloadedDocs cleanup : leaving stale file %s behind&quot;\
+-                          % fil
++                    import traceback
++                    traceback.print_exc()
+             try:
+                 os.rmdir(tmpdir)
+-                print &quot;DownloadedDocs cleanup : removing %s&quot; % fil
++                print &quot;DownloadedDocs cleanup : removing %s&quot; % tmpdir
+             except:
+-                print &quot;DownloadedDocs cleanup : leaving stale tmp dir %s behind&quot;\
+-                      % tmpdir
++                import traceback
++                traceback.print_exc()
+     cleanup = staticmethod(cleanup)
+                     
+ class SearchForm(MaayPage):
+@@ -190,12 +191,15 @@
+         docid = context.arg('docid')
+         if not host or not port or not docid:
+             return Maay404()
+-        proxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port))
+-        try:
+-            rpcFriendlyData = proxy.downloadFile(docid, words)
+-            fileData = rpcFriendlyData.data
+-        except:
+-            return # peer might be down
++        print &quot;SearchForm distantfile&quot;
++        proxy = Proxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port))
++        d = proxy.callRemote('downloadFile', docid, words)
++        d.addCallback(self.foo, filename)
++        return d
++
++    def foo(self, rpcFriendlyData, filename):
++        fileData = rpcFriendlyData.data
++        print &quot; ... downloaded !&quot;
+         tmpdir = DownloadedDocs.makeTmpDir()
+         filepath = osp.join(tmpdir, filename)
+         f=file(filepath,'wb')
+@@ -302,14 +306,6 @@
+ 
+     def __init__(self, context, querier, p2pquerier):
+         athena.LivePage.__init__(self)
+-        # XXX: nevow/livepage related trick (version 0.6.0) :
+-        # This resource is instanciated several times when rendering the
+-        # results page (each time the browser tries to load
+-        # ROOT/search/athena.js, ROOT/search/MochiKit.js, etc.) because
+-        # the Livepage-Id is not yet set in the request. In these particuliar
+-        # cases, we don't want to start new queries, so we do an ugly check
+-        # to test whether or not we're instanciating the *real* live page
+-        # (or if we're just trying to download JS files)
+         # NOTE: At the time this comment is written, athena/LivePages are handled
+         #       differently in nevow SVN. It's now possible to insantiate directly
+         #       LivePage instances (which is great !), so we'll have to change
+@@ -342,7 +338,7 @@
+         self.p2pquerier.sendQuery(self.p2pQuery)
+         self.p2pquerier.addAnswerCallback(self.p2pQuery.qid, self.onNewResults)
+         self.querier.pushDocuments(self.queryId, self.results, provider=None)
+-        return 0
++        return u''
+ 
+     def remote_browseResults(self, context, offset):
+         self.query.offset = offset
+@@ -359,6 +355,9 @@
+     docFactory = loaders.xmlstr(&quot;&quot;&quot;
+   &lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; &gt;
+    &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; (&lt;nevow:slot name=&quot;count&quot; /&gt;) for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
++   &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
++    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
++    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+     &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+       &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+         &lt;td&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000440.html">[Maay-svncheckins] r469 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000442.html">[Maay-svncheckins] r471 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#441">[ date ]</a>
+              <a href="thread.html#441">[ thread ]</a>
+              <a href="subject.html#441">[ subject ]</a>
+              <a href="author.html#441">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

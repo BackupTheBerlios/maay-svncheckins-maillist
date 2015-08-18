@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r486 - in trunk: . doc
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r486%20-%20in%20trunk%3A%20.%20doc&In-Reply-To=%3C200511150902.jAF9217P002480%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000456.html">
+   <LINK REL="Next"  HREF="000458.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r486 - in trunk: . doc</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r486%20-%20in%20trunk%3A%20.%20doc&In-Reply-To=%3C200511150902.jAF9217P002480%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r486 - in trunk: . doc">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 10:02:01 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000456.html">[Maay-svncheckins] r485 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000458.html">[Maay-svncheckins] r487 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#457">[ date ]</a>
+              <a href="thread.html#457">[ thread ]</a>
+              <a href="subject.html#457">[ subject ]</a>
+              <a href="author.html#457">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-15 10:01:52 +0100 (Tue, 15 Nov 2005)
+New Revision: 486
+
+Modified:
+   trunk/README.txt
+   trunk/doc/README.html
+Log:
+corrections
+
+Modified: trunk/README.txt
+===================================================================
+--- trunk/README.txt	2005-11-15 08:55:13 UTC (rev 485)
++++ trunk/README.txt	2005-11-15 09:01:52 UTC (rev 486)
+@@ -51,7 +51,8 @@
+  * python-twisted 2.0 or above ((<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>)
+  * python-twisted-web (<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>)
+  * python-nevow 0.6 or above (<A HREF="http://nevow.com/">http://nevow.com/</A>) 
+- * python-imaging (www.pythonware.com/products/pil/)
++ * python-imaging (<A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>)
++ * mxDatetime (<A HREF="http://www.egenix.com/files/python/mxDateTime.html">http://www.egenix.com/files/python/mxDateTime.html</A>)
+ 
+ You will also need a few helper applications to perform the conversion
+ of various binary formats to something that Maay can index. There is
+@@ -62,12 +63,12 @@
+  * antiword (<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>)
+  * unrtf (<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>)
+ 
+-The indexation part uses a MySQL database (version 4.1). You
+-will need to install such a database or get in touch with your
+-DBA. The following assumes a local mysql installation, with no root
+-password. Maay has not been tested with MySQL 5.0, but it should
+-work. Please report if you encounter problems with this version of
+-MySQL. 
++The indexation part uses a MySQL database, version 4.1
++(<A HREF="http://www.mysql.org/">http://www.mysql.org/</A>). You will need to install such a database or
++get in touch with your DBA. The following assumes a local mysql
++installation, with no root password. Maay has not been tested with
++MySQL 5.0, but it should work. Please report if you encounter problems
++with this version of MySQL.
+ 
+ Once everything else is installed, you can point you web browser to
+ <A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> and download the latest
+@@ -126,7 +127,6 @@
+ 
+ For now the best place to ask for help is on the development mailing
+ list of Maay. You can subscribe from
+-
+ <A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev">http://lists.berlios.de/mailman/listinfo/maay-dev</A>
+ 
+ You may also use the bug tracker on the Berlios project page at 
+
+Modified: trunk/doc/README.html
+===================================================================
+--- trunk/doc/README.html	2005-11-15 08:55:13 UTC (rev 485)
++++ trunk/doc/README.html	2005-11-15 09:01:52 UTC (rev 486)
+@@ -55,7 +55,8 @@
+ &lt;li&gt;python-twisted 2.0 or above ((&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/&lt;/a">http://twistedmatrix.com/&lt;/a</A>&gt;)&lt;/li&gt;
+ &lt;li&gt;python-twisted-web (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/&lt;/a">http://twistedmatrix.com/&lt;/a</A>&gt;)&lt;/li&gt;
+ &lt;li&gt;python-nevow 0.6 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://nevow.com/">http://nevow.com/</A>&quot;&gt;<A HREF="http://nevow.com/&lt;/a">http://nevow.com/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-imaging (www.pythonware.com/products/pil/)&lt;/li&gt;
++&lt;li&gt;python-imaging (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>&quot;&gt;<A HREF="http://www.pythonware.com/products/pil/&lt;/a">http://www.pythonware.com/products/pil/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;mxDatetime (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.egenix.com/files/python/mxDateTime.html">http://www.egenix.com/files/python/mxDateTime.html</A>&quot;&gt;<A HREF="http://www.egenix.com/files/python/mxDateTime.html&lt;/a">http://www.egenix.com/files/python/mxDateTime.html&lt;/a</A>&gt;)&lt;/li&gt;
+ &lt;/ul&gt;
+ &lt;/blockquote&gt;
+ &lt;p&gt;You will also need a few helper applications to perform the conversion
+@@ -69,12 +70,12 @@
+ &lt;li&gt;unrtf (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>&quot;&gt;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html&lt;/a">http://www.gnu.org/software/unrtf/unrtf.html&lt;/a</A>&gt;)&lt;/li&gt;
+ &lt;/ul&gt;
+ &lt;/blockquote&gt;
+-&lt;p&gt;The indexation part uses a MySQL database (version 4.1). You
+-will need to install such a database or get in touch with your
+-DBA. The following assumes a local mysql installation, with no root
+-password. Maay has not been tested with MySQL 5.0, but it should
+-work. Please report if you encounter problems with this version of
+-MySQL.&lt;/p&gt;
++&lt;p&gt;The indexation part uses a MySQL database, version 4.1
++(&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.mysql.org/">http://www.mysql.org/</A>&quot;&gt;<A HREF="http://www.mysql.org/&lt;/a">http://www.mysql.org/&lt;/a</A>&gt;). You will need to install such a database or
++get in touch with your DBA. The following assumes a local mysql
++installation, with no root password. Maay has not been tested with
++MySQL 5.0, but it should work. Please report if you encounter problems
++with this version of MySQL.&lt;/p&gt;
+ &lt;p&gt;Once everything else is installed, you can point you web browser to
+ &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and download the latest
+ source tarball. Unpack it, go to the newly created directory and run:&lt;/p&gt;
+@@ -123,8 +124,8 @@
+ &lt;div class=&quot;section&quot; id=&quot;where-can-i-get-help&quot;&gt;
+ &lt;h1&gt;&lt;a name=&quot;where-can-i-get-help&quot;&gt;Where can I get help?&lt;/a&gt;&lt;/h1&gt;
+ &lt;p&gt;For now the best place to ask for help is on the development mailing
+-list of Maay. You can subscribe from&lt;/p&gt;
+-&lt;p&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev">http://lists.berlios.de/mailman/listinfo/maay-dev</A>&quot;&gt;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a">http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a</A>&gt;&lt;/p&gt;
++list of Maay. You can subscribe from
++&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev">http://lists.berlios.de/mailman/listinfo/maay-dev</A>&quot;&gt;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a">http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a</A>&gt;&lt;/p&gt;
+ &lt;p&gt;You may also use the bug tracker on the Berlios project page at 
+ &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt;&lt;/p&gt;
+ &lt;p&gt;When reporting a bug or asking for help, don't forget to provide the
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000456.html">[Maay-svncheckins] r485 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000458.html">[Maay-svncheckins] r487 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#457">[ date ]</a>
+              <a href="thread.html#457">[ thread ]</a>
+              <a href="subject.html#457">[ subject ]</a>
+              <a href="author.html#457">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

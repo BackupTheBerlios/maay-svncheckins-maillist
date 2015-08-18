@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r619 - in trunk: . maay/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r619%20-%20in%20trunk%3A%20.%20maay/data&In-Reply-To=%3C200511231113.jANBDAEJ031260%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000590.html">
+   <LINK REL="Next"  HREF="000592.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r619 - in trunk: . maay/data</H1>
+    <B>dnf at berlios.de</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r619%20-%20in%20trunk%3A%20.%20maay/data&In-Reply-To=%3C200511231113.jANBDAEJ031260%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r619 - in trunk: . maay/data">dnf at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 12:13:10 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000590.html">[Maay-svncheckins] r618 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000592.html">[Maay-svncheckins] r620 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#591">[ date ]</a>
+              <a href="thread.html#591">[ thread ]</a>
+              <a href="subject.html#591">[ subject ]</a>
+              <a href="author.html#591">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-23 12:12:58 +0100 (Wed, 23 Nov 2005)
+New Revision: 619
+
+Added:
+   trunk/maay/data/version.js
+Modified:
+   trunk/maay.iss
+   trunk/maay/data/searchform.html
+Log:
+Fix bug: 
+- maay.iss creates a link Maay.url in the start menu (this was not working on french version of windows)
+
+Add a javascript checking of new versions of maay on maay.netofpeers.net.
+
+
+
+Modified: trunk/maay/data/searchform.html
+===================================================================
+--- trunk/maay/data/searchform.html	2005-11-23 10:35:00 UTC (rev 618)
++++ trunk/maay/data/searchform.html	2005-11-23 11:12:58 UTC (rev 619)
+@@ -1,13 +1,57 @@
+ &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+ &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
++  &lt;head&gt;
++    &lt;title&gt;Indexation Page&lt;/title&gt;
++    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
++    &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
+ 
+-  &lt;nevow:invisible xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+-    &lt;!-- &lt;a nevow:render=&quot;loginurl&quot;&gt; --&gt;
+-&lt;!--       &lt;nevow:attr name=&quot;href&quot;&gt; --&gt;
+-&lt;!--         &lt;nevow:slot name=&quot;loginurl&quot; /&gt; --&gt;
+-&lt;!--       &lt;/nevow:attr&gt; --&gt;
+-&lt;!--       &lt;nevow:slot name=&quot;actionlabel&quot; /&gt; --&gt;
+-&lt;!--     &lt;/a&gt; --&gt;
++    &lt;script type='text/javascript' language=&quot;text/javascript&quot; src=&quot;<A HREF="http://maay.netofpeers.net/version.js">http://maay.netofpeers.net/version.js</A>&quot;&gt;&lt;/script&gt;
++    &lt;script type='text/javascript' language='javascript'&gt;
++&lt;!--
++// TODO: use the <A HREF="http://localhost:7777/version.js">http://localhost:7777/version.js</A> instead to get the
++// current version
++current_version = &quot;0.2.3&quot;;
++
++function checkNewRelease()
++{
++    v= current_version.split(&quot;.&quot;);
++    current_ver =parseInt(v[0]);
++    current_release = parseInt(v[1]);
++    current_subrelease = parseInt(v[2]);
++
++    v= version.split(&quot;.&quot;);
++    new_ver =parseInt(v[0]);
++    new_release = parseInt(v[1]);
++    new_subrelease = parseInt(v[2]);
++
++    if (new_ver &lt; current_ver)
++        return 0;
++
++    if (new_ver == current_ver)
++    {
++            if (new_release &lt; current_release)
++                return 0;
++
++            if (new_release == current_release)
++                if (new_subrelease &lt;= current_subrelease)
++                    return 0;
++    }
++    newReleaseMessage = document.getElementById(&quot;newReleaseMessage&quot;);
++    newReleaseMessage.innerHTML = 'Your version of MAAY is outdated. &lt;a href=&quot;<A HREF="http://maay.netofpeers.net/wiki/index.php/Download">http://maay.netofpeers.net/wiki/index.php/Download</A>&quot;&gt; Download the version ' + version + ' of MAAY !&lt;/a&gt;'
++    return 1;
++}
++--&gt;
++    &lt;/script&gt;
++  &lt;/head&gt;
++  &lt;body onLoad=&quot;checkNewRelease();&quot;&gt;
++    &lt;table width=&quot;100%&quot;&gt;
++      &lt;tr&gt;
++        &lt;td valign=&quot;top&quot; width=&quot;100%&quot;&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot; class=&quot;footlink&quot;&gt;[Maay&nbsp;Homepage]&lt;/a&gt;&lt;/td&gt;
++        &lt;td valign=&quot;top&quot;&gt;&lt;a href=&quot;/indexation&quot; class=&quot;footlink&quot;&gt;[Manage&nbsp;Folders]&lt;/a&gt;&lt;/td&gt;
++      &lt;/tr&gt;
++    &lt;/table&gt;
++
+     &lt;center&gt;
+     &lt;img src=&quot;images/maay.png&quot; /&gt;&lt;br /&gt;&lt;br /&gt;
+     &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+@@ -21,9 +65,13 @@
+     &lt;br /&gt;
+     &lt;div class=&quot;homemessage&quot;&gt;Search your own computer.&lt;br /&gt;
+     Publish your documents.&lt;/div&gt;&lt;br /&gt;
++    &lt;div id=&quot;newReleaseMessage&quot; class=&quot;newReleaseMessage&quot;&gt;&lt;/div&gt;
++    &lt;br /&gt;
+     &lt;div class=&quot;shortDocStat&quot; nevow:render=&quot;shortstat&quot;&gt;
+     &lt;nevow:slot name=&quot;localDocumentCount&quot; /&gt; local documents / &lt;nevow:slot name=&quot;publicDocumentCount&quot; /&gt; published documents.
+     &lt;/div&gt;
+     &lt;/center&gt;
+-  &lt;/nevow:invisible&gt;
+-  
++
++  &lt;nevow:invisible nevow:macro=&quot;footer&quot; /&gt;
++  &lt;/body&gt;
++&lt;/html&gt;
+\ No newline at end of file
+
+Added: trunk/maay/data/version.js
+===================================================================
+--- trunk/maay/data/version.js	2005-11-23 10:35:00 UTC (rev 618)
++++ trunk/maay/data/version.js	2005-11-23 11:12:58 UTC (rev 619)
+@@ -0,0 +1 @@
++version = &quot;0.2.3&quot;;
+\ No newline at end of file
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-11-23 10:35:00 UTC (rev 618)
++++ trunk/maay.iss	2005-11-23 11:12:58 UTC (rev 619)
+@@ -6,7 +6,7 @@
+ 
+ [Setup]
+ AppName=Maay
+-AppVerName=Maay-0.2.2
++AppVerName=Maay-0.2.4
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+ UninstallDisplayIcon={app}\maay_node.exe
+@@ -27,6 +27,7 @@
+ [Files]
+ Source: &quot;dist\*&quot;; DestDir: &quot;{app}&quot;
+ Source: &quot;maay\data\*.css&quot;; DestDir: &quot;{app}\data&quot;
++Source: &quot;maay\data\*.js&quot;; DestDir: &quot;{app}\data&quot;
+ Source: &quot;maay\data\*.html&quot;; DestDir: &quot;{app}\data&quot;
+ Source: &quot;maay\data\images\*.gif&quot;; DestDir: &quot;{app}\data\images&quot;
+ Source: &quot;maay\data\images\*.png&quot;; DestDir: &quot;{app}\data\images&quot;
+@@ -43,7 +44,7 @@
+ Source: &quot;maay\configuration\win32\*.ini&quot;; DestDir: &quot;{app}&quot;
+ Source: &quot;maay\configuration\win32\Maay.url&quot;; DestDir: &quot;{app}&quot;
+ Source: &quot;maay\configuration\win32\Maay.url&quot;; DestDir: &quot;{userdesktop}&quot;
+-Source: &quot;maay\configuration\win32\Maay.url&quot;; DestDir: &quot;{userstartmenu}\Programs\Maay\&quot;
++Source: &quot;maay\configuration\win32\Maay.url&quot;; DestDir: &quot;{group}&quot;
+ Source: &quot;doc\README.html&quot;; DestDir: &quot;{app}\documentation&quot;
+ Source: &quot;doc\default.css&quot;; DestDir: &quot;{app}\documentation&quot;
+ Source: &quot;ChangeLog&quot;; DestDir: &quot;{app}&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000590.html">[Maay-svncheckins] r618 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000592.html">[Maay-svncheckins] r620 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#591">[ date ]</a>
+              <a href="thread.html#591">[ thread ]</a>
+              <a href="subject.html#591">[ subject ]</a>
+              <a href="author.html#591">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

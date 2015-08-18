@@ -1,0 +1,268 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r602 - in trunk: . maay/configuration/win32
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r602%20-%20in%20trunk%3A%20.%20maay/configuration/win32&In-Reply-To=%3C200511221639.jAMGdlR5019312%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000573.html">
+   <LINK REL="Next"  HREF="000575.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r602 - in trunk: . maay/configuration/win32</H1>
+    <B>dnf at berlios.de</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r602%20-%20in%20trunk%3A%20.%20maay/configuration/win32&In-Reply-To=%3C200511221639.jAMGdlR5019312%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r602 - in trunk: . maay/configuration/win32">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov 22 17:39:47 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000573.html">[Maay-svncheckins] r601 - in trunk/maay: . sql
+</A></li>
+        <LI>Next message: <A HREF="000575.html">[Maay-svncheckins] r603 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#574">[ date ]</a>
+              <a href="thread.html#574">[ thread ]</a>
+              <a href="subject.html#574">[ subject ]</a>
+              <a href="author.html#574">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-22 17:39:42 +0100 (Tue, 22 Nov 2005)
+New Revision: 602
+
+Added:
+   trunk/maay/configuration/win32/Maay.url
+Modified:
+   trunk/maayservice.py
+Log:
+- Update maayservice (remove tab indentation, use nodeConfiguration for the port)
+- Add Maay.url to repository.
+
+
+
+Added: trunk/maay/configuration/win32/Maay.url
+===================================================================
+--- trunk/maay/configuration/win32/Maay.url	2005-11-22 16:32:54 UTC (rev 601)
++++ trunk/maay/configuration/win32/Maay.url	2005-11-22 16:39:42 UTC (rev 602)
+@@ -0,0 +1,3 @@
++[InternetShortcut]
++URL=<A HREF="http://localhost:7777/">http://localhost:7777/</A>
++Modified=40D1F3B380EFC501EC
+
+Modified: trunk/maayservice.py
+===================================================================
+--- trunk/maayservice.py	2005-11-22 16:32:54 UTC (rev 601)
++++ trunk/maayservice.py	2005-11-22 16:39:42 UTC (rev 602)
+@@ -38,88 +38,88 @@
+ # maybe need some refactoring
+ 
+ class Win32MaayTaskbar:
+-        SEARCH_MENU_ID = 1001
+-        INDEXATION_MENU_ID = 1002
+-        HOMEPAGE_MENU_ID = 1003
++    SEARCH_MENU_ID = 1001
++    INDEXATION_MENU_ID = 1002
++    HOMEPAGE_MENU_ID = 1003
+         
+-	def __init__(self):
+-		pass
++    def __init__(self, node):
++        self.node = node
+ 
+-	def __start__(self):
+-		msg_TaskbarRestart = win32api.RegisterWindowMessage(&quot;TaskbarCreated&quot;);
+-		message_map = {
+-				msg_TaskbarRestart: self.OnRestart,
+-				win32con.WM_DESTROY: self.OnDestroy,
+-				win32con.WM_COMMAND: self.OnCommand,
+-				win32con.WM_USER+20 : self.OnTaskbarNotify,
+-		}
+-		# Register the Window class.
+-		wc = win32gui.WNDCLASS()
+-		hinst = wc.hInstance = win32gui.GetModuleHandle(None)
+-		wc.lpszClassName = &quot;MaayTaskbar&quot;
+-		wc.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW;
+-		wc.hCursor = win32gui.LoadCursor( 0, win32con.IDC_ARROW )
+-		wc.hbrBackground = win32con.COLOR_WINDOW
+-		wc.lpfnWndProc = message_map # could also specify a wndproc.
+-		classAtom = win32gui.RegisterClass(wc)
+-		# Create the Window.
+-		style = win32con.WS_OVERLAPPED | win32con.WS_SYSMENU
+-		self.hwnd = win32gui.CreateWindow( classAtom, &quot;Maay&quot;, style, \
+-				0, 0, win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT, \
+-				0, 0, hinst, None)
+-		win32gui.UpdateWindow(self.hwnd)
++    def __start__(self):
++        msg_TaskbarRestart = win32api.RegisterWindowMessage(&quot;TaskbarCreated&quot;);
++        message_map = {
++                msg_TaskbarRestart: self.OnRestart,
++                win32con.WM_DESTROY: self.OnDestroy,
++                win32con.WM_COMMAND: self.OnCommand,
++                win32con.WM_USER+20 : self.OnTaskbarNotify,
++        }
++        # Register the Window class.
++        wc = win32gui.WNDCLASS()
++        hinst = wc.hInstance = win32gui.GetModuleHandle(None)
++        wc.lpszClassName = &quot;MaayTaskbar&quot;
++        wc.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW;
++        wc.hCursor = win32gui.LoadCursor( 0, win32con.IDC_ARROW )
++        wc.hbrBackground = win32con.COLOR_WINDOW
++        wc.lpfnWndProc = message_map # could also specify a wndproc.
++        classAtom = win32gui.RegisterClass(wc)
++        # Create the Window.
++        style = win32con.WS_OVERLAPPED | win32con.WS_SYSMENU
++        self.hwnd = win32gui.CreateWindow( classAtom, &quot;Maay&quot;, style, \
++                0, 0, win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT, \
++                0, 0, hinst, None)
++        win32gui.UpdateWindow(self.hwnd)
+ 
+-		# Try and find a custom icon
+-		hinst =  win32gui.GetModuleHandle(None)
+-#		iconPathName = os.path.abspath(os.path.join( os.path.split(sys.executable)[0], &quot;maay_node.exe&quot; ))
++        # Try and find a custom icon
++        hinst =  win32gui.GetModuleHandle(None)
++#        iconPathName = os.path.abspath(os.path.join( os.path.split(sys.executable)[0], &quot;maay_node.exe&quot; ))
+ 
+-		icon_flags = win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE
+-		self.hicon = win32gui.LoadImage(hinst, &quot;data\\images\\maay.ico&quot;, win32con.IMAGE_ICON, 0, 0, icon_flags)
++        icon_flags = win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE
++        self.hicon = win32gui.LoadImage(hinst, &quot;data\\images\\maay.ico&quot;, win32con.IMAGE_ICON, 0, 0, icon_flags)
+ 
+-		flags = win32gui.NIF_ICON | win32gui.NIF_MESSAGE | win32gui.NIF_TIP
+-		nid = (self.hwnd, 0, flags, win32con.WM_USER+20, self.hicon, &quot;Maay&quot;)
+-		win32gui.Shell_NotifyIcon(win32gui.NIM_ADD, nid)
++        flags = win32gui.NIF_ICON | win32gui.NIF_MESSAGE | win32gui.NIF_TIP
++        nid = (self.hwnd, 0, flags, win32con.WM_USER+20, self.hicon, &quot;Maay&quot;)
++        win32gui.Shell_NotifyIcon(win32gui.NIM_ADD, nid)
+ 
+-		win32gui.PumpMessages()
+-		
++        win32gui.PumpMessages()
++        
+ 
+-	def start(self):
+-		thread.start_new_thread(self.__start__, ())
++    def start(self):
++        thread.start_new_thread(self.__start__, ())
+ 
+-	def OnRestart(self, hwnd, msg, wparam, lparam):
+-		self._DoCreateIcons()
++    def OnRestart(self, hwnd, msg, wparam, lparam):
++        self._DoCreateIcons()
+ 
+-	def OnDestroy(self, hwnd, msg, wparam, lparam):
+-		nid = (self.hwnd, 0)
+-		Shell_NotifyIcon(NIM_DELETE, nid)
+-		PostQuitMessage(0) # Terminate the app.
++    def OnDestroy(self, hwnd, msg, wparam, lparam):
++        nid = (self.hwnd, 0)
++        Shell_NotifyIcon(NIM_DELETE, nid)
++        PostQuitMessage(0) # Terminate the app.
+ 
+ 
+-	def OnTaskbarNotify(self, hwnd, msg, wparam, lparam):
+-		if lparam == win32con.WM_RBUTTONUP:
+-			menu = win32gui.CreatePopupMenu()
+-			win32gui.AppendMenu( menu, win32con.MF_STRING, Win32MaayTaskbar.SEARCH_MENU_ID, &quot;Search&quot;)
+-			win32gui.AppendMenu( menu, win32con.MF_STRING, Win32MaayTaskbar.INDEXATION_MENU_ID, &quot;Manage Folders&quot;)
+-			win32gui.AppendMenu( menu, win32con.MF_SEPARATOR, 1002, &quot;&quot;)
+-			win32gui.AppendMenu( menu, win32con.MF_STRING, Win32MaayTaskbar.HOMEPAGE_MENU_ID, &quot;Maay Homepage&quot;)
+-		        win32gui.SetMenuDefaultItem(menu, Win32MaayTaskbar.SEARCH_MENU_ID, 0)
+-			pos = win32gui.GetCursorPos()
+-			# See <A HREF="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winui/menus_0hdi.asp">http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winui/menus_0hdi.asp</A>
+-			win32gui.SetForegroundWindow(self.hwnd)
+-			win32gui.TrackPopupMenu(menu, win32con.TPM_LEFTALIGN, pos[0], pos[1], 0, self.hwnd, None)
+-			win32gui.PostMessage(self.hwnd, win32con.WM_NULL, 0, 0)
+-		elif lparam==win32con.WM_LBUTTONDBLCLK:
+-			webbrowser.open(&quot;<A HREF="http://127.0.0.1:7777/">http://127.0.0.1:7777/</A>&quot;, autoraise=1)
+-		return 1
++    def OnTaskbarNotify(self, hwnd, msg, wparam, lparam):
++        if lparam == win32con.WM_RBUTTONUP:
++            menu = win32gui.CreatePopupMenu()
++            win32gui.AppendMenu( menu, win32con.MF_STRING, Win32MaayTaskbar.SEARCH_MENU_ID, &quot;Search&quot;)
++            win32gui.AppendMenu( menu, win32con.MF_STRING, Win32MaayTaskbar.INDEXATION_MENU_ID, &quot;Manage Folders&quot;)
++            win32gui.AppendMenu( menu, win32con.MF_SEPARATOR, 1002, &quot;&quot;)
++            win32gui.AppendMenu( menu, win32con.MF_STRING, Win32MaayTaskbar.HOMEPAGE_MENU_ID, &quot;Maay Homepage&quot;)
++            win32gui.SetMenuDefaultItem(menu, Win32MaayTaskbar.SEARCH_MENU_ID, 0)
++            pos = win32gui.GetCursorPos()
++            # See <A HREF="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winui/menus_0hdi.asp">http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winui/menus_0hdi.asp</A>
++            win32gui.SetForegroundWindow(self.hwnd)
++            win32gui.TrackPopupMenu(menu, win32con.TPM_LEFTALIGN, pos[0], pos[1], 0, self.hwnd, None)
++            win32gui.PostMessage(self.hwnd, win32con.WM_NULL, 0, 0)
++        elif lparam==win32con.WM_LBUTTONDBLCLK:
++            webbrowser.open(&quot;<A HREF="http://127.0.0.1:%s/">http://127.0.0.1:%s/</A>&quot; % self.node.nodeConfig.webserver_port, autoraise=1)
++        return 1
+ 
+-	def OnCommand(self, hwnd, msg, wparam, lparam):
+-		id = win32api.LOWORD(wparam)
+-		if id == Win32MaayTaskbar.SEARCH_MENU_ID:
+-			webbrowser.open(&quot;<A HREF="http://127.0.0.1:7777/">http://127.0.0.1:7777/</A>&quot;, autoraise=1)
+-		elif id == Win32MaayTaskbar.INDEXATION_MENU_ID:
+-			webbrowser.open(&quot;<A HREF="http://127.0.0.1:7777/indexation">http://127.0.0.1:7777/indexation</A>&quot;, autoraise=1)
+-		elif id == Win32MaayTaskbar.HOMEPAGE_MENU_ID:
+-			webbrowser.open(&quot;<A HREF="http://maay.netofpeers.net">http://maay.netofpeers.net</A>&quot;, autoraise=1)
++    def OnCommand(self, hwnd, msg, wparam, lparam):
++        id = win32api.LOWORD(wparam)
++        if id == Win32MaayTaskbar.SEARCH_MENU_ID:
++            webbrowser.open(&quot;<A HREF="http://127.0.0.1:%s/">http://127.0.0.1:%s/</A>&quot; % self.node.nodeConfig.webserver_port, autoraise=1)
++        elif id == Win32MaayTaskbar.INDEXATION_MENU_ID:
++            webbrowser.open(&quot;<A HREF="http://127.0.0.1:%s/indexation">http://127.0.0.1:%s/indexation</A>&quot; % self.node.nodeConfig.webserver_port, autoraise=1)
++        elif id == Win32MaayTaskbar.HOMEPAGE_MENU_ID:
++            webbrowser.open(&quot;<A HREF="http://maay.netofpeers.net">http://maay.netofpeers.net</A>&quot;, autoraise=1)
+ 
+ 
+ class MyService(win32serviceutil.ServiceFramework):
+@@ -135,15 +135,15 @@
+ 
+     def SvcDoRun(self):
+         import servicemanager
+-        from maay.node import run
++        import maay.node
+         win32evtlogutil.ReportEvent(self._svc_name_,
+                                     servicemanager.PYS_SERVICE_STARTED,
+                                     0, # category
+                                     servicemanager.EVENTLOG_INFORMATION_TYPE,
+                                     (self._svc_name_, ''))
+-	taskbar = Win32MaayTaskbar()
+-	taskbar.start()
+-        run()
++        taskbar = Win32MaayTaskbar(maay.node)
++        taskbar.start()
++        maay.node.run()
+         # and write a 'stopped' event to the event log.
+         win32evtlogutil.ReportEvent(self._svc_name_,
+                                     servicemanager.PYS_SERVICE_STOPPED,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000573.html">[Maay-svncheckins] r601 - in trunk/maay: . sql
+</A></li>
+	<LI>Next message: <A HREF="000575.html">[Maay-svncheckins] r603 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#574">[ date ]</a>
+              <a href="thread.html#574">[ thread ]</a>
+              <a href="subject.html#574">[ subject ]</a>
+              <a href="author.html#574">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

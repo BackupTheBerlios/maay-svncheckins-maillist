@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r225 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r225%20-%20trunk/maay&In-Reply-To=%3C200510260955.j9Q9tiG6012939%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000195.html">
+   <LINK REL="Next"  HREF="000197.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r225 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r225%20-%20trunk/maay&In-Reply-To=%3C200510260955.j9Q9tiG6012939%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r225 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Oct 26 11:55:44 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000195.html">[Maay-svncheckins] r224 - in trunk/maay: . data data/images
+</A></li>
+        <LI>Next message: <A HREF="000197.html">[Maay-svncheckins] r226 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#196">[ date ]</a>
+              <a href="thread.html#196">[ thread ]</a>
+              <a href="subject.html#196">[ subject ]</a>
+              <a href="author.html#196">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-26 11:55:43 +0200 (Wed, 26 Oct 2005)
+New Revision: 225
+
+Modified:
+   trunk/maay/indexer.py
+Log:
+Minor cleanups.
+
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-25 15:08:18 UTC (rev 224)
++++ trunk/maay/indexer.py	2005-10-26 09:55:43 UTC (rev 225)
+@@ -38,30 +38,30 @@
+ from maay.querier import MaayAuthenticationError
+ from maay.texttool import removeControlChar
+ 
+-# grabbed from nevow, but it doesn't work until you test it interactively ;-)
+-mimetypes.types_map.update( 
+-    {
+-            '.conf':  'text/plain',
+-            '.diff':  'text/plain',
+-            '.exe':   'application/x-executable',
+-            '.flac':  'audio/x-flac',
+-            '.java':  'text/plain',
+-            '.ogg':   'application/ogg',
+-            '.oz':    'text/x-oz',
+-            '.swf':   'application/x-shockwave-flash',
+-            '.tgz':   'application/x-gtar',
+-            '.wml':   'text/vnd.wap.wml',
+-            '.xul':   'application/vnd.mozilla.xul+xml',
+-            '.py':    'text/plain',
+-            '.patch': 'text/plain',
+-            '.c' :    'text/plain',
+-            '.h':     'text/plain',
+-            '.C':     'text/plain',
+-            '.cpp':   'text/plain',
+-            '.cc':    'text/plain',
+-            '.c++':   'text/plain',
+-        }
+-    )
++# grabbed from nevow, but useless
++# mimetypes.types_map.update( 
++#     {
++#             '.conf':  'text/plain',
++#             '.diff':  'text/plain',
++#             '.exe':   'application/x-executable',
++#             '.flac':  'audio/x-flac',
++#             '.java':  'text/plain',
++#             '.ogg':   'application/ogg',
++#             '.oz':    'text/x-oz',
++#             '.swf':   'application/x-shockwave-flash',
++#             '.tgz':   'application/x-gtar',
++#             '.wml':   'text/vnd.wap.wml',
++#             '.xul':   'application/vnd.mozilla.xul+xml',
++#             '.py':    'text/plain',
++#             '.patch': 'text/plain',
++#             '.c' :    'text/plain',
++#             '.h':     'text/plain',
++#             '.C':     'text/plain',
++#             '.cpp':   'text/plain',
++#             '.cc':    'text/plain',
++#             '.c++':   'text/plain',
++#         }
++#     )
+ 
+ 
+ def makeDocumentId(filename):
+@@ -92,6 +92,7 @@
+         password = self.indexerConfig.password
+         host = self.indexerConfig.host
+         port = self.indexerConfig.port
++        print &quot;Indexer connecting to server %s:%s&quot; % (host, port)
+         self.serverProxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port),
+                                        allow_none=True,
+                                        encoding='utf-8')
+@@ -317,22 +318,9 @@
+ #     more parametrable run. For now it's just a convenience thing.
+ 
+ def purge():
+-    indexerConfig = IndexerConfiguration()
+-    indexerConfig.load()
+-    try:
+-        try:
+-            indexer = Indexer(indexerConfig)
+-        except MaayAuthenticationError, exc:
+-            print &quot;AuthenticationError:&quot;, exc
+-            sys.exit(1)
+-        indexer._purgeEverything()
+-    except socket.error, exc:
+-        print &quot;Cannot contact server:&quot;, exc
+-        print &quot;Check that the server is running on %s:%s&quot; % \
+-              (indexerConfig.host, indexerConfig.port)
+-        sys.exit(1)
++    run(purge=True)
+ 
+-def run():
++def run(purge=False):
+     indexerConfig = IndexerConfiguration()
+     indexerConfig.load()
+     try:
+@@ -341,7 +329,10 @@
+         except MaayAuthenticationError, exc:
+             print &quot;AuthenticationError:&quot;, exc
+             sys.exit(1)
+-        indexer.start()
++        if not purge:
++            indexer.start()
++        else:
++            indexer._purgeEverything()
+     except socket.error, exc:
+         print &quot;Cannot contact server:&quot;, exc
+         print &quot;Check that the server is running on %s:%s&quot; % \
+@@ -351,4 +342,4 @@
+ if __name__ == '__main__':
+     run()
+ 
+-#print &quot;PYTHON&quot;, mimetypes.types_map['.py']
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000195.html">[Maay-svncheckins] r224 - in trunk/maay: . data data/images
+</A></li>
+	<LI>Next message: <A HREF="000197.html">[Maay-svncheckins] r226 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#196">[ date ]</a>
+              <a href="thread.html#196">[ thread ]</a>
+              <a href="subject.html#196">[ subject ]</a>
+              <a href="author.html#196">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

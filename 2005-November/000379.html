@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r403 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r403%20-%20trunk/maay&In-Reply-To=%3C200511101351.jAADpvnq014051%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000378.html">
+   <LINK REL="Next"  HREF="000380.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r403 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r403%20-%20trunk/maay&In-Reply-To=%3C200511101351.jAADpvnq014051%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r403 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov 10 14:51:57 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000378.html">[Maay-svncheckins] r402 - trunk/maay/data/images
+</A></li>
+        <LI>Next message: <A HREF="000380.html">[Maay-svncheckins] r404 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#379">[ date ]</a>
+              <a href="thread.html#379">[ thread ]</a>
+              <a href="subject.html#379">[ subject ]</a>
+              <a href="author.html#379">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-10 14:51:56 +0100 (Thu, 10 Nov 2005)
+New Revision: 403
+
+Modified:
+   trunk/maay/rpc.py
+Log:
+Enhance pylint score
+
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-10 13:49:43 UTC (rev 402)
++++ trunk/maay/rpc.py	2005-11-10 13:51:56 UTC (rev 403)
+@@ -13,18 +13,26 @@
+ #     You should have received a copy of the GNU General Public License
+ #     along with this program; if not, write to the Free Software
+ #     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++&quot;&quot;&quot;
++This is the interface made available to the network, from a node.
++Protocol is XMLRPC, which provides :
++- to everybody : [authenticate]
++- to the indexer : [lastIndexationTimeAndState, getIndexedFiles,
++                    removeFileInfo, UnreferencedDocuments, indexDocument]
++- to the peers : [distributedQuery, distributedQueryAnswer]               
++&quot;&quot;&quot;
+ 
++__revision__ = ''
++
+ from time import time
+ from random import randint
+-import sys
+ 
+ from twisted.web.xmlrpc import XMLRPC
+ from twisted.cred.credentials import UsernamePassword, Anonymous
+-from twisted.cred.error import UnauthorizedLogin
+-from twisted.internet import defer, reactor
++from twisted.internet import reactor
+ ## from twisted.python.failure import Failure
+ 
+-from maay.querier import MaayQuerier, IQuerier, ANONYMOUS_AVATARID, WEB_AVATARID
++from maay.querier import IQuerier, ANONYMOUS_AVATARID, WEB_AVATARID
+ from maay.dbentity import FutureDocument, Document
+ from maay.p2pquerier import P2pQuerier, P2pQuery, P2pAnswer
+ from maay.query import Query
+@@ -34,6 +42,8 @@
+     # FIXME: need a better implementation
+     return '%X' % abs(hash(username+password) + hash(time()) + randint(-1000, 1000))
+ 
++def getP2pQuerier():
++    return MaayRPCServer.theP2pQuerier
+ 
+ class MaayRPCServer(XMLRPC):
+     #XXX: should be in instance, but this simplifies greatly
+@@ -58,11 +68,8 @@
+         self._lastClient = request.transport.getPeer()
+         return XMLRPC.render(self, request)
+ 
+-    def getP2pQuerier(self):
+-        assert (MaayRPCServer.theP2pQuerier) is not None
+-        return MaayRPCServer.theP2pQuerier
+-        
+-    def _attachUser(self, (interface, querier, logout), username, password):
++      
++    def _attachUser(self, (interface, querier, _), username, password):
+         print &quot;MaayRPCServer _attachUser&quot;, username, type(querier)
+         if interface is not IQuerier or querier is None:
+             errmsg = &quot;Could not get Querier for&quot;, username
+@@ -94,17 +101,17 @@
+             querier = self._sessions[cnxId]
+             fileInfos = querier.getFileInformations(filename)
+             if len(fileInfos):
+-                time = fileInfos[0].file_time
++                time_ = fileInfos[0].file_time
+                 state = fileInfos[0].state
+             else:
+-                time = 0
++                time_ = 0
+                 state = Document.UNKNOWN_STATE
+         else:
+             # XXX : could we return twisted.python.failure.Failure instance here ?
+             ## return Failure(ValueError(&quot;invalid connexion&quot;)
+-            time = -1 # XXX: need to differenciate bad cnxId and no last mod time
++            time_ = -1 # XXX: need to differenciate bad cnxId and no last mod time
+             state = Document.UNKNOWN_STATE
+-        return time, state
++        return time_, state
+ 
+     def xmlrpc_getIndexedFiles(self, cnxId):
+         if self.cnxIsValid(cnxId):
+@@ -139,7 +146,7 @@
+             futureDoc.text = unicode(futureDoc.text)
+         except UnicodeError, exc:
+             print exc
+-            print `text`
++            print futureDoc.text
+             return 1
+         if self.cnxIsValid(cnxId):
+             querier = self._sessions[cnxId]
+@@ -162,14 +169,14 @@
+         querier.registerNode(query.sender, query.host, query.port)
+         # schedule the query for later processing and return immediately
+         # this enables the sender to query several nodes in a row
+-        d = reactor.callLater(.01, self.getP2pQuerier().receiveQuery, query)
++        reactor.callLater(.01, getP2pQuerier().receiveQuery, query)
+         return self.nodeId
+ 
+     def xmlrpc_distributedQueryAnswer(self, queryId, senderId, documents):
+         print &quot;MaayRPCServer distributedQueryAnswer : %s %s, %s document(s)&quot; % \
+               (queryId, senderId, len(documents))
+         answer = P2pAnswer(queryId, documents)
+-        d = reactor.callLater(.01, self.getP2pQuerier().relayAnswer, answer)
++        reactor.callLater(.01, getP2pQuerier().relayAnswer, answer)
+         return self.nodeId
+                          
+     
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000378.html">[Maay-svncheckins] r402 - trunk/maay/data/images
+</A></li>
+	<LI>Next message: <A HREF="000380.html">[Maay-svncheckins] r404 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#379">[ date ]</a>
+              <a href="thread.html#379">[ thread ]</a>
+              <a href="subject.html#379">[ subject ]</a>
+              <a href="author.html#379">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r482 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r482%20-%20trunk/maay&In-Reply-To=%3C200511150826.jAF8Q5uU012444%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000452.html">
+   <LINK REL="Next"  HREF="000454.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r482 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r482%20-%20trunk/maay&In-Reply-To=%3C200511150826.jAF8Q5uU012444%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r482 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 09:26:05 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000452.html">[Maay-svncheckins] r481 - in trunk: . maay maay/test
+</A></li>
+        <LI>Next message: <A HREF="000454.html">[Maay-svncheckins] r483 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#453">[ date ]</a>
+              <a href="thread.html#453">[ thread ]</a>
+              <a href="subject.html#453">[ subject ]</a>
+              <a href="author.html#453">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-15 09:25:46 +0100 (Tue, 15 Nov 2005)
+New Revision: 482
+
+Modified:
+   trunk/maay/node.py
+Log:
+Try to start reactor with signal handlers, even on
+windows. Remove signal handlers only if the latter 
+raised an exception
+
+Modified: trunk/maay/node.py
+===================================================================
+--- trunk/maay/node.py	2005-11-15 08:10:46 UTC (rev 481)
++++ trunk/maay/node.py	2005-11-15 08:25:46 UTC (rev 482)
+@@ -267,16 +267,20 @@
+     reactor.listenTCP(nodeConfig.webserver_port, website)
+     reactor.listenTCP(nodeConfig.rpcserver_port, rpcserver)
+     try:
+-        print &quot;-------------Starting Node mainloop-------------&quot;
+-        # REM: twisted raise an error if reactor is not run in the main thread.
+-        # This occurs when maay is runned as a windows service.
+-        if sys.platform == 'win32':
+-            reactor.run(installSignalHandlers=0)
+-        else:
++        try:
++            print &quot;-------------Starting Node mainloop-------------&quot;
+             reactor.run()
++        except ValueError:
++            # Note: twisted raise an error if reactor is not run in the
++            # main thread. This occurs when maay is runned as a windows
++            # service.
++            if sys.platform == 'win32':
++                reactor.run(installSignalHandlers=0)
++            else:
++                raise
+     finally:
+         print &quot;---------------Shutting down Node---------------&quot;
+-        
+ 
++
+ if __name__ == '__main__':
+     run()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000452.html">[Maay-svncheckins] r481 - in trunk: . maay maay/test
+</A></li>
+	<LI>Next message: <A HREF="000454.html">[Maay-svncheckins] r483 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#453">[ date ]</a>
+              <a href="thread.html#453">[ thread ]</a>
+              <a href="subject.html#453">[ subject ]</a>
+              <a href="author.html#453">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

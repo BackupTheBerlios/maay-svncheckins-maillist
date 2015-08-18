@@ -1,0 +1,886 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r159 - in trunk: . maay maay/bin maay/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r159%20-%20in%20trunk%3A%20.%20maay%20maay/bin%20maay/test&In-Reply-To=%3C200510061634.j96GYWTY024916%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000131.html">
+   <LINK REL="Next"  HREF="000133.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r159 - in trunk: . maay maay/bin maay/test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r159%20-%20in%20trunk%3A%20.%20maay%20maay/bin%20maay/test&In-Reply-To=%3C200510061634.j96GYWTY024916%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r159 - in trunk: . maay maay/bin maay/test">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Oct  6 18:34:32 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000131.html">[Maay-svncheckins] r158 - in trunk: . maay maay/bin maay/configuration maay/data maay/sql maay/test maay/test/data
+</A></li>
+        <LI>Next message: <A HREF="000133.html">[Maay-svncheckins] r160 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#132">[ date ]</a>
+              <a href="thread.html#132">[ thread ]</a>
+              <a href="subject.html#132">[ subject ]</a>
+              <a href="author.html#132">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-06 18:34:27 +0200 (Thu, 06 Oct 2005)
+New Revision: 159
+
+Modified:
+   trunk/maay/__init__.py
+   trunk/maay/bin/maay-indexer
+   trunk/maay/bin/maay-server
+   trunk/maay/cleandb.py
+   trunk/maay/configuration.py
+   trunk/maay/converter.py
+   trunk/maay/createdb.py
+   trunk/maay/dbentity.py
+   trunk/maay/dbstats.py
+   trunk/maay/graphical_indexer.py
+   trunk/maay/indexer.py
+   trunk/maay/querier.py
+   trunk/maay/registration.py
+   trunk/maay/registration.tac
+   trunk/maay/registrationclient.py
+   trunk/maay/rpc.py
+   trunk/maay/server.py
+   trunk/maay/test/runtests.py
+   trunk/maay/test/test_codecs.py
+   trunk/maay/test/test_configuration.py
+   trunk/maay/test/test_converter.py
+   trunk/maay/test/test_dbentity.py
+   trunk/maay/test/test_fileiteration.py
+   trunk/maay/test/test_indexer.py
+   trunk/maay/test/test_querier.py
+   trunk/maay/test/test_rpc.py
+   trunk/maay/test/test_server.py
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+   trunk/setup.py
+Log:
+added GPL boilerplate and copyright statement
+
+Modified: trunk/maay/__init__.py
+===================================================================
+--- trunk/maay/__init__.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/__init__.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,6 +1,21 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;MAAY project
+ &quot;&quot;&quot;
+ 
+-# FIXME: add a copyright and license statement 
+ 
+ __revision__ = '$Id$'
+
+Modified: trunk/maay/bin/maay-indexer
+===================================================================
+--- trunk/maay/bin/maay-indexer	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/bin/maay-indexer	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ #!/usr/bin/python
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ __revision__ = '$Id$'
+ from maay.indexer import run
+ run()
+
+Modified: trunk/maay/bin/maay-server
+===================================================================
+--- trunk/maay/bin/maay-server	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/bin/maay-server	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ #!/usr/bin/python
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ __revision__ = '$Id$'
+ from maay.server import run
+ run()
+
+Modified: trunk/maay/cleandb.py
+===================================================================
+--- trunk/maay/cleandb.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/cleandb.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ #!/usr/bin/python
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;Utility script to clean the database. This forces full reindexation
+ on the following indexer run
+ &quot;&quot;&quot;
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/configuration.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;provides configuration (command line / config file) helpers for Maay&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+
+Modified: trunk/maay/converter.py
+===================================================================
+--- trunk/maay/converter.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/converter.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;this module handles Converter Registry
+ 
+ Typical use ::
+
+Modified: trunk/maay/createdb.py
+===================================================================
+--- trunk/maay/createdb.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/createdb.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot; helper to create the maay mysql instance on windows platform&quot;&quot;&quot;
+ import os
+ 
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/dbentity.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;this module provides a simple document abstraction&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+
+Modified: trunk/maay/dbstats.py
+===================================================================
+--- trunk/maay/dbstats.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/dbstats.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ #!/usr/bin/python
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;Helper script to display how many rows are stored in the various maay tables on localhost&quot;&quot;&quot;
+ 
+ from MySQLdb import connect
+
+Modified: trunk/maay/graphical_indexer.py
+===================================================================
+--- trunk/maay/graphical_indexer.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/graphical_indexer.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;This module contains a Tk wrapper around the indexer, for easier
+ operation on Windows boxes
+ &quot;&quot;&quot;
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/indexer.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;This module contains the indexer code.
+ The indexer crawl files on disk, analyse the textual content
+ of a file and update the indexes.
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/querier.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ # -*- coding: iso-8859-1 -*- 
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;provides the MaayQuerier class&quot;&quot;&quot;
+ 
+ from __future__ import division
+
+Modified: trunk/maay/registration.py
+===================================================================
+--- trunk/maay/registration.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/registration.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;this module defines the central registration server.
+ 
+ The Registration server keeps track of every connected
+
+Modified: trunk/maay/registration.tac
+===================================================================
+--- trunk/maay/registration.tac	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/registration.tac	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,5 +1,21 @@
+ #!/usr/bin/twistd2.3 -noy 
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ 
++
+ from twisted.application import service, internet
+ from twisted.internet.protocol import ServerFactory
+ 
+
+Modified: trunk/maay/registrationclient.py
+===================================================================
+--- trunk/maay/registrationclient.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/registrationclient.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ from twisted.internet.protocol import Protocol
+ from time import mktime
+ 
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/rpc.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ from time import time
+ from random import randint
+ import sys
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/server.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;maay local web UI script&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+@@ -28,11 +44,15 @@
+ 
+ from nevow import inevow, rend, tags, guard, loaders, appserver
+ from nevow.url import URL
+-# this is to help py2exe
++
++# These imports are not used, but they help py2exe tremendously.
++# Do not remove them (that is, unless we change the database backend
++# or drop twisted)
+ import nevow.flat.flatstan
+ import nevow.query
+ import twisted.web.woven.guard
+ import MySQLdb
++# end of py2exe helping imports
+ 
+ from logilab.common.textutils import normalize_text
+ 
+
+Modified: trunk/maay/test/runtests.py
+===================================================================
+--- trunk/maay/test/runtests.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/runtests.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ from logilab.common.testlib import main
+ 
+ if __name__ == '__main__':
+
+Modified: trunk/maay/test/test_codecs.py
+===================================================================
+--- trunk/maay/test/test_codecs.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_codecs.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ # -*- coding: iso-8859-1 -*-
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ import unittest
+ import codecs
+ import gzip
+
+Modified: trunk/maay/test/test_configuration.py
+===================================================================
+--- trunk/maay/test/test_configuration.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_configuration.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;small unit tests for Configuration class&quot;&quot;&quot;
+ 
+ import unittest
+
+Modified: trunk/maay/test/test_converter.py
+===================================================================
+--- trunk/maay/test/test_converter.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_converter.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;tests converters registry management&quot;&quot;&quot;
+ 
+ import unittest
+
+Modified: trunk/maay/test/test_dbentity.py
+===================================================================
+--- trunk/maay/test/test_dbentity.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_dbentity.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ # -*- encoding: iso-8859-1 -*-
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;querier test cases&quot;&quot;&quot;
+ 
+ import unittest
+
+Modified: trunk/maay/test/test_fileiteration.py
+===================================================================
+--- trunk/maay/test/test_fileiteration.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_fileiteration.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;tests file iteration&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+
+Modified: trunk/maay/test/test_indexer.py
+===================================================================
+--- trunk/maay/test/test_indexer.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_indexer.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ import unittest
+ from  tempfile import mkstemp
+ import os
+
+Modified: trunk/maay/test/test_querier.py
+===================================================================
+--- trunk/maay/test/test_querier.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_querier.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ # -*- coding: iso-8859-1 -*-
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;querier test cases&quot;&quot;&quot;
+ 
+ import unittest
+
+Modified: trunk/maay/test/test_rpc.py
+===================================================================
+--- trunk/maay/test/test_rpc.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_rpc.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;unit tests for Maay's XMLRPC server
+ 
+ These test cases should be tested with the twisted's `trial` utility
+
+Modified: trunk/maay/test/test_server.py
+===================================================================
+--- trunk/maay/test/test_server.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_server.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,3 +1,19 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ import unittest
+ 
+ from maay.server import Query
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/test/test_texttool.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,6 +1,24 @@
+ # -*- coding: iso-8859-1 -*-
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;unit tests for Text and HTML parsers&quot;&quot;&quot;
+ 
++
++
+ import unittest
+ from os.path import join, dirname
+ 
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/maay/texttool.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
+ # -*- coding: iso-8859-1 -*-
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;this module provide text / parsing tools&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-10-06 16:23:13 UTC (rev 158)
++++ trunk/setup.py	2005-10-06 16:34:27 UTC (rev 159)
+@@ -1,4 +1,20 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ 
++
+ __revision__ = &quot;$Id$&quot;
+ from distutils.core import setup
+ import sys
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000131.html">[Maay-svncheckins] r158 - in trunk: . maay maay/bin maay/configuration maay/data maay/sql maay/test maay/test/data
+</A></li>
+	<LI>Next message: <A HREF="000133.html">[Maay-svncheckins] r160 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#132">[ date ]</a>
+              <a href="thread.html#132">[ thread ]</a>
+              <a href="subject.html#132">[ subject ]</a>
+              <a href="author.html#132">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r641 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r641%20-%20trunk/maay&In-Reply-To=%3C200511240906.jAO964CV016921%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000612.html">
+   <LINK REL="Next"  HREF="000614.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r641 - trunk/maay</H1>
+    <B>dnf at berlios.de</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r641%20-%20trunk/maay&In-Reply-To=%3C200511240906.jAO964CV016921%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r641 - trunk/maay">dnf at berlios.de
+       </A><BR>
+    <I>Thu Nov 24 10:06:04 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000612.html">[Maay-svncheckins] r640 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000614.html">[Maay-svncheckins] r642 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#613">[ date ]</a>
+              <a href="thread.html#613">[ thread ]</a>
+              <a href="subject.html#613">[ subject ]</a>
+              <a href="author.html#613">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-24 10:05:53 +0100 (Thu, 24 Nov 2005)
+New Revision: 641
+
+Modified:
+   trunk/maay/configuration.py
+Log:
+Last fix (I hope ;-)) of the &quot;default download-dir&quot; problem.
+Problem description : in windows version, the directory C:\Documents and Settings\All Users\Desktop\Maay Documents\Downlaoded
+was created even if download-dir was set in indexer.ini.
+
+
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-24 07:49:13 UTC (rev 640)
++++ trunk/maay/configuration.py	2005-11-24 09:05:53 UTC (rev 641)
+@@ -258,13 +258,13 @@
+ 
+ ################ Indexer stuff
+ 
+-def _download_dir():
++def _default_download_dir():
+     if sys.platform == 'win32':
++        # FIXME: if we can get the user desktop path, it would be better.
++        # (the path may depend of the language)
+         theDir = r'\Documents and Settings\All Users\Desktop\Maay Documents\downloaded'
+     else:
+         theDir = osp.expanduser('~/maay-downloads/')
+-    if not osp.exists(theDir):
+-        os.makedirs(theDir)
+     return theDir
+ 
+     
+@@ -330,7 +330,7 @@
+          {'type': 'string',
+           'metavar': '&lt;downloads&gt;',
+           'help': 'downloaded files will go there and be immediately indexed',
+-          'default' : None
++          'default' : _default_download_dir()
+           })
+         
+         ]
+@@ -342,6 +342,10 @@
+         if not self.download_dir:
+             self.download_dir = _download_dir()
+ 
++    def load(self):
++        Configuration.load(self)
++        if not osp.exists(self.download_dir):
++            os.makedirs(self.download_dir)
+ 
+     def save(self):
+         # FIXME: since there may be several configuration files, which
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000612.html">[Maay-svncheckins] r640 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000614.html">[Maay-svncheckins] r642 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#613">[ date ]</a>
+              <a href="thread.html#613">[ thread ]</a>
+              <a href="subject.html#613">[ subject ]</a>
+              <a href="author.html#613">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r458 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r458%20-%20trunk/maay&In-Reply-To=%3C200511141200.jAEC0fGR029518%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000428.html">
+   <LINK REL="Next"  HREF="000430.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r458 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r458%20-%20trunk/maay&In-Reply-To=%3C200511141200.jAEC0fGR029518%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r458 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov 14 13:00:41 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000428.html">[Maay-svncheckins] r457 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000430.html">[Maay-svncheckins] r459 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#429">[ date ]</a>
+              <a href="thread.html#429">[ thread ]</a>
+              <a href="subject.html#429">[ subject ]</a>
+              <a href="author.html#429">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-14 13:00:27 +0100 (Mon, 14 Nov 2005)
+New Revision: 458
+
+Modified:
+   trunk/maay/webapplication.py
+Log:
+Attempt at automatic removal of temporary file from downloads
+
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-14 11:21:46 UTC (rev 457)
++++ trunk/maay/webapplication.py	2005-11-14 12:00:27 UTC (rev 458)
+@@ -28,6 +28,7 @@
+ 
+ from zope.interface import Interface
+ from twisted.web import static
++from twisted.internet import reactor
+ from nevow import rend, tags, loaders
+ 
+ from logilab.common.textutils import normalize_text
+@@ -92,6 +93,40 @@
+             context.fillSlots(attrname, getattr(peerNode, attrname, 'N/A'))
+         return context.tag
+ 
++
++class DownloadedDocs:
++    &quot;&quot;&quot;manage automatic removal of locally downloaded
++       documents in a clunky way
++       note : tmpdirs should contain exactly one file
++              and last no longer than the file
++    &quot;&quot;&quot;
++    
++    DIRS = {}
++
++    def makeTmpDir():
++        tempdir = mkdtemp()
++        DownloadedDocs.DIRS[tempdir] = []
++        reactor.callLater(20, DownloadedDocs.cleanup)
++        return tempdir
++    makeTmpDir = staticmethod(makeTmpDir)
++
++    def addFile(tempdir, thefile):
++        DownloadedDocs.DIRS[tempdir].append(thefile)
++    addFile = staticmethod(addFile)
++
++    def cleanup():
++        for tmpdir in DownloadedDocs.DIRS:
++            files = DownloadedDocs.DIRS[tmpdir]
++            for fil in files:
++                try:
++                    os.unlink(fil)
++                except:
++                    print &quot;cleanup : leaving stale file %s behind&quot; % fil
++            try:
++                os.rmdir(tmpdir)
++            except:
++                print &quot;cleanup : leaving stale tmp dir %s behind&quot; % tmpdir
++    cleanup = staticmethod(cleanup)
+                     
+ class SearchForm(MaayPage):
+     &quot;&quot;&quot;default search form&quot;&quot;&quot;
+@@ -102,7 +137,7 @@
+         MaayPage.__init__(self, maayId)
+         self.querier = querier
+         self.p2pquerier = p2pquerier
+-        self.downloads = mkdtemp()
++        
+ 
+     def __del__(self):
+         try:
+@@ -163,24 +198,25 @@
+             fileData = rpcFriendlyData.data
+         except:
+             return # peer might be down
+-        filepath = osp.join(self.downloads, filename)
++        tmpdir = DownloadedDocs.makeTmpDir()
++        filepath = osp.join(tmpdir, filename)
+         f=file(filepath,'wb')
+         f.write(fileData)
+         f.close()
+-        return DistantFilePage(filepath)
++        return DistantFilePage(tmpdir, filepath)
+ 
+ class DistantFilePage(static.File):
+-    def __init__(self, filepath):
++    def __init__(self, tmpdir, filepath):
+         static.File.__init__(self, filepath)
++        self.tmpdir = tmpdir
+         self.filepath = filepath
+         
+     def __del__(self):
+         try:
+-            os.unlink(self.filepath)
++            DownloadedDoc.addFile(self.tmpdir, self.filepath)
+         except:
+             print &quot;Ooooops, leaving garbage behind : %s&quot; % \
+                   self.filepath
+-            pass #FIXME: Might get there on Win32
+     
+ 
+ class IndexationPage(MaayPage):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000428.html">[Maay-svncheckins] r457 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000430.html">[Maay-svncheckins] r459 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#429">[ date ]</a>
+              <a href="thread.html#429">[ thread ]</a>
+              <a href="subject.html#429">[ subject ]</a>
+              <a href="author.html#429">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

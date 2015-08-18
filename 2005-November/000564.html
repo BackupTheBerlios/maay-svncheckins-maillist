@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r592 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r592%20-%20trunk/maay&In-Reply-To=%3C200511211306.jALD6pZG016186%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000563.html">
+   <LINK REL="Next"  HREF="000565.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r592 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r592%20-%20trunk/maay&In-Reply-To=%3C200511211306.jALD6pZG016186%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r592 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov 21 14:06:51 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000563.html">[Maay-svncheckins] r591 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000565.html">[Maay-svncheckins] r593 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#564">[ date ]</a>
+              <a href="thread.html#564">[ thread ]</a>
+              <a href="subject.html#564">[ subject ]</a>
+              <a href="author.html#564">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-21 14:06:47 +0100 (Mon, 21 Nov 2005)
+New Revision: 592
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+Fix the send/answer errbacks (correct targets should be set in all cases now)
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-21 13:05:05 UTC (rev 591)
++++ trunk/maay/p2pquerier.py	2005-11-21 13:06:47 UTC (rev 592)
+@@ -258,9 +258,8 @@
+             proxy = Proxy(target)
+             d = proxy.callRemote('distributedQuery', query.asKwargs())
+             d.addCallback(self.querier.registerNodeActivity)
+-            d.addErrback(P2pErrbacks.sendQueryProblem)
+-            # FIXME : mecanism below likely to be bogus
+-            P2pErrbacks.setQueryTarget(target)
++            errback = sendQueryErrback(target)
++            d.addErrback(errback)
+             self._sentQueries[query.qid] = query
+             print &quot; ... query from %s:%s sent to %s %s %s&quot; % (query.client_host,
+                                                               query.client_port,
+@@ -343,8 +342,8 @@
+                                      answer.provider,
+                                      toSend) 
+                 d.addCallback(self.querier.registerNodeActivity)
+-                d.addErrback(P2pErrbacks.answerQueryProblem)
+-                P2pErrbacks.setAnswerTarget(senderUrl)
++                errback = answerQueryErrback(senderUrl)
++                d.addErrback(errback)
+             except ValueError:
+                 print &quot; ... unknown node %s&quot; % query.sender
+         else: 
+@@ -359,37 +358,23 @@
+         
+ 
+ 
+-#FIXME: this should be shot (auc)
++##### Custommized errbacks for send/answer ops
+ 
+-class P2pErrbacks:
+-    &quot;&quot;&quot;a small namespace to hold errbacks and contextual
+-       information so as to display meaningful stuff
+-    &quot;&quot;&quot;
+-
+-    lastQueryTarget = None
+-    lastAnswerTarget = None
+-
+-    def setQueryTarget(target):
+-        P2pErrbacks.lastQueryTarget = target
+-    setQueryTarget = staticmethod(setQueryTarget)
+-        
+-    def setAnswerTarget(target):
+-        P2pErrbacks.lastAnswerTarget = target
+-    setAnswerTarget = staticmethod(setAnswerTarget)
+-
+-    def sendQueryProblem(failure):
++def sendQueryErrback(target):
++    def QP(failure):
+         &quot;&quot;&quot;Politely displays any problem (bug, unavailability) related
+         to an attempt to send a query.
+         &quot;&quot;&quot;
+         print &quot; ... problem sending the query (likely to %s) : %s&quot; \
+-              % (P2pErrbacks.lastQueryTarget, failure.getTraceback())
+-    sendQueryProblem = staticmethod(sendQueryProblem)
++              % (target, failure.getTraceback())
++    return QP
+ 
+-
+-    def answerQueryProblem(failure):
++def answerQueryErrback(target):
++    def AP(failure):
+         &quot;&quot;&quot;Politely displays any problem (bug, unavailability) related
+         to an attempt to answer a query.
+         &quot;&quot;&quot;
+         print &quot; ... problem answering the query (likely to %s) : %s&quot; \
+-              % (P2pErrbacks.lastAnswerTarget, failure.getTraceback())
+-    answerQueryProblem = staticmethod(answerQueryProblem)
++              % (target, failure.getTraceback())
++    return AP
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000563.html">[Maay-svncheckins] r591 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000565.html">[Maay-svncheckins] r593 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#564">[ date ]</a>
+              <a href="thread.html#564">[ thread ]</a>
+              <a href="subject.html#564">[ subject ]</a>
+              <a href="author.html#564">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

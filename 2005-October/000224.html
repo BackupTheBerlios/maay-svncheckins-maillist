@@ -1,0 +1,289 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r250 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r250%20-%20trunk/maay&In-Reply-To=%3C200510281313.j9SDDlje015260%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000223.html">
+   <LINK REL="Next"  HREF="000225.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r250 - trunk/maay</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r250%20-%20trunk/maay&In-Reply-To=%3C200510281313.j9SDDlje015260%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r250 - trunk/maay">dnf at berlios.de
+       </A><BR>
+    <I>Fri Oct 28 15:13:47 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000223.html">[Maay-svncheckins] r249 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000225.html">[Maay-svncheckins] r251 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#224">[ date ]</a>
+              <a href="thread.html#224">[ thread ]</a>
+              <a href="subject.html#224">[ subject ]</a>
+              <a href="author.html#224">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-10-28 15:13:47 +0200 (Fri, 28 Oct 2005)
+New Revision: 250
+
+Modified:
+   trunk/maay/texttool.py
+Log:
+- fix makeAbstract function.
+- Add removeSpace in texttool for removing extra space in text before saving it into the database. But function do not work with unicode, why? So desactivate it.
+
+
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-28 12:21:21 UTC (rev 249)
++++ trunk/maay/texttool.py	2005-10-28 13:13:47 UTC (rev 250)
+@@ -27,11 +27,16 @@
+ import gzip
+ import bz2
+ from cStringIO import StringIO
++from sets import Set
+ 
+ from maay.exif import get_ustring_from_exif
+ 
+ WORD_MIN_LEN = 2
+ WORD_MAX_LEN = 50
++
++MAX_EXCERPT = 3 
++EXCERPT_MAX_LEN = 70
++
+ MAX_STORED_SIZE = 65535
+ 
+ WORDS_RGX = re.compile(r'\w{%s,%s}' % (WORD_MIN_LEN, WORD_MAX_LEN)) 
+@@ -62,6 +67,7 @@
+         FF FE           UTF-16, little-endian
+         EF BB BF        UTF-8
+     &quot;&quot;&quot;
++
+     if filename.endswith(&quot;.gz&quot;):
+         stream = gzip.open(filename, 'rb')
+     elif filename.endswith(&quot;.bz2&quot;):
+@@ -128,8 +134,8 @@
+         When a title cannot be computed from file content,
+         the last component of the filepath is used instead
+         &quot;&quot;&quot;
+-        encoding = encoding or guessEncoding(filepath)
+         try:
++            encoding = encoding or guessEncoding(filepath)
+             stream = universalOpen(filepath, 'rb', encoding, errors='ignore')
+         except LookupError:
+             raise ParsingError('Unsupported document encoding %s' % encoding)
+@@ -300,6 +306,27 @@
+     return text.translate(table)
+ del _table2
+     
++# function do not work with unicode, TODO: fix it...
++# (use for remove extra space in text before saving it in the database)
++# desactivated...
++def removeSpace(text):
++    return text
++    rgx = re.compile('\s+')
++    s = StringIO()
++    lastStart = 0
++    end = 0
++    for occurence in rgx.finditer(text):
++        wordFound = occurence.group(0)
++        start, end = occurence.start(), occurence.end()
++        if start &gt; 0:
++            s.write(&quot; &quot;)
++        s.write(&quot;%s&quot; % text[lastStart:start])
++        lastStart = end
++
++    s.write(text[end:])
++    return u&quot;%s&quot; % s.getvalue()
++
++
+ def boldifyText(text, words):
+     rgx = re.compile('|'.join(words), re.I)
+     s = StringIO()
+@@ -313,66 +340,119 @@
+         lastStart = end
+ 
+     s.write(text[end:])
+-    return s.getvalue()
++    return u&quot;%s&quot; % s.getvalue()
+ 
+ def makeAbstract(text, words):
+     &quot;&quot;&quot;return excerpts of the original text surrounding the word occurrences
+     XXX: this is a less quick and dirty implementation
+     &quot;&quot;&quot;
+ 
+-    # To build the abstract, we only display the first occurrence of each
+-    # word in the text.
+-    # Each occurrence is shown in an excerpt (approx 60 caracters).
+-    # If two excerpts are close, we merge them into one.
++    text = untagText(text)
++    text_length = len(text)
+ 
++    EXCERPT_MAX_HALF_LEN = EXCERPT_MAX_LEN / 2
++
++    # quick and dirty regex...
++    rgx = re.compile('\W' + '\W|\W'.join(words) + '\W', re.I)
++
++    #
++    # Get the best excerpt for the abstract :
++    # - excerpt for most words of the query
++    # - first occurence of words
++    #
++
++    # wordOccurrences[word] = #nb of occurences
++    wordOccurrences = {}
++
+     # excerptPositions = [(word,position)]
+     excerptPositions = []
+ 
+-    text = untagText(text)
+-    text_length = len(text)
++    for occurence in rgx.finditer(text):
++        foundWord = occurence.group(0)
++        start, end = occurence.start(), occurence.end()
+ 
+-    for word in words:
+-        m = re.search(word, text, re.I)
+-        if m:
+-            excerptPositions.append((word, m.start()))
++        if len(excerptPositions) &gt;= MAX_EXCERPT:
++            # remove one of excerpts which is the more frequent
++            max_occurence = 0
++            for word, occurence in wordOccurrences.items():
++                max_occurence = max(occurence, max_occurence)
+ 
++            if wordOccurrences.get(foundWord) == max_occurence:
++                continue
++                
++            for i in xrange(len(excerptPositions) - 1, 0, -1):
++                if wordOccurrences[excerptPositions[i][0]] == max_occurence:
++                    wordOccurrences[excerptPositions[i][0]] -= 1
++                    if wordOccurrences[excerptPositions[i][0]] == 0:
++                        del wordOccurrences[excerptPositions[i][0]]
++                    del excerptPositions[i]
++
++        if wordOccurrences.has_key(foundWord):
++            wordOccurrences[foundWord] += 1
++        else:
++            wordOccurrences[foundWord] = 1
++
++        excerptPositions.append((foundWord, start))
++
++        if len(wordOccurrences.keys()) &gt;= MAX_EXCERPT or (len(wordOccurrences.keys()) == len(words) and len(excerptPositions) == MAX_EXCERPT):
++            break
++
++    #
++    # Build abstract
++    #
++
+     if not excerptPositions:
+-        return text[:200]
++        if text_length &gt;= 200:
++            end = 200
++            while text[end].isalpha(): end -= 1
++            return text[:end] + &quot; &lt;b&gt;...&lt;/b&gt;&quot;
++        else:
++            return text
+ 
+-    # sort by position
+-    excerptPositions.sort(lambda x, y: x[1] - y [1])
+-
+     s = StringIO()
+     start = -1
+     last_position = -100
+     last_word = 0
+ 
+     for word, position in excerptPositions:
+-        if position - last_position &lt; 30:
++        if position - last_position &lt; EXCERPT_MAX_LEN:
+             last_position = position
+             last_word = word
+             continue
+             
+         if start !=-1:
+-            end = min(last_position + 30 + len(last_word), text_length - 1)
+-            while not text[end].isspace():
+-                end -= 1
+-            s.write(&quot; &lt;b&gt;...&lt;/b&gt;&quot;)
++            end = last_position + EXCERPT_MAX_LEN + len(last_word)
++            if end &gt;= text_length:
++                end = text_length
++            else:
++                while text[end].isalpha():
++                   end -= 1
++
++            if start &gt; 0:
++                s.write(&quot; &lt;b&gt;...&lt;/b&gt; &quot;)
+             s.write(boldifyText(text[start:end], words))
+-            print &quot;makeAbstract : repl = %s&quot; % str('|'.join(words))
+ 
+-        start = max(0, position - 30)
+-        while not text[start].isspace(): start += 1
++        start = position - EXCERPT_MAX_HALF_LEN
++        if start &lt; 0:
++            start = 0
++        else:
++            while text[start].isalpha(): start += 1
+ 
+         last_position = position
+         last_word = word
+ 
+-    end = min(last_position + 30 + len(word), text_length - 1)
+-    while not text[end].isspace():
+-        end -= 1
+-    s.write(&quot;&lt;b&gt;...&lt;/b&gt;&quot;)
++    if start &gt; 0:
++        s.write(&quot; &lt;b&gt;...&lt;/b&gt; &quot;)
++    end = last_position + EXCERPT_MAX_HALF_LEN + len(word)
++    if end &gt;= text_length:
++        end = text_length
++    else:
++        while text[end].isalpha():
++            end -= 1
+     s.write(boldifyText(text[start:end], words))
+-    s.write(&quot;&lt;b&gt;...&lt;/b&gt;&quot;)
+ 
++    if end &lt; text_length:
++        s.write(&quot; &lt;b&gt;...&lt;/b&gt;&quot;)
++
+     return u&quot;%s&quot; % s.getvalue()
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000223.html">[Maay-svncheckins] r249 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000225.html">[Maay-svncheckins] r251 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#224">[ date ]</a>
+              <a href="thread.html#224">[ thread ]</a>
+              <a href="subject.html#224">[ subject ]</a>
+              <a href="author.html#224">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

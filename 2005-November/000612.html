@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r640 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r640%20-%20trunk&In-Reply-To=%3C200511240749.jAO7nUjK010848%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000611.html">
+   <LINK REL="Next"  HREF="000613.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r640 - trunk</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r640%20-%20trunk&In-Reply-To=%3C200511240749.jAO7nUjK010848%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r640 - trunk">adimasci at berlios.de
+       </A><BR>
+    <I>Thu Nov 24 08:49:30 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000611.html">[Maay-svncheckins] r639 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000613.html">[Maay-svncheckins] r641 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#612">[ date ]</a>
+              <a href="thread.html#612">[ thread ]</a>
+              <a href="subject.html#612">[ subject ]</a>
+              <a href="author.html#612">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-24 08:49:13 +0100 (Thu, 24 Nov 2005)
+New Revision: 640
+
+Modified:
+   trunk/README.txt
+   trunk/ReleaseNotes.txt
+   trunk/setup.py
+Log:
+updated release and setup files
+
+Modified: trunk/README.txt
+===================================================================
+--- trunk/README.txt	2005-11-23 20:31:04 UTC (rev 639)
++++ trunk/README.txt	2005-11-24 07:49:13 UTC (rev 640)
+@@ -80,6 +80,7 @@
+ following pieces of information:
+ 
+  * operating system
++ * version and name of browser
+  * version of maay
+  * on unix: version of python
+  * steps to reproduce the bug
+
+Modified: trunk/ReleaseNotes.txt
+===================================================================
+--- trunk/ReleaseNotes.txt	2005-11-23 20:31:04 UTC (rev 639)
++++ trunk/ReleaseNotes.txt	2005-11-24 07:49:13 UTC (rev 640)
+@@ -1,18 +1,19 @@
+-Release Notes for version 0.2.2
++Release Notes for version 0.2.4
+ 
+ See README.txt for installation and quick start instructions. 
+ 
+ This release is beta-level software, which contains several bug fixes
+-and improvements over 0.2.1. 
++and improvements over 0.2.2. The 0.2.3 version was not released
++officially, and only contains a few bugfixes concerning the 
++windows services management.
+ 
+-There may be some problems with the web interface when accessed
+-through Microsoft Internet Explorer. Please give some feedback on
+-using Maay with this web browser.  Using Firefox or Mozilla should
+-work fine.
++If you encounter any problem with the web interface (like 
++never ending requests, pages not updated), please notify us and
++describe the problem. In this case, don't forget to mention which
++browser (name and version) and which platform you're using.
+ 
+ The windows installer will install and set up all the required
+ dependencies (including mysql and twisted). It uses Inno Setup and
+ Py2exe.
+ 
+ 
+-
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-11-23 20:31:04 UTC (rev 639)
++++ trunk/setup.py	2005-11-24 07:49:13 UTC (rev 640)
+@@ -23,7 +23,7 @@
+ import sys
+ from glob import glob
+ 
+-version = '0.2.1'
++version = '0.2.4' # This should be imported from the maay package
+ author = &quot;France Telecom R&amp;D&quot;
+ author_email = &quot;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">maay-dev at lists.berlios.de</A>&quot;
+ copyright = &quot;Copyright (c)2004-2005 France Telecom R&amp;D&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000611.html">[Maay-svncheckins] r639 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000613.html">[Maay-svncheckins] r641 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#612">[ date ]</a>
+              <a href="thread.html#612">[ thread ]</a>
+              <a href="subject.html#612">[ subject ]</a>
+              <a href="author.html#612">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r413 - in trunk/maay: . configuration configuration/win32 test/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r413%20-%20in%20trunk/maay%3A%20.%20configuration%20configuration/win32%20test/data&In-Reply-To=%3C200511101554.jAAFs3mG015975%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000388.html">
+   <LINK REL="Next"  HREF="000390.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r413 - in trunk/maay: . configuration configuration/win32 test/data</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r413%20-%20in%20trunk/maay%3A%20.%20configuration%20configuration/win32%20test/data&In-Reply-To=%3C200511101554.jAAFs3mG015975%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r413 - in trunk/maay: . configuration configuration/win32 test/data">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Nov 10 16:54:03 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000388.html">[Maay-svncheckins] r412 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000390.html">[Maay-svncheckins] r414 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#389">[ date ]</a>
+              <a href="thread.html#389">[ thread ]</a>
+              <a href="subject.html#389">[ subject ]</a>
+              <a href="author.html#389">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-10 16:53:56 +0100 (Thu, 10 Nov 2005)
+New Revision: 413
+
+Modified:
+   trunk/maay/configuration.py
+   trunk/maay/configuration/node.ini
+   trunk/maay/configuration/win32/node.ini
+   trunk/maay/test/data/webapp1.ini
+   trunk/maay/test/data/webapp2.ini
+Log:
+a few servers that passed through the tests
+
+
+Modified: trunk/maay/configuration/node.ini
+===================================================================
+--- trunk/maay/configuration/node.ini	2005-11-10 15:27:39 UTC (rev 412)
++++ trunk/maay/configuration/node.ini	2005-11-10 15:53:56 UTC (rev 413)
+@@ -1,4 +1,4 @@
+-[SERVER]
++[NODE]
+ db-name=maay
+ db-host=localhost
+ user=maay
+
+Modified: trunk/maay/configuration/win32/node.ini
+===================================================================
+--- trunk/maay/configuration/win32/node.ini	2005-11-10 15:27:39 UTC (rev 412)
++++ trunk/maay/configuration/win32/node.ini	2005-11-10 15:53:56 UTC (rev 413)
+@@ -1,4 +1,4 @@
+-[SERVER]
++[NODE]
+ db-name=maay
+ db-host=localhost
+ user=maay
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-10 15:27:39 UTC (rev 412)
++++ trunk/maay/configuration.py	2005-11-10 15:53:56 UTC (rev 413)
+@@ -194,7 +194,7 @@
+           }),
+         ]
+ 
+-    config_file = 'Node.ini'
++    config_file = 'node.ini'
+ 
+     def __init__(self):
+         Configuration.__init__(self, name=&quot;Node&quot;)
+
+Modified: trunk/maay/test/data/webapp1.ini
+===================================================================
+--- trunk/maay/test/data/webapp1.ini	2005-11-10 15:27:39 UTC (rev 412)
++++ trunk/maay/test/data/webapp1.ini	2005-11-10 15:53:56 UTC (rev 413)
+@@ -1,2 +1,2 @@
+-[SERVER]
++[NODE]
+ db-host=eusebius
+
+Modified: trunk/maay/test/data/webapp2.ini
+===================================================================
+--- trunk/maay/test/data/webapp2.ini	2005-11-10 15:27:39 UTC (rev 412)
++++ trunk/maay/test/data/webapp2.ini	2005-11-10 15:53:56 UTC (rev 413)
+@@ -1,2 +1,2 @@
+-[SERVER]
++[NODE]
+ db-name=muche
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000388.html">[Maay-svncheckins] r412 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000390.html">[Maay-svncheckins] r414 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#389">[ date ]</a>
+              <a href="thread.html#389">[ thread ]</a>
+              <a href="subject.html#389">[ subject ]</a>
+              <a href="author.html#389">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

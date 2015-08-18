@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r540 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r540%20-%20trunk/maay&In-Reply-To=%3C200511170957.jAH9vYur031690%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000510.html">
+   <LINK REL="Next"  HREF="000512.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r540 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r540%20-%20trunk/maay&In-Reply-To=%3C200511170957.jAH9vYur031690%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r540 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov 17 10:57:34 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000510.html">[Maay-svncheckins] r539 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000512.html">[Maay-svncheckins] r541 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#511">[ date ]</a>
+              <a href="thread.html#511">[ thread ]</a>
+              <a href="subject.html#511">[ subject ]</a>
+              <a href="author.html#511">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-17 10:57:30 +0100 (Thu, 17 Nov 2005)
+New Revision: 540
+
+Modified:
+   trunk/maay/presenceserver.py
+Log:
+Remove spurious print
+
+
+Modified: trunk/maay/presenceserver.py
+===================================================================
+--- trunk/maay/presenceserver.py	2005-11-17 09:55:47 UTC (rev 539)
++++ trunk/maay/presenceserver.py	2005-11-17 09:57:30 UTC (rev 540)
+@@ -109,7 +109,6 @@
+     def do_logout(self, nodeId):
+         try:
+             print &quot;%s logout&quot; % str(PresenceServer._registeredUsers[nodeId])
+-            print &quot;???&quot;, PresenceServer._registeredUsers[nodeId]
+             ip, port = PresenceServer._registeredUsers[nodeId] [2:4]
+             del PresenceServer._registeredUsers[nodeId]
+             del PresenceServer._ruTimestamp[nodeId]
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000510.html">[Maay-svncheckins] r539 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000512.html">[Maay-svncheckins] r541 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#511">[ date ]</a>
+              <a href="thread.html#511">[ thread ]</a>
+              <a href="subject.html#511">[ subject ]</a>
+              <a href="author.html#511">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

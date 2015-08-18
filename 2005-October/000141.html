@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r168 - trunk/maay/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r168%20-%20trunk/maay/data&In-Reply-To=%3C200510070902.j9792lWp002758%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000140.html">
+   <LINK REL="Next"  HREF="000142.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r168 - trunk/maay/data</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r168%20-%20trunk/maay/data&In-Reply-To=%3C200510070902.j9792lWp002758%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r168 - trunk/maay/data">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Oct  7 11:02:47 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000140.html">[Maay-svncheckins] r167 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000142.html">[Maay-svncheckins] r169 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#141">[ date ]</a>
+              <a href="thread.html#141">[ thread ]</a>
+              <a href="subject.html#141">[ subject ]</a>
+              <a href="author.html#141">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-07 11:02:40 +0200 (Fri, 07 Oct 2005)
+New Revision: 168
+
+Modified:
+   trunk/maay/data/searchform.html
+Log:
+fixed the &quot;login&quot; link bug on search form
+(Impressive how certain I was to have checked for that ....)
+
+The fix makes me think that we should use kind of ZPT macors
+for our Pages. Need to investigate on how to do that with Nevow
+
+
+
+Modified: trunk/maay/data/searchform.html
+===================================================================
+--- trunk/maay/data/searchform.html	2005-10-07 08:56:08 UTC (rev 167)
++++ trunk/maay/data/searchform.html	2005-10-07 09:02:40 UTC (rev 168)
+@@ -7,8 +7,8 @@
+     &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
+   &lt;/head&gt;
+  
+-  &lt;body&gt;
+-    &lt;a href=&quot;login&quot;&gt;Login&lt;/a&gt;    
++  &lt;body&gt; 
++    &lt;a nevow:render=&quot;loginurl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;loginurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;actionlabel&quot; /&gt;&lt;/a&gt;
+     &lt;table class=&quot;searchHome&quot;&gt;
+       &lt;tr&gt;
+ 	&lt;td&gt;&lt;img src=&quot;images/maay.png&quot; /&gt;&lt;/td&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000140.html">[Maay-svncheckins] r167 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000142.html">[Maay-svncheckins] r169 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#141">[ date ]</a>
+              <a href="thread.html#141">[ thread ]</a>
+              <a href="subject.html#141">[ subject ]</a>
+              <a href="author.html#141">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

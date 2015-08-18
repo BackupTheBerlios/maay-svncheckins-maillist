@@ -1,0 +1,251 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r491 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r491%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511151001.jAFA1CRr010642%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000461.html">
+   <LINK REL="Next"  HREF="000463.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r491 - in trunk/maay: . data</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r491%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511151001.jAFA1CRr010642%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r491 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 11:01:12 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000461.html">[Maay-svncheckins] r490 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000463.html">[Maay-svncheckins] r492 - trunk/maay/win32
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#462">[ date ]</a>
+              <a href="thread.html#462">[ thread ]</a>
+              <a href="subject.html#462">[ subject ]</a>
+              <a href="author.html#462">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-15 11:00:55 +0100 (Tue, 15 Nov 2005)
+New Revision: 491
+
+Modified:
+   trunk/maay/data/footer.html
+   trunk/maay/data/indexationpage.html
+   trunk/maay/data/maay.css
+   trunk/maay/data/searchform.html
+   trunk/maay/data/skeleton.html
+   trunk/maay/webapplication.py
+Log:
+Some esthetic modifications.
+Bug fixed in idnexationPage.
+
+
+
+Modified: trunk/maay/data/footer.html
+===================================================================
+--- trunk/maay/data/footer.html	2005-11-15 09:45:40 UTC (rev 490)
++++ trunk/maay/data/footer.html	2005-11-15 10:00:55 UTC (rev 491)
+@@ -4,8 +4,7 @@
+   &lt;hr/&gt;
+   &lt;table width=&quot;100%&quot;&gt;
+     &lt;tr&gt;
+-      &lt;td valign=&quot;top&quot;&gt;&lt;a href=&quot;/&quot; class=&quot;footlink&quot;&gt;[Main&nbsp;page]&lt;/a&gt;&lt;/td&gt;
+-      &lt;td valign=&quot;top&quot; width=&quot;100%&quot;&gt;&lt;a href=&quot;/indexation&quot; class=&quot;footlink&quot;&gt;[Indexation&nbsp;Page]&nbsp;&lt;/a&gt;&lt;/td&gt;
++      &lt;td valign=&quot;top&quot; width=&quot;100%&quot;&gt;&lt;a href=&quot;/&quot; class=&quot;footlink&quot;&gt;[Main&nbsp;page]&lt;/a&gt;&lt;/td&gt;
+       &lt;td valign=&quot;top&quot;&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot; class=&quot;footlink&quot;&gt;[Maay&nbsp;Home&nbsp;page]&lt;/a&gt;&lt;/td&gt;
+       &lt;td align=&quot;right&quot;&gt;&lt;img src=&quot;/images/logoFT.png&quot; /&gt;&lt;/td&gt;
+     &lt;/tr&gt;
+
+Modified: trunk/maay/data/indexationpage.html
+===================================================================
+--- trunk/maay/data/indexationpage.html	2005-11-15 09:45:40 UTC (rev 490)
++++ trunk/maay/data/indexationpage.html	2005-11-15 10:00:55 UTC (rev 491)
+@@ -21,11 +21,11 @@
+     &lt;/div&gt;
+   &lt;h2&gt;Public Directories&lt;/h2&gt;
+   &lt;h3&gt;Indexed&lt;/h3&gt;
+-    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;indexedprivatedirectories&quot;&gt;
++    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;indexedpublicdirectories&quot;&gt;
+       &lt;div class=&quot;indexedDirectoryName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
+     &lt;/div&gt;
+     &lt;h3&gt;Skipped&lt;/h3&gt;
+-    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;skippedprivatedirectories&quot;&gt;
++    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;skippedpublicdirectories&quot;&gt;
+       &lt;div class=&quot;skippedDirectoryName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
+     &lt;/div&gt;
+   &lt;hr /&gt;
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-15 09:45:40 UTC (rev 490)
++++ trunk/maay/data/maay.css	2005-11-15 10:00:55 UTC (rev 491)
+@@ -3,8 +3,20 @@
+ h1 { font-family: arial,helvetica; font-size: 14pt; color: #000000; font-weight:bold }
+ h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 12pt; font-style:italic ; font-weight: bold ; color: #444444}
+ h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; color: #888888}
++/** header ********/
++div.headlinks {
++  text-align: right;
++}
+ 
++a.headlink {
++  /* display: block; */
++  font-size: 70%;
++  color: #444444;
++  text-align: right;
++}
+ 
++
++
+ /** footer ********/
+ a.footlink {
+   /* display: block; */
+@@ -29,11 +41,33 @@
+   text-align: center;
+ }
+ 
+-div.resultItem {
++div.localPublicResult {
+   margin-top: 5px;
+   margin-bottom: 5px;
++  border-left-style: solid;
++  border-left-width: 4px;
++  border-left-color: #00ff00;
+ }
+ 
++div.localPrivateResult {
++  margin-top: 5px;
++  margin-bottom: 5px;
++  border-left-style: solid;
++  border-left-width: 4px;
++  border-left-color: #00ff00;
++}
++
++
++
++div.distantResult {
++  margin-top: 5px;
++  margin-bottom: 5px;
++  border-left-style: solid;
++  border-left-width: 4px;
++  border-left-color: #ff0000;
++}
++
++
+ div.resultDesc {
+   /* display: block; */
+   font-size: 90%;
+
+Modified: trunk/maay/data/searchform.html
+===================================================================
+--- trunk/maay/data/searchform.html	2005-11-15 09:45:40 UTC (rev 490)
++++ trunk/maay/data/searchform.html	2005-11-15 10:00:55 UTC (rev 491)
+@@ -21,6 +21,5 @@
+         &lt;/td&gt;
+       &lt;/tr&gt;
+     &lt;/table&gt;
+-  &lt;small&gt;&lt;p align=&quot;right&quot;&gt;&lt;a href=&quot;/indexation&quot;&gt;Indexation page&lt;/a&gt;&lt;/p&gt;&lt;/small&gt;
+   &lt;/nevow:invisible&gt;
+   
+
+Modified: trunk/maay/data/skeleton.html
+===================================================================
+--- trunk/maay/data/skeleton.html	2005-11-15 09:45:40 UTC (rev 490)
++++ trunk/maay/data/skeleton.html	2005-11-15 10:00:55 UTC (rev 491)
+@@ -6,7 +6,7 @@
+     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
+       &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
+   &lt;/head&gt;
+- 
++      &lt;div class=&quot;headlinks&quot;&gt;&lt;a href=&quot;/indexation&quot; class=&quot;headlink&quot;&gt;[Indexation&nbsp;Page]&nbsp;&lt;/a&gt;&lt;/div&gt;
+   &lt;body&gt;
+     &lt;nevow:invisible nevow:macro=&quot;body&quot; /&gt;
+     &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-15 09:45:40 UTC (rev 490)
++++ trunk/maay/webapplication.py	2005-11-15 10:00:55 UTC (rev 491)
+@@ -441,17 +441,24 @@
+     &quot;&quot;&quot;
+     docFactory = loaders.xmlstr(&quot;&quot;&quot;
+   &lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; &gt;
+-   &lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;&lt;span nevow:render=&quot;localcount&quot; /&gt; local results&lt;/a&gt;&lt;br/&gt;
+-   &lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;&lt;span nevow:render=&quot;distantcount&quot; /&gt; distant results&lt;/a&gt;&lt;br/&gt;
+-   &lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; results&lt;/a&gt;&lt;br/&gt;
+    &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;b&gt;&lt;nevow:slot name=&quot;start_result&quot; /&gt;&lt;/b&gt; - &lt;b&gt;&lt;nevow:slot name=&quot;end_result&quot; /&gt;&lt;/b&gt; of &lt;b&gt;&lt;nevow:slot name=&quot;count&quot; /&gt;&lt;/b&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
++   &lt;table&gt;
++     &lt;tr&gt;
++       &lt;td&gt;&lt;div class=&quot;localPublicResult&quot;&gt;&lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;&lt;span nevow:render=&quot;localcount&quot; /&gt; local&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
++       &lt;td&gt; - &lt;/td&gt;
++       &lt;td&gt; &lt;div class=&quot;distantResult&quot;&gt;&lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;&lt;span nevow:render=&quot;distantcount&quot; /&gt; distant&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
++       &lt;td&gt;-&lt;/td&gt;
++       &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; all&lt;/a&gt;&lt;/td&gt;
++     &lt;/tr&gt;
++   &lt;/table&gt;
+    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+     nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+     name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+     &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+       &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+         &lt;td&gt;
+-          &lt;div class=&quot;resultItem&quot;&gt;
++          &lt;div&gt;
++            &lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;resultClass&quot; /&gt;&lt;/nevow:attr&gt;
+             &lt;table&gt;
+               &lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot;/&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;
+                   &lt;td&gt;
+@@ -492,13 +499,17 @@
+     
+     def render_row(self, context, data):
+         document = data
++        print data
+         ResultsPageMixIn.render_row(self, context, data)
+         if document.host == 'localhost':
+             baseurl = '/download?docid=%s' % (document.document_id,)
+             context.fillSlots('linkClass', &quot;docTitle&quot;)
++            # TODO: make a difference between private and public results
++            context.fillSlots('resultClass', &quot;localPublicResult&quot;)
+         else:
+             baseurl = '/distantfile?docid=%s' % (document.document_id,)
+             context.fillSlots('linkClass', &quot;distantDocTitle&quot;)
++            context.fillSlots('resultClass', &quot;distantResult&quot;)
+             baseurl += '&amp;host=%s' % (document.host,)
+             baseurl += '&amp;port=%s' % (document.port,)
+         baseurl += '&amp;filename=%s' % osp.basename(document.url)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000461.html">[Maay-svncheckins] r490 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000463.html">[Maay-svncheckins] r492 - trunk/maay/win32
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#462">[ date ]</a>
+              <a href="thread.html#462">[ thread ]</a>
+              <a href="subject.html#462">[ subject ]</a>
+              <a href="author.html#462">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

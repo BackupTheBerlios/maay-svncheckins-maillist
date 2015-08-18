@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r63 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r63%20-%20trunk/maay&In-Reply-To=%3C200509211600.j8LG0SuU017927%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000036.html">
+   <LINK REL="Next"  HREF="000038.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r63 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r63%20-%20trunk/maay&In-Reply-To=%3C200509211600.j8LG0SuU017927%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r63 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Sep 21 18:00:28 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000036.html">[Maay-svncheckins] r62 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000038.html">[Maay-svncheckins] r64 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#37">[ date ]</a>
+              <a href="thread.html#37">[ thread ]</a>
+              <a href="subject.html#37">[ subject ]</a>
+              <a href="author.html#37">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-09-21 18:00:27 +0200 (Wed, 21 Sep 2005)
+New Revision: 63
+
+Modified:
+   trunk/maay/querier.py
+Log:
+fix bad syntax in generated SQL query
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-21 15:24:21 UTC (rev 62)
++++ trunk/maay/querier.py	2005-09-21 16:00:27 UTC (rev 63)
+@@ -85,15 +85,16 @@
+         if not words:
+             return []
+         columns = ['document_id', 'title', 'size', 'text', 'url', 'mime_type']
+-        args = {'words' : '(' + ','.join([repr(word) for word in words]) + ')',
++        args = {# 'words' : words, # '(' + ','.join([repr(word) for word in words]) + ')',
+                 'lenwords' : len(words)}
++        strwords = '(' + ','.join([repr(word) for word in words]) + ')'
+         # XXX: what is the HAVING clause supposed to do ?
+         query = &quot;&quot;&quot;SELECT %s
+                     FROM documents D, document_scores DS 
+-                    WHERE DS.db_document_id=D.db_document_id AND DS.word IN %%(words)s
++                    WHERE DS.db_document_id=D.db_document_id AND DS.word IN %s
+                     GROUP BY DS.db_document_id
+                     HAVING count(DS.db_document_id) = %%(lenwords)s&quot;&quot;&quot; % (
+-            ['D.%s' % col for col in columns])
++            ', '.join(['D.%s' % col for col in columns]), strwords)
+         # for each row, build a dict from list of couples (attrname, value)
+         # and build a DBEntity from this dict
+         results = [Document(**dict(zip(columns, row)))
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000036.html">[Maay-svncheckins] r62 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000038.html">[Maay-svncheckins] r64 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#37">[ date ]</a>
+              <a href="thread.html#37">[ thread ]</a>
+              <a href="subject.html#37">[ subject ]</a>
+              <a href="author.html#37">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

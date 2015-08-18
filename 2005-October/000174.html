@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r203 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r203%20-%20trunk/maay&In-Reply-To=%3C200510191543.j9JFhM7g028525%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000173.html">
+   <LINK REL="Next"  HREF="000175.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r203 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r203%20-%20trunk/maay&In-Reply-To=%3C200510191543.j9JFhM7g028525%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r203 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Oct 19 17:43:22 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000173.html">[Maay-svncheckins] r202 - in trunk/maay: . test/data
+</A></li>
+        <LI>Next message: <A HREF="000175.html">[Maay-svncheckins] r204 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#174">[ date ]</a>
+              <a href="thread.html#174">[ thread ]</a>
+              <a href="subject.html#174">[ subject ]</a>
+              <a href="author.html#174">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-19 17:43:21 +0200 (Wed, 19 Oct 2005)
+New Revision: 203
+
+Modified:
+   trunk/maay/dbentity.py
+Log:
+- revert first try at including title in the list of words (cf. lasts checkins)
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-10-19 15:41:40 UTC (rev 202)
++++ trunk/maay/dbentity.py	2005-10-19 15:43:21 UTC (rev 203)
+@@ -21,6 +21,7 @@
+            'Word', 'Node', 'NodeInterest']
+ 
+ import re
++from sets import Set
+ 
+ from maay.texttool import normalizeText, WORD_MIN_LEN, WORD_MAX_LEN
+ 
+@@ -177,14 +178,16 @@
+     # Caution : in the maay.orig branch, this parameter gets stored as
+     # a string containing a single integer, so values of state above 9
+     # are lost
+-    PUBLISHED_STATE = 1 &lt;&lt; 0
++    # XXX: only PUBLISHED and PRIVATE states are correctly handled
++    PRIVATE_STATE = 0 
++    PUBLISHED_STATE = 1 # &lt;&lt; 0
++
+     CACHED_STATE = 1 &lt;&lt; 1
+     KNOWN_STATE = 1 &lt;&lt; 2
+-    PRIVATE_STATE = 1 &lt;&lt; 3
+     UNKNOWN_STATE = 1 &lt;&lt; 9 ### FIXME : this gets stored in the
+-                           ### database as a char in table Document or
+-                           ### as a tinyint(4) in table files. Check
+-                           ### to see if you get 0 or something else.
++                            ### database as a char in table Document or
++                            ### as a tinyint(4) in table files. Check
++                            ### to see if you get 0 or something else.
+ 
+ 
+     attributes = ('db_document_id', 'document_id', 'mime_type', 'title',
+@@ -208,13 +211,12 @@
+         return self.text[:200]
+     abstract = property(get_abstract)
+ 
+-
+     def _selectContainingQuery(cls, words, mimetype=None, offset=0, allowPrivate=False):
++        if not words:
++            return ''
+         words = [normalizeText(unicode(w))
+                  for w in words
+-                 if WORD_MIN_LEN &lt;= len(w) &lt;= WORD_MAX_LEN]
+-        if not words:
+-            return ''
++                 if WORD_MIN_LEN &lt;= len(w) &lt;= WORD_MAX_LEN]        
+         # XXX mimetype handling is a HACK. It needs to be integrated
+         #     nicely in order to handle any kind of restrictions easily
+         if mimetype is not None:
+@@ -229,7 +231,7 @@
+         # Question: what is the HAVING clause supposed to do ?
+         # Answer: we select all documents containing one of the words
+         # that we are looking for, group them by their identifier, and
+-        # only keep those identifier which appeared once for each word
++        # only keep those identifiers which appeared once for each word
+         # we were looking for.
+         # XXX: LIMIT clause should be optional
+         query = (&quot;SELECT D.db_document_id, &quot;
+@@ -253,17 +255,20 @@
+     _selectContainingQuery = classmethod(_selectContainingQuery)
+ 
+     def selectContaining(cls, cursor, words, mimetype=None, offset=0, allowPrivate=False):
+-        query, params= cls._selectContainingQuery(words, mimetype,
+-                                                  offset=offset,
+-                                                  allowPrivate=allowPrivate)
++        query, params = cls._selectContainingQuery(words, mimetype,
++                                                   offset=offset,
++                                                   allowPrivate=allowPrivate)
+         if query:
+             cursor.execute(query, params)
+             results = cursor.fetchall()
+-            return [cls(**dict(zip(['db_document_id', 'document_id', 'title', 'size', 'text', 'url', 'mime_type', 'publication_time'],
++            return [cls(**dict(zip(['db_document_id', 'document_id', 'title',
++                                    'size', 'text', 'url', 'mime_type',
++                                    'publication_time'],
+                                    row)))
+                     for row in results]
+         else:
+-            return []
++            return [] 
++        
+     selectContaining = classmethod(selectContaining)
+     
+ 
+@@ -428,3 +433,4 @@
+     key = ('node_id', 'word')
+ 
+     
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000173.html">[Maay-svncheckins] r202 - in trunk/maay: . test/data
+</A></li>
+	<LI>Next message: <A HREF="000175.html">[Maay-svncheckins] r204 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#174">[ date ]</a>
+              <a href="thread.html#174">[ thread ]</a>
+              <a href="subject.html#174">[ subject ]</a>
+              <a href="author.html#174">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

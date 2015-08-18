@@ -1,0 +1,272 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r80 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r80%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509271353.j8RDrlDU014880%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000052.html">
+   <LINK REL="Next"  HREF="000054.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r80 - in trunk/maay: . test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r80%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509271353.j8RDrlDU014880%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r80 - in trunk/maay: . test">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Sep 27 15:53:47 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000052.html">[Maay-svncheckins] r79 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000054.html">[Maay-svncheckins] r81 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#53">[ date ]</a>
+              <a href="thread.html#53">[ thread ]</a>
+              <a href="subject.html#53">[ subject ]</a>
+              <a href="author.html#53">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-27 15:53:47 +0200 (Tue, 27 Sep 2005)
+New Revision: 80
+
+Modified:
+   trunk/maay/indexer.py
+   trunk/maay/querier.py
+   trunk/maay/rpc.py
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+Added verbosity control in indexer
+Various unicode checks in rpc communication
+Querying through the web interface works (but document cannot be retrieved yet)
+
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-09-27 13:52:04 UTC (rev 79)
++++ trunk/maay/indexer.py	2005-09-27 13:53:47 UTC (rev 80)
+@@ -7,7 +7,8 @@
+ 
+ __revision__ = '$Id$'
+ 
+-import os, stat
++import os
++import time
+ import sys
+ import sha
+ from xmlrpclib import ServerProxy, Binary
+@@ -49,6 +50,7 @@
+         port = self.indexerConfig.port
+         self.serverProxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port), allow_none=True)
+         self.cnxId = self.serverProxy.authenticate(username, password)
++        self.verbose = indexerConfig.verbose
+         if not self.cnxId:
+             raise MaayAuthenticationError(&quot;Failed to connect as '%s'&quot; % username)
+         
+@@ -61,23 +63,25 @@
+         for filename in self.getFileIterator():
+             lastModificationTime = os.path.getmtime(filename)
+             lastIndexationTime = self.getLastIndexationTime(filename)
+-            if lastIndexationTime &gt; lastModificationTime:
+-                print &quot;%s didn't change since last indexation&quot;
++            if lastIndexationTime &gt;= lastModificationTime:
++                if self.verbose:
++                    print &quot;%s didn't change since last indexation&quot; % filename
+             else:
+                 fileSize = os.path.getsize(filename)
+                 try:
+                     title, text, links, offset = converter.extractWordsFromFile(filename)
+                 except converter.IndexationFailure, exc:
+-                    print exc
++                    if self.verbose:
++                        print exc
+                     continue
+                 docId = makeDocumentId(filename)
+                 mime_type = mimetypes.guess_type(filename)[0]
+                 mime_type = mimetypes.guess_type(filename)
+ 
+-                self.indexDocument(filename, Binary(title), Binary(text), fileSize,
++                self.indexDocument(filename, title, text, fileSize,
+                                    lastModificationTime,
+                                    docId, mime_type, Document.PUBLISHED_STATE)
+-        # FIXME: do some cleanup of the database after indexing
++        # FIXME: do some cleanup of the database after indexing:
+         # * remove FileInfo for files that are no longer on disk
+         # * remove Documents with no corresponding files
+         
+@@ -90,7 +94,8 @@
+     def indexDocument(self, filename, title, text, fileSize,
+                       lastModTime, content_hash, mime_type, state,
+                       file_state=FileInfo.CREATED_FILE_STATE):
+-        print &quot;I should now update DB with all these new words ! (%s)&quot; % filename
++        if self.verbose:
++            print &quot;Requesting indexation of %s&quot; % filename
+         self.serverProxy.indexDocument(self.cnxId, filename, title, text,
+                                        fileSize, lastModTime, content_hash,
+                                        mime_type, state, file_state)
+@@ -166,6 +171,12 @@
+           'metavar': '&lt;csv&gt;', 'short': 's',
+           'help': 'skip this directory'
+           }),
++        ('verbose',
++         {'type': 'yn',
++          'metavar': '&lt;y or n&gt;', 'short': 'v',
++          'help': 'enable verbose mode',
++          &quot;default&quot;: False,
++          }),
+         ]
+ 
+     config_file = 'indexer.ini'
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-27 13:52:04 UTC (rev 79)
++++ trunk/maay/querier.py	2005-09-27 13:53:47 UTC (rev 80)
+@@ -87,7 +87,7 @@
+         &quot;&quot;&quot;Find all indexed documents containing all the words in the list&quot;&quot;&quot;
+         try:
+             cursor = self._cnx.cursor()
+-            return Document.selectContaining(cursor, xwords)
++            return Document.selectContaining(cursor, words)
+         finally:
+             cursor.close()
+ 
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-09-27 13:52:04 UTC (rev 79)
++++ trunk/maay/rpc.py	2005-09-27 13:53:47 UTC (rev 80)
+@@ -33,27 +33,24 @@
+ 
+     def xmlrpc_authenticate(self, username, password):
+         &quot;&quot;&quot;server authentication method&quot;&quot;&quot;
+-        print &quot;call authenticate&quot;
+         creds = UsernamePassword(username, password)
+         d = self.portal.login(creds, None, IQuerier)
+         d.addCallback(self._attachUser, username, password)
+         d.addErrback(lambda deferred: '')
+-        print &quot;done&quot;
+         return d
+ 
+     def xmlrpc_lastIndexationTime(self, cnxId, filename):
+-        print &quot;call lastIndexationTime&quot;
+         if self.cnxIsValid(cnxId):
+             querier = self._sessions[cnxId]
+             fileInfos = querier.getFileInformations(filename)
+             if len(fileInfos):
+                 time = fileInfos[0].file_time
+-            time = 0
++            else:
++                time = 0
+         else:
+             # XXX : could we return twisted.python.failure.Failure instance here ?
+             ## return Failure(ValueError(&quot;invalid connexion&quot;)
+             time = -1 # XXX: need to differenciate bad cnxId and no last mod time
+-        print 'done'
+         return time
+     
+     def xmlrpc_indexDocument(self, cnxId, filename, title, text, fileSize,
+@@ -63,16 +60,14 @@
+         :type title: xmlrpclib.Binary
+         :type text: xmlrpclib.Binary
+         &quot;&quot;&quot;
+-        print &quot;call indexDocument&quot;
+-        title = title.data
++        title = unicode(title, 'utf-8')
+         # Uh ? FIXME : encoding should be passed as a parameter
+-        text = unicode(text.data, 'ISO-8859-1') 
++        text = unicode(text, 'utf-8')
+         if self.cnxIsValid(cnxId):
+             querier = self._sessions[cnxId]
+             querier.indexDocument(filename, title, text, fileSize,
+                                   lastModifiedOn, content_hash, mime_type, state,
+                                   file_state)
+-        print &quot;done&quot;
+         return 0
+     
+     def cnxIsValid(self, cnxId):
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-09-27 13:52:04 UTC (rev 79)
++++ trunk/maay/test/test_texttool.py	2005-09-27 13:53:47 UTC (rev 80)
+@@ -71,9 +71,14 @@
+             ]
+ 
+     def test_parseDifficultFile(self):
+-        filename = join(DATADIR, 'node22.html')
+-        title, text, links, offset = self.parser.parseFile(filename)
+-        self.assertEquals(type(text), unicode)
+-
++        # This file has got some weird, non HTML compliant content
++        # and is not handled properly by HTMLParser 
++        stream = file(join(DATADIR, 'node22.html'))
++        data = stream.read()
++        stream.close()
++        title, text, links, offset = self.parser.parseString(data)
++        self.assertEquals(title, u'21 Porting to Python 2.3')
++        self.failUnless(len(text)&gt;10)
++        
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-09-27 13:52:04 UTC (rev 79)
++++ trunk/maay/texttool.py	2005-09-27 13:53:47 UTC (rev 80)
+@@ -9,8 +9,10 @@
+ 
+ WORD_MIN_LEN = 2
+ WORD_MAX_LEN = 50
++MAX_STORED_SIZE = 65535 # not actually used in the code for now,
++                        # because the db engine does the truncation
++                        # for us
+ 
+-MAX_STORED_SIZE = 65535
+ WORDS_RGX = re.compile(r'\w{%s,%s}' % (WORD_MIN_LEN, WORD_MAX_LEN)) 
+ 
+ 
+@@ -126,7 +128,7 @@
+     
+     def parseString(self, source):
+         self.feed(source)
+-        result = normalizeText(''.join(self.textbuf))
++        result = normalizeText(u''.join(self.textbuf))
+         return self.title, result, self.links, 0
+ 
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000052.html">[Maay-svncheckins] r79 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000054.html">[Maay-svncheckins] r81 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#53">[ date ]</a>
+              <a href="thread.html#53">[ thread ]</a>
+              <a href="subject.html#53">[ subject ]</a>
+              <a href="author.html#53">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

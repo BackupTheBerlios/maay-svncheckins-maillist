@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r422 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r422%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511111314.jABDEl3p012240%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000392.html">
+   <LINK REL="Next"  HREF="000394.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r422 - in trunk/maay: . test</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r422%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511111314.jABDEl3p012240%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r422 - in trunk/maay: . test">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Nov 11 14:14:47 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000392.html">[Maay-svncheckins] r421 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000394.html">[Maay-svncheckins] r423 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#393">[ date ]</a>
+              <a href="thread.html#393">[ thread ]</a>
+              <a href="subject.html#393">[ subject ]</a>
+              <a href="author.html#393">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-11 14:14:34 +0100 (Fri, 11 Nov 2005)
+New Revision: 422
+
+Modified:
+   trunk/maay/configuration.py
+   trunk/maay/test/test_configuration.py
+Log:
+- ImageConfiguration just extends BaseConfiguration
+- fixed lot of small bugs (missing imports, typos)
+
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-11 11:19:56 UTC (rev 421)
++++ trunk/maay/configuration.py	2005-11-11 13:14:34 UTC (rev 422)
+@@ -24,6 +24,7 @@
+ import sha
+ import platform
+ import time
++import stat
+ 
+ from logilab.common.configuration import Configuration as BaseConfiguration
+ 
+@@ -249,42 +250,6 @@
+                 continue
+         raise ValueError('Unable to find a writable directory to store the node id')
+ 
+-################ Image stuff 
+-
+-class NoThumbnailsDir(Exception):
+-    &quot;&quot;&quot;Represents impossibility to access or create RW the
+-       maay thumbnails dir repository&quot;&quot;&quot;
+-    pass
+-
+-class ImageConfiguration(Configuration):
+-    options = Configuration.options + [
+-        ('thumbnails-dir',
+-         {'type' : &quot;string&quot;, 'metavar' : &quot;--thumbnailsdir&quot;,
+-          'help' : &quot;Thumbnail files repository&quot;,
+-          'default' : '.maay_thumbnails'},)]
+-    config_file = 'image.ini'
+-
+-    def __init__(self):
+-        Configuration.__init__(self, name=&quot;Image&quot;)
+-
+-    def get_thumbnails_dir(self):
+-        &quot;&quot;&quot;Returns the complete path to Maay thumnails directory
+-           XXX: It will try to create the dir if absent&quot;&quot;&quot;
+-        path = osp.join(osp.expanduser('~'),
+-                        self.get('thumbnails-dir'))
+-        if not os.access(path, os.W_OK):
+-            try:
+-                os.makedirs(path, stat.S_IRWXU)
+-            except Exception, e:
+-                raise NoThumbnailsDir(&quot;Impossible to access or create %s. &quot;
+-                                      &quot;Cause : %e&quot; % (path, e))
+-        if os.access(path, os.W_OK): # yes, I'm paranoId
+-            return path
+-        else:
+-            raise NoThumbnailsDir(&quot;Access to %s is impossible.&quot; % path)
+-
+-
+-
+ ################ Indexer stuff 
+ 
+ class IndexerConfiguration(Configuration):
+@@ -360,3 +325,42 @@
+ 
+     def __init__(self):
+         Configuration.__init__(self, name=&quot;Indexer&quot;)
++
++################ Image stuff 
++
++class NoThumbnailsDir(Exception):
++    &quot;&quot;&quot;Represents impossibility to access or create RW the
++       maay thumbnails dir repository&quot;&quot;&quot;
++    pass
++
++class ImageConfiguration(BaseConfiguration):
++    options = [
++        ('thumbnails-dir',
++         {'type' : &quot;string&quot;, 'metavar' : &quot;--thumbnailsdir&quot;,
++          'help' : &quot;Thumbnail files repository&quot;,
++          'default' : '.maay_thumbnails'},)]
++    config_file = 'image.ini'
++
++    def __init__(self):
++        BaseConfiguration.__init__(self, options=self.options,
++                                   config_file=self.config_file,
++                                   name='Image')
++
++    def get_thumbnails_dir(self):
++        &quot;&quot;&quot;Returns the complete path to Maay thumnails directory
++           XXX: It will try to create the dir if absent&quot;&quot;&quot;
++        path = osp.join(osp.expanduser('~'),
++                        self.get('thumbnails-dir'))
++        if not os.access(path, os.W_OK):
++            try:
++                os.makedirs(path, stat.S_IRWXU)
++            except Exception, e:
++                raise NoThumbnailsDir(&quot;Impossible to access or create %s. &quot;
++                                      &quot;Cause : %s&quot; % (path, e))
++        if os.access(path, os.W_OK): # yes, I'm paranoId
++            return path
++        else:
++            raise NoThumbnailsDir(&quot;Access to %s is impossible.&quot; % path)
++
++
++
+
+Modified: trunk/maay/test/test_configuration.py
+===================================================================
+--- trunk/maay/test/test_configuration.py	2005-11-11 11:19:56 UTC (rev 421)
++++ trunk/maay/test/test_configuration.py	2005-11-11 13:14:34 UTC (rev 422)
+@@ -23,7 +23,7 @@
+ import re
+ 
+ from maay import configuration
+-from maay.configuration import NodeConfiguration
++from maay.configuration import NodeConfiguration, ImageConfiguration
+ 
+ class NodeConfigTC(unittest.TestCase):
+ 
+@@ -66,6 +66,18 @@
+         result = configuration._filter_files_with(files, os.R_OK)
+         self.assertEquals(result, ['.'])
+ 
++class ImageConfigurationTC(unittest.TestCase):
++    def setUp(self):
++        self.argvBackup = sys.argv
++
++    def tearDown(self):
++        sys.argv = self.argvBackup
++    
++    def testLoadNotClutteredByArgv(self):
++        sys.argv = &quot;indexer.py --private-index-dir=foo&quot;.split()
++        config = ImageConfiguration()
++        self.assertEquals(config.get('thumbnails-dir'), '.maay_thumbnails')
++        
+ if sys.platform == 'win32':
+     class Win32ConfigTC(unittest.TestCase):
+         def testUpdateEnvPath(self):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000392.html">[Maay-svncheckins] r421 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000394.html">[Maay-svncheckins] r423 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#393">[ date ]</a>
+              <a href="thread.html#393">[ thread ]</a>
+              <a href="subject.html#393">[ subject ]</a>
+              <a href="author.html#393">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,410 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r50 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r50%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509201208.j8KC88t5031540%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000023.html">
+   <LINK REL="Next"  HREF="000025.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r50 - in trunk/maay: . test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r50%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509201208.j8KC88t5031540%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r50 - in trunk/maay: . test">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Sep 20 14:08:08 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000023.html">[Maay-svncheckins] r49 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000025.html">[Maay-svncheckins] r51 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24">[ date ]</a>
+              <a href="thread.html#24">[ thread ]</a>
+              <a href="subject.html#24">[ subject ]</a>
+              <a href="author.html#24">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-20 14:08:08 +0200 (Tue, 20 Sep 2005)
+New Revision: 50
+
+Added:
+   trunk/maay/test/test_querier.py
+Modified:
+   trunk/maay/querier.py
+Log:
+Major rewrite. Needs reviewing.
+Added tests.
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-20 12:06:08 UTC (rev 49)
++++ trunk/maay/querier.py	2005-09-20 12:08:08 UTC (rev 50)
+@@ -8,6 +8,7 @@
+ from mimetypes import guess_type
+ import re
+ import time
++from string import maketrans, translate
+ 
+ from zope.interface import Interface, implements
+ import MySQLdb
+@@ -45,9 +46,6 @@
+     def insertDocumentInfo(docId, title, mimetype, text, size, publicationTime, url):
+         &quot;&quot;&quot;inserts a record in the document_infos table&quot;&quot;&quot;
+         
+-    def getScoresForDocument(document, text, links, offset):
+-        &quot;&quot;&quot;parse words from document's text and update DB infos&quot;&quot;&quot;
+-
+     def getDocumentWithId(docId):
+         &quot;&quot;&quot;searchs the DB for a document with id &lt;docId&gt; and builds a Document
+         instance with the results
+@@ -60,12 +58,19 @@
+ 
+         
+ class MaayQuerier:
+-    &quot;&quot;&quot;High-Level interface to Maay SQL database&quot;&quot;&quot;
++    &quot;&quot;&quot;High-Level interface to Maay SQL database.
++
++    The Querier receives requests from other components to insert or
++    read data in the SQL database and dutifully executes these
++    requests&quot;&quot;&quot;
++    
+     implements(IQuerier)
+     
+-    def __init__(self, host='', database='', user='', password=''):
+-        self._cnx = MySQLdb.connect(host=host, db=database,
+-                                    user=user, passwd=password)
++    def __init__(self, host='', database='', user='', password='', connection=None):
++        if connection is None:
++            connection = MySQLdb.connect(host=host, db=database,
++                                        user=user, passwd=password)
++        self._cnx = connection
+ 
+     def _execute(self, query, args=None):
+         cursor = self._cnx.cursor()
+@@ -75,6 +80,7 @@
+             results = cursor.fetchall()
+         except:
+             print &quot;GOT ERROR while executing %r/%s ... rollback&quot; % (query, args)
++            cursor.close()
+             self._cnx.rollback()
+         else:
+             cursor.close()
+@@ -110,86 +116,141 @@
+         cursor.close()
+         return results
+ 
+-    def insertDocument(self, docId, filename, title, text, links, offset,
+-                       fileSize, lastModTime, nodeID):
+-        mimetype = guess_type(filename)[0]
+-        doc = self.insertDocumentInfo(docId, title, mimetype, text, fileSize,
+-                                      lastModTime, filename)
+-        scores = self.getScoresForDocument(doc, text, links, offset)
++    def indexDocument(self, filename, title, text, fileSize, lastModifiedOn,
++                      content_hash, mime_type, state, file_state):
++        &quot;&quot;&quot;Inserts or update information in table documents, file_info, document_score and word&quot;&quot;&quot;
++        # XXX Decide if we can compute the content_hash and mime_type
++        # ourselves or if the indexer should do it and pass the values as an argument
+         cursor = self._cnx.cursor()
+-        dbDocumentScores = {}
+-        for documentScore in DocumentScore.buildElementsFromTable(cursor):
+-            dbDocumentScores[documentScore.word] = documentScore
+-        for word, position in scores.iteritems():
+-            try:
+-                dbDocumentScore = dbDocumentScores[word]
+-            except KeyError:
+-                update = False
+-                download_count = 0
+-            else:
+-                update = True
+-                download_count += dbDocumentScore.download_count
+-            documentScore = DocumentScore(doc.db_document_id, word, position,
+-                                          download_count, 0, 0)
+-            documentScore.commit(cursor, update)
+-        fileInfo = FileInfo(filename, lastModTime, doc.db_document_id,
+-                            Document.PUBLISHED_STATE,
+-                            FileInfo.CREATED_FILE_STATE)
+-        fileInfo.commit(cursor, update=False)
+-        provider = DocumentProvider(doc.db_document_id, nodeID, int(time.time()))
+-        provider.commit(cursor, update=False)
+ 
+-    def updateDocument(self, docId, filename, title, text, links, offset,
+-                       fileSize, lastModTime, nodeID):
+-        pass ## FIXME this is where adim and alf stopped porting the code
+-    
+-    def insertDocumentInfo(self, docId, title, mimetype, text, size,
+-                           publicationTime, url):
+-        downloadCount = 0 # XXX 
+-        # check if it exists first :
+-        title = MySQLdb.escape_string(title)
+-        text = MySQLdb.escape_string(text[:MAX_STORED_SIZE])
+-        url = MySQLdb.escape_string(url or &quot;&quot;)
+-        query = &quot;&quot;&quot;INSERT INTO documents (document_id, mime_type, title,
+-                                          size, text, publication_time,
+-                                          state, download_count, url,
+-                                          indexed)
+-                VALUES ('%s', '%s', '%s', '%s', '%s',
+-                        '%s', '%s',
+-                        '%s', '%s', '%s')
+-                &quot;&quot;&quot; %  (docId, mimetype, title, size, text,
+-                        publicationTime, Document.UNKNOWN_STATE,
+-                        downloadCount, url, 1)
+-        self._execute(query)
+-        return self.getDocumentWithId(docId)
++        # insert or update in table document
++        doc = Document.selectWhere(cursor, document_id = content_hash)
++        if not doc:
++            doc = Document(document_id = content_hash,
++                           title = title,
++                           text = text,
++                           size = fileSize,
++                           publication_time = lastModifiedOn,
++                           download_count = 0.,
++                           url = filename,
++                           matching = 0.,
++                           indexed = '1',
++                           state = state)
++            doc.commit(cursor, update=False)
++            doc = Document.selectWhere(cursor, document_id = content_hash)[0]
+ 
+-    def getScoresForDocument(self, document, text, links, offset):
+-        &quot;&quot;&quot;parse words from document's text and update DB infos&quot;&quot;&quot;
+-        scores = {}
+-        for match in WORDS_RGX.finditer(text):
++
++        # insert or update in table file_info
++        files = FileInfo.selectWhere(cursor,
++                                     db_document_id=doc.db_document_id,
++                                     file_name = filename)
++        if files:
++            file_info = files[0]
++            file_info.file_time = lastModifiedOn
++            file_info.state = state
++            file_info.file_state = file_state
++            file_info.commit(cursor, update=True)
++        else:
++            file_info = FileInfo(db_document_id = doc.db_document_id,
++                                 file_name = filename,
++                                 file_time = lastModifiedOn,
++                                 state = state,
++                                 file_state = file_state)
++            file_info.commit(cursor, update = False)
++
++        self._updateScores(self, cursor, doc.db_document_id, text)
++        cursor.close()
++
++
++    def _updateScores(self, cursor, db_document_id, text):
++        # insert or update in table document_score
++        db_scores = self._getScoresDict(db_document_id)
++        doc_scores = {}
++        # We update the document_score table only for the first
++        # occurence of the word in the document
++        for match in WORDS_RGX.finditer(normalize_word(text)):
+             word = match.group(0)
+-            word = word.lower()
+-            position = match.start() - offset
+-            if position &lt; 0:
+-                position = -1
+-            scores[word] = position
+-        return scores
+-                
+-    def getDocumentWithId(self, docId):
+-        &quot;&quot;&quot;searchs the DB for a document with id &lt;docId&gt; and builds a Document
+-        instance with the results
++            if word in doc_scores:
++                continue
++            doc_scores[word] = 0
++            position = match.start()
++            if word in db_scores :
++                if db_scores[word].position != position:
++                    db_scores[word].position = position
++                    db_scores[word].commit(cursor, update=True)
++            else:
++                # insert a row in the Word table if required
++                self._ensureWordInDatabase(word)
++                db_score = DocumentScore(db_document_id = db_document_id,
++                                         word = word,
++                                         position = position,
++                                         download_count = 0.,
++                                         relevance = 0.,
++                                         popularity = 0.)
++                db_score.commit(cursor, update = False)
++                    
+ 
+-        :return: `Document` or None if no document matches docId
+-        &quot;&quot;&quot;
+-        columns = ['db_document_id', 'document_id', 'mime_type', 'title',
+-                   'size', 'text', 'publication_time', 'state',
+-                   'download_count', 'url']
+-        query = 'SELECT %s FROM documents '\
+-                'WHERE document_id=%%(docId)s' % (', '.join(columns))
+-        results = self._execute(query, {'docId' : docId})
+-        if results:
+-            # build a dict from list of couples (attrname, value) from the
+-            # first row and build a DBEntity from this dict
+-            return Document(**dict(zip(columns, results[0])))
+-        else:
+-            return None
++    def _ensureWordInDatabase(self, cursor, word):
++        db_words = Word.selectWhere(cursor, word = word)
++        if not db_words:
++            db_word = Word(word = word,
++                           claim_count = 0.,
++                           download_count = 0.)
++            db_word.commit(cursor, update = False)
++        
++    def _getScoresDict(self, db_document_id):
++        _scores = DocumentScore.selectWhere(cursor, db_document_id = db_document_id)
++        db_scores = {}
++        while _scores:
++            score = _scores.pop()
++            db_scores[score.word] = score
++        return db_scores
++
++        
++_table = maketrans(
++                   '\xc0\xc1\xc2\xc3\xc4\xc5'
++                   '\xc7'
++                   '\xc8\xc9\xca\xcb'
++                   '\xcc\xcd\xce\xcf'
++                   '\xd0'
++                   '\xd1'
++                   '\xd2\xd3\xd4\xd5\xd6\xd8'
++                   '\xd9\xda\xdb\xdc'
++                   '\xdd'
++                   '\xe0\xe1\xe2\xe3\xe4\xe5'
++                   '\xe7'
++                   '\xe8\xe9\xea\xeb'
++                   '\xec\xed\xee\xef'
++                   '\xf0'
++                   '\xf1'
++                   '\xf2\xf3\xf4\xf5\xf6\xf8'
++                   '\xf9\xfa\xfb\xfc'
++                   '\xff'
++                   ,
++                   'aaaaaa'
++                   'c'
++                   'eeee'
++                   'iiii'
++                   'o'
++                   'n'
++                   'oooooo'
++                   'uuuu'
++                   'y'
++                   'aaaaaa'
++                   'c'
++                   'eeee'
++                   'iiii'
++                   'o'
++                   'n'
++                   'oooooo'
++                   'uuuu'
++                   'y'
++                   )
++def normalize_word(word, table=_table):
++    &quot;&quot;&quot;turns everything to lowercase, and converts accentuated
++    characters to non accentuated chars.&quot;&quot;&quot;
++    word = word.lower()
++    return translate(word, table)
++
++del maketrans
++del _table
+
+Added: trunk/maay/test/test_querier.py
+===================================================================
+--- trunk/maay/test/test_querier.py	2005-09-20 12:06:08 UTC (rev 49)
++++ trunk/maay/test/test_querier.py	2005-09-20 12:08:08 UTC (rev 50)
+@@ -0,0 +1,47 @@
++# -*- coding: iso-8859-1 -*-
++&quot;querier test cases&quot;&quot;&quot;
++
++import unittest
++import sha
++
++from logilab.common.testlib import MockConnection
++
++from maay.querier import MaayQuerier, normalize_word, Document, FileInfo
++
++
++
++class QuerierTC(unittest.TestCase):
++    def setUp(self):
++        self.cnx = MockConnection([])
++        self.querier = MaayQuerier(connection = self.cnx)
++    def tearDown(self):
++        self.cnx.close()
++
++    def test_execute(self):
++        answ = self.querier._execute('SELECT * FROM titi')
++        self.assertEquals(answ, [])
++
++    def testIndexDocument(self):
++        text = &quot;&quot;&quot;Le tartuffe, de Jean-Baptiste Poquelin, dit Moli&#232;re.
++
++Le petit chat est mort.&quot;&quot;&quot;
++        
++        self.querier.indexDocument('/tmp/Tartuffe.txt',
++                                   'Le Tartuffe',
++                                   text,
++                                   len(text),
++                                   30000,
++                                   sha.sha(text).hexdigest(),
++                                   'text',
++                                   Document.PUBLISHED_STATE,
++                                   FileInfo.CREATED_FILE_STATE)
++                                   
++                                   
++
++
++    def test_normalize_word(self):
++        self.assertEquals(normalize_word(&quot;&#201;t&#249;&#239;&#196;&#231;&quot;), &quot;etuiac&quot;)
++
++
++if __name__ == '__main__':
++    unittest.main()
+
+
+Property changes on: trunk/maay/test/test_querier.py
+___________________________________________________________________
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000023.html">[Maay-svncheckins] r49 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000025.html">[Maay-svncheckins] r51 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#24">[ date ]</a>
+              <a href="thread.html#24">[ thread ]</a>
+              <a href="subject.html#24">[ subject ]</a>
+              <a href="author.html#24">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

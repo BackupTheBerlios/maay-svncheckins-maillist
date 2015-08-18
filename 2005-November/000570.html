@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r598 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r598%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511211710.jALHAbEb001160%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000569.html">
+   <LINK REL="Next"  HREF="000571.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r598 - in trunk/maay: . data</H1>
+    <B>dnf at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r598%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511211710.jALHAbEb001160%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r598 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Mon Nov 21 18:10:37 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000569.html">[Maay-svncheckins] r597 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000571.html">[Maay-svncheckins] r599 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#570">[ date ]</a>
+              <a href="thread.html#570">[ thread ]</a>
+              <a href="subject.html#570">[ subject ]</a>
+              <a href="author.html#570">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-21 18:10:36 +0100 (Mon, 21 Nov 2005)
+New Revision: 598
+
+Modified:
+   trunk/maay/data/indexationpage.html
+   trunk/maay/data/maay.css
+   trunk/maay/indexer.py
+   trunk/maay/webapplication.py
+Log:
+Add documents statistics (public, private documents) in indexation page.
+
+TODO: 
+  - cache the privateDocumentCount, publicDocumentCount to not compute them each time the indexationpage is displayed or the searchForm is displayed.
+  - fix the porky way to pass the querier ref to the IndexationPage.
+
+
+
+Modified: trunk/maay/data/indexationpage.html
+===================================================================
+--- trunk/maay/data/indexationpage.html	2005-11-21 16:59:41 UTC (rev 597)
++++ trunk/maay/data/indexationpage.html	2005-11-21 17:10:36 UTC (rev 598)
+@@ -19,6 +19,16 @@
+   elt.innerHTML = msg;
+ }
+ 
++function updatePrivateDocumentCount(count) {
++  elt = document.getElementById('privateDocumentCount');
++  elt.innerHTML = count;
++}
++
++function updatePublicDocumentCount(count) {
++  elt = document.getElementById('publicDocumentCount');
++  elt.innerHTML = count;
++}
++
+     &lt;/script&gt;
+   &lt;/head&gt;
+   &lt;body onload=&quot;live();&quot;&gt;
+@@ -34,21 +44,26 @@
+   &lt;div class=&quot;message&quot;&gt;&lt;b&gt;Status: &lt;/b&gt;&lt;span id=&quot;statusMessage&quot;&gt;&lt;span nevow:render=&quot;message&quot; /&gt;&lt;/span&gt;&lt;/div&gt;
+   &lt;br /&gt;
+   &lt;h2&gt;Search these private folders&lt;/h2&gt;
++   &lt;div class=&quot;documentCount&quot;&gt;&lt;span id=&quot;privateDocumentCount&quot;&gt;&lt;span nevow:render=&quot;privateDocumentCount&quot; /&gt;&lt;/span&gt; private documents.&lt;/div&gt;
+    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;privatefolders&quot;&gt;
+       &lt;div class=&quot;indexedFolderName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/indexation?removePrivateFolder=&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/nevow:attr&gt;X&lt;/a&gt; - &lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
+    &lt;/div&gt;
++   &lt;br /&gt;
+     &lt;input type=&quot;text&quot; name=&quot;addPrivateFolder&quot; size=&quot;50&quot; /&gt;
+     &lt;input type=&quot;submit&quot; value=&quot;Add&quot; /&gt;
+   &lt;h2&gt;Search/Publish these public folders&lt;/h2&gt;
++   &lt;div class=&quot;documentCount&quot;&gt;&lt;span id=&quot;publicDocumentCount&quot;&gt;&lt;span nevow:render=&quot;publicDocumentCount&quot; /&gt;&lt;/span&gt; public documents.&lt;/div&gt;
+     &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;publicfolders&quot;&gt;
+       &lt;div class=&quot;indexedFolderName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/indexation?removePublicFolder=&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/nevow:attr&gt;X&lt;/a&gt; - &lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
+     &lt;/div&gt;
++    &lt;br /&gt;
+     &lt;input type=&quot;text&quot; name=&quot;addPublicFolder&quot; size=&quot;50&quot; /&gt;
+     &lt;input type=&quot;submit&quot; value=&quot;Add&quot; /&gt;
+   &lt;h2&gt;Don't search these folders&lt;/h2&gt;
+     &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;skippedfolders&quot;&gt;
+       &lt;div class=&quot;skippedFolderName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/indexation?removeSkippedFolder=&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/nevow:attr&gt;X&lt;/a&gt; - &lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
+     &lt;/div&gt;
++    &lt;br /&gt;
+     &lt;input type=&quot;text&quot; name=&quot;addSkippedFolder&quot; size=&quot;50&quot; /&gt;
+     &lt;input type=&quot;submit&quot; value=&quot;Add&quot; /&gt;
+  
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-21 16:59:41 UTC (rev 597)
++++ trunk/maay/data/maay.css	2005-11-21 17:10:36 UTC (rev 598)
+@@ -143,14 +143,18 @@
+ 
+ 
+ /** indexation page *******/
++div.documentCount {
++  font-size: 80%;
++}
++
+ div.indexedFolderName {
+-  font-size: 60%;
++  font-size: 80%;
+   color: #448844; 
+   margin-left: 10px;
+ }
+ 
+ div.skippedFolderName {
+-  font-size: 60%;
++  font-size: 80%;
+   color: #884444; 
+   margin-left: 10px;
+ }
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-21 16:59:41 UTC (rev 597)
++++ trunk/maay/indexer.py	2005-11-21 17:10:36 UTC (rev 598)
+@@ -257,7 +257,7 @@
+                 print &quot;Error indexing %s: %s&quot; % \
+                       (safe_encode(futureDoc.filename), exc)
+         for obs in self.observers:
+-            obs.newDocumentIndexed(futureDoc.filename)
++            obs.newDocumentIndexed(futureDoc.filename, futureDoc.state)
+ 
+ ######### FileIterator
+ 
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-21 16:59:41 UTC (rev 597)
++++ trunk/maay/webapplication.py	2005-11-21 17:10:36 UTC (rev 598)
+@@ -116,6 +116,11 @@
+     # share counter among instances
+     indexedDocuments = 0
+     untouchedDocuments = 0
++
++    privateDocuments = 0
++    publicDocuments = 0
++
++    querier = None
+     
+     def __init__(self):
+         athena.LivePage.__init__(self)
+@@ -140,11 +145,30 @@
+     def updateStatus(self, message):
+         self.callRemote('updateStatus', message)
+ 
+-    def newDocumentIndexed(self, filename):
++    def updateDocumentStats(self):
++        docCounts = IndexationPage.querier.getDocumentCount()
++        IndexationPage.privateDocuments = docCounts[Document.PRIVATE_STATE]
++        IndexationPage.publicDocuments = docCounts[Document.PUBLISHED_STATE]
++
++    def updatePrivateDocumentCount(self):
++        self.callRemote('updatePrivateDocumentCount', IndexationPage.privateDocuments)
++
++    def updatePublicDocumentCount(self):
++        self.callRemote('updatePublicDocumentCount', IndexationPage.publicDocuments)
++
++    def newDocumentIndexed(self, filename, state):
+         IndexationPage.indexedDocuments += 1
++
++        if state == Document.PRIVATE_STATE:
++            IndexationPage.privateDocuments += 1
++        elif state == Document.PUBLIC_STATE:
++            IndexationPage.publicDocuments += 1
++
+         if (IndexationPage.indexedDocuments % 10) == 0:
+             self.updateStatus(u'Indexation in progress - %s new documents / %s total'
+                 % (IndexationPage.indexedDocuments, IndexationPage.indexedDocuments + IndexationPage.untouchedDocuments))
++            self.updatePrivateDocumentCount()
++            self.updatePublicDocumentCount()
+ 
+     def documentUntouched(self, filename):
+         IndexationPage.untouchedDocuments += 1
+@@ -159,9 +183,20 @@
+         IndexationPage.untouchedDocuments = 0
+         IndexationPage.indexedDocuments = 0
+ 
++        self.updateDocumentStats()
++        self.updatePrivateDocumentCount()
++        self.updatePublicDocumentCount()
++
++
+     def render_message(self, context, data):
+         return self.msg
+ 
++    def render_privateDocumentCount(self, context, data):
++        return IndexationPage.privateDocuments
++
++    def render_publicDocumentCount(self, context, data):
++        return IndexationPage.publicDocuments
++
+     def render_alert(self, context, data):
+         context.fillSlots(&quot;message&quot;, self.alertmessage)
+         return context.tag
+@@ -189,9 +224,9 @@
+ class IndexationPageFactory(athena.LivePageFactory):
+     implements(indexer.IIndexerObserver)
+ 
+-    def newDocumentIndexed(self, filename):
++    def newDocumentIndexed(self, filename, state):
+         for webpage in self.clients.itervalues():
+-            webpage.newDocumentIndexed(filename)
++            webpage.newDocumentIndexed(filename, state)
+         
+     def documentUntouched(self, filename):
+         for webpage in self.clients.itervalues():
+@@ -200,7 +235,6 @@
+     def indexationCompleted(self):
+         for webpage in self.clients.itervalues():
+             webpage.indexationCompleted()
+-    
+ 
+ class SearchForm(MaayPage):
+     &quot;&quot;&quot;default search form&quot;&quot;&quot;
+@@ -294,6 +328,11 @@
+ 
+         start = int(context.arg('start', 0))
+         indexationPage = _factory.clientFactory(context)
++
++        # FIXME: porky way to pass the querier ref to the indexationPage
++        IndexationPage.querier = self.querier
++        indexationPage.updateDocumentStats()
++        
+         if start == 0:
+             if indexer.is_running():
+                 msg = &quot;Indexer running&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000569.html">[Maay-svncheckins] r597 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000571.html">[Maay-svncheckins] r599 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#570">[ date ]</a>
+              <a href="thread.html#570">[ thread ]</a>
+              <a href="subject.html#570">[ subject ]</a>
+              <a href="author.html#570">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

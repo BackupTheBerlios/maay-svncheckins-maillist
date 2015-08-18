@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r317 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r317%20-%20trunk/maay&In-Reply-To=%3C200511071017.jA7AHAe1031459%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000292.html">
+   <LINK REL="Next"  HREF="000294.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r317 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r317%20-%20trunk/maay&In-Reply-To=%3C200511071017.jA7AHAe1031459%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r317 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov  7 11:17:10 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000292.html">[Maay-svncheckins] r316 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000294.html">[Maay-svncheckins] r318 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#293">[ date ]</a>
+              <a href="thread.html#293">[ thread ]</a>
+              <a href="subject.html#293">[ subject ]</a>
+              <a href="author.html#293">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-07 11:17:07 +0100 (Mon, 07 Nov 2005)
+New Revision: 317
+
+Modified:
+   trunk/maay/indexer.py
+Log:
+=Add type check on FileIterator.__init__
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-07 10:00:24 UTC (rev 316)
++++ trunk/maay/indexer.py	2005-11-07 10:17:07 UTC (rev 317)
+@@ -184,9 +184,10 @@
+ 
+ class FileIterator:
+     &quot;&quot;&quot;provide a simple way to walk through indexed dirs&quot;&quot;&quot;
+-    def __init__(self, indexed, skipped=None):
++    def __init__(self, indexed, skipped=[]):
++        assert((type(indexed)==list or type(indexed)==tuple) and \
++               (type(skipped)==list or type(skipped)==tuple))
+         self.indexed = [os.path.abspath(os.path.expanduser(p)) for p in indexed]
+-        skipped = skipped or []
+         self.skipped = [os.path.abspath(os.path.expanduser(p)) for p in skipped]
+         self.skipped = [self.normalizeCase(p) for p in self.skipped]
+         
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000292.html">[Maay-svncheckins] r316 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000294.html">[Maay-svncheckins] r318 - in trunk/maay: . test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#293">[ date ]</a>
+              <a href="thread.html#293">[ thread ]</a>
+              <a href="subject.html#293">[ subject ]</a>
+              <a href="author.html#293">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

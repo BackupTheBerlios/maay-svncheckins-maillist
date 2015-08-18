@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r355 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r355%20-%20trunk/maay&In-Reply-To=%3C200511090941.jA99ffpE021562%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000330.html">
+   <LINK REL="Next"  HREF="000332.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r355 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r355%20-%20trunk/maay&In-Reply-To=%3C200511090941.jA99ffpE021562%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r355 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 10:41:41 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000330.html">[Maay-svncheckins] r354 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000332.html">[Maay-svncheckins] r356 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#331">[ date ]</a>
+              <a href="thread.html#331">[ thread ]</a>
+              <a href="subject.html#331">[ subject ]</a>
+              <a href="author.html#331">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 10:41:28 +0100 (Wed, 09 Nov 2005)
+New Revision: 355
+
+Modified:
+   trunk/maay/dbstats.py
+Log:
+play with matplotlib
+
+Modified: trunk/maay/dbstats.py
+===================================================================
+--- trunk/maay/dbstats.py	2005-11-09 08:44:45 UTC (rev 354)
++++ trunk/maay/dbstats.py	2005-11-09 09:41:28 UTC (rev 355)
+@@ -18,7 +18,7 @@
+ &quot;&quot;&quot;Helper script to display how many rows are stored in the various maay tables on localhost&quot;&quot;&quot;
+ 
+ from MySQLdb import connect
+-from Scientific.Statistics.Histogram import Histogram
++from pylab import hist, show
+ 
+ cnx = connect(user='maay', passwd='maay', use_unicode=True, db='maay')
+ cursor = cnx.cursor()
+@@ -32,14 +32,12 @@
+     size[table] = nbRows
+     print &quot;Table %s: %d rows&quot; % (table, nbRows)
+ 
+-r = &quot;&quot;&quot;SELECT count(word) from document_scores group by word&quot;&quot;&quot;
++r = &quot;&quot;&quot;SELECT count(word) FROM document_scores GROUP BY word LIMIT 10000&quot;&quot;&quot;
+ cursor.execute(r)
+-h = Histogram(cursor.fetchall(), 10)
++data = [int(e[0]) for e in cursor.fetchall() if int(e[0])!=1]
++print data
++h = hist(data, 1000)
++show()
+ 
+-for i in range(10):
+-    print h[i]
+-
+-
+-
+ cnx.close()
+     
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000330.html">[Maay-svncheckins] r354 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000332.html">[Maay-svncheckins] r356 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#331">[ date ]</a>
+              <a href="thread.html#331">[ thread ]</a>
+              <a href="subject.html#331">[ subject ]</a>
+              <a href="author.html#331">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

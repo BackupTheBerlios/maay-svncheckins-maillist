@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r28 - trunk/maay/sql
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r28%20-%20trunk/maay/sql&In-Reply-To=%3C200509151537.j8FFbQ33023427%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000001.html">
+   <LINK REL="Next"  HREF="000003.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r28 - trunk/maay/sql</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r28%20-%20trunk/maay/sql&In-Reply-To=%3C200509151537.j8FFbQ33023427%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r28 - trunk/maay/sql">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Sep 15 17:37:26 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000001.html">[Maay-svncheckins] r27 - in trunk/maay: . sql
+</A></li>
+        <LI>Next message: <A HREF="000003.html">[Maay-svncheckins] r29 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-15 17:37:26 +0200 (Thu, 15 Sep 2005)
+New Revision: 28
+
+Modified:
+   trunk/maay/sql/mysql.sql
+Log:
+annotated the script
+
+
+Modified: trunk/maay/sql/mysql.sql
+===================================================================
+--- trunk/maay/sql/mysql.sql	2005-09-15 15:09:37 UTC (rev 27)
++++ trunk/maay/sql/mysql.sql	2005-09-15 15:37:26 UTC (rev 28)
+@@ -68,6 +68,7 @@
+   `size` int(11) default NULL,
+   `text` text,
+   `publication_time` int(14) default NULL,
++-- FIXME: this should be an unsigned tinyint
+   `state` char(1) default NULL,
+   `download_count` float NOT NULL default '0',
+   `url` varchar(255) NOT NULL default '',
+@@ -88,7 +89,9 @@
+   `file_name` varchar(255) NOT NULL default '',
+   `file_time` int(11) NOT NULL default '0',
+   `db_document_id` int(11) default NULL,
++-- FIXME : this matches documents.state, and should be unsigned tinyint too
+   `state` tinyint(4) default NULL,
++-- FIXME: unsigned tinyint too
+   `file_state` tinyint(4) default NULL,
+   PRIMARY KEY  (`file_name`),
+   KEY `db_document_id` (`db_document_id`)
+@@ -119,6 +122,7 @@
+ CREATE TABLE `nodes` (
+   `node_id` char(40) NOT NULL default '',
+   `ip` char(15) NOT NULL default '',
++-- FIXME: this should be unsigned smallint
+   `port` smallint(11) NOT NULL default '0',
+   `last_seen_time` int(11) default NULL,
+   `counter` int(11) NOT NULL default '0',
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000001.html">[Maay-svncheckins] r27 - in trunk/maay: . sql
+</A></li>
+	<LI>Next message: <A HREF="000003.html">[Maay-svncheckins] r29 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#2">[ date ]</a>
+              <a href="thread.html#2">[ thread ]</a>
+              <a href="subject.html#2">[ subject ]</a>
+              <a href="author.html#2">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

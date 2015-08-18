@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r374 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r374%20-%20trunk/maay&In-Reply-To=%3C200511091258.jA9CwClo019878%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000349.html">
+   <LINK REL="Next"  HREF="000351.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r374 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r374%20-%20trunk/maay&In-Reply-To=%3C200511091258.jA9CwClo019878%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r374 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 13:58:12 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000349.html">[Maay-svncheckins] r373 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000351.html">[Maay-svncheckins] r375 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#350">[ date ]</a>
+              <a href="thread.html#350">[ thread ]</a>
+              <a href="subject.html#350">[ subject ]</a>
+              <a href="author.html#350">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 13:58:05 +0100 (Wed, 09 Nov 2005)
+New Revision: 374
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+avoid calling uname each time which can cause 'interrupted system call' errors with twisted
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-09 12:41:30 UTC (rev 373)
++++ trunk/maay/p2pquerier.py	2005-11-09 12:58:05 UTC (rev 374)
+@@ -28,13 +28,9 @@
+ from twisted.web.xmlrpc import Proxy
+ from maay.texttool import makeAbstract, removeSpace, untagText
+ 
+-def hashIt(item):
+-    &quot;&quot;&quot;Returns a growing monotone value for the
+-       associated item (starting from 0 when
+-       item is seen first)
+-    &quot;&quot;&quot;
++def hashIt(item, uname=''.join(platform.uname())):
+     hasher = sha.sha()
+-    hasher.update(''.join(platform.uname()))
++    hasher.update(uname)
+     hasher.update('%s' % id(item))
+     hasher.update('%s' % time.time())
+     return hasher.hexdigest()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000349.html">[Maay-svncheckins] r373 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000351.html">[Maay-svncheckins] r375 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#350">[ date ]</a>
+              <a href="thread.html#350">[ thread ]</a>
+              <a href="subject.html#350">[ subject ]</a>
+              <a href="author.html#350">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

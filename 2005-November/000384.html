@@ -1,0 +1,1325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r408 - in trunk: . maay maay/bin maay/configuration maay/configuration/win32 maay/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r408%20-%20in%20trunk%3A%20.%20maay%20maay/bin%20maay/configuration%20maay/configuration/win32%20maay/test&In-Reply-To=%3C200511101448.jAAEmOVp002163%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000383.html">
+   <LINK REL="Next"  HREF="000385.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r408 - in trunk: . maay maay/bin maay/configuration maay/configuration/win32 maay/test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r408%20-%20in%20trunk%3A%20.%20maay%20maay/bin%20maay/configuration%20maay/configuration/win32%20maay/test&In-Reply-To=%3C200511101448.jAAEmOVp002163%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r408 - in trunk: . maay maay/bin maay/configuration maay/configuration/win32 maay/test">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Nov 10 15:48:24 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000383.html">[Maay-svncheckins] r407 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000385.html">[Maay-svncheckins] r409 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#384">[ date ]</a>
+              <a href="thread.html#384">[ thread ]</a>
+              <a href="subject.html#384">[ subject ]</a>
+              <a href="author.html#384">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-10 15:48:23 +0100 (Thu, 10 Nov 2005)
+New Revision: 408
+
+Added:
+   trunk/maay/bin/maay-node
+   trunk/maay/configuration/node.ini
+   trunk/maay/configuration/win32/node.ini
+   trunk/maay/node.py
+   trunk/maay/test/test_node.py
+Removed:
+   trunk/maay/bin/maay-server
+   trunk/maay/configuration/webapp.ini
+   trunk/maay/configuration/win32/webapp.ini
+   trunk/maay/exif.py
+   trunk/maay/server.py
+   trunk/maay/test/test_server.py
+Modified:
+   trunk/maay.iss
+   trunk/maay/configuration.py
+   trunk/maay/image.py
+   trunk/maay/indexer.py
+   trunk/maay/p2pquerier.py
+   trunk/maay/test/test_configuration.py
+   trunk/maay/test/test_converter.py
+   trunk/maay/test/test_image.py
+   trunk/maay/test/test_rpc.py
+   trunk/maay/updateconfig.py
+   trunk/maay/webapplication.py
+   trunk/maayservice.py
+   trunk/setup.py
+Log:
+renamed server to node
+renamed remaining references to 'registration' -&gt; 'presence'
+
+WARNING: this revision makes some incompatible changes in the configuration 
+files and options: webapp.ini becomes node.ini and the presence server 
+configuration parameters have been consistently renamed
+
+
+Copied: trunk/maay/bin/maay-node (from rev 400, trunk/maay/bin/maay-server)
+===================================================================
+--- trunk/maay/bin/maay-server	2005-11-10 13:23:58 UTC (rev 400)
++++ trunk/maay/bin/maay-node	2005-11-10 14:48:23 UTC (rev 408)
+@@ -0,0 +1,20 @@
++#!/usr/bin/python
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++__revision__ = '$Id$'
++from maay.node import run
++run()
+
+Deleted: trunk/maay/bin/maay-server
+===================================================================
+--- trunk/maay/bin/maay-server	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/bin/maay-server	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,20 +0,0 @@
+-#!/usr/bin/python
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This program is free software; you can redistribute it and/or modify
+-#     it under the terms of the GNU General Public License as published by
+-#     the Free Software Foundation; either version 2 of the License, or
+-#     (at your option) any later version.
+-#
+-#     This program is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-#     GNU General Public License for more details.
+-#
+-#     You should have received a copy of the GNU General Public License
+-#     along with this program; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+-
+-__revision__ = '$Id$'
+-from maay.server import run
+-run()
+
+Copied: trunk/maay/configuration/node.ini (from rev 400, trunk/maay/configuration/webapp.ini)
+===================================================================
+--- trunk/maay/configuration/webapp.ini	2005-11-10 13:23:58 UTC (rev 400)
++++ trunk/maay/configuration/node.ini	2005-11-10 14:48:23 UTC (rev 408)
+@@ -0,0 +1,7 @@
++[SERVER]
++db-name=maay
++db-host=localhost
++user=maay
++password=maay
++presence-host=localhost
++presence-port=2345
+
+Deleted: trunk/maay/configuration/webapp.ini
+===================================================================
+--- trunk/maay/configuration/webapp.ini	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/configuration/webapp.ini	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,7 +0,0 @@
+-[SERVER]
+-db-name=maay
+-db-host=localhost
+-user=maay
+-password=maay
+-registration-host=localhost
+-registration-port=2345
+
+Copied: trunk/maay/configuration/win32/node.ini (from rev 400, trunk/maay/configuration/win32/webapp.ini)
+
+Deleted: trunk/maay/configuration/win32/webapp.ini
+===================================================================
+--- trunk/maay/configuration/win32/webapp.ini	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/configuration/win32/webapp.ini	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,7 +0,0 @@
+-[SERVER]
+-db-name=maay
+-db-host=localhost
+-user=maay
+-password=maay
+-registration-host=localhost
+-registration-port=2345
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/configuration.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -133,7 +133,7 @@
+ 
+ ################ Web server, rpc server stuff
+ 
+-class WebappConfiguration(Configuration):
++class NodeConfiguration(Configuration):
+     options = Configuration.options + [
+         ('db-name',
+          {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;dbname&gt;&quot;, 'short' : &quot;d&quot;,
+@@ -142,7 +142,7 @@
+           }),
+         ('db-host',
+          {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;dbhost&gt;&quot;, 'short' : &quot;H&quot;,
+-          'help' : &quot;which server hosts the database&quot;,
++          'help' : &quot;hostname of the database server&quot;,
+           'default' : &quot;localhost&quot;,
+           }),
+         ('user',
+@@ -157,14 +157,14 @@
+           'help': 'password of anonymous user to use to connect to the database',
+           'default' : &quot;maay&quot;,
+           }),
+-        ('registration-host',
+-         {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;registration_host&gt;&quot;, 
+-          'help' : &quot;Host name or IP address of the registration server&quot;,
+-          'default' : &quot;localhost&quot;,
++        ('presence-host',
++         {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;presence_host&gt;&quot;, 
++          'help' : &quot;Host name or IP address of the presence server&quot;,
++          'default' : &quot;192.33.178.29&quot;,
+           }),
+-        ('registration-port',
+-         {'type' : &quot;int&quot;, 'metavar' : &quot;&lt;registration_port&gt;&quot;, 
+-          'help' : &quot;Internet port on which the registration server is listening&quot;,
++        ('presence-port',
++         {'type' : &quot;int&quot;, 'metavar' : &quot;&lt;presence_port&gt;&quot;, 
++          'help' : &quot;Internet port on which the presence server is listening&quot;,
+           'default' : 2345,
+           }),
+         ('webserver-port',
+@@ -189,15 +189,15 @@
+           }),
+         ('query-life-time',
+          {'type' : 'int', 'metavar' : '&lt;query_life_time&gt;',
+-          'help' : &quot;Sets the maximum time allowed for a query to live in the node caches&quot;,
++          'help' : &quot;The lifespan (in seconds) of a query in the node cache&quot;,
+           'default' : 60,
+           }),
+         ]
+ 
+-    config_file = 'webapp.ini'
++    config_file = 'Node.ini'
+ 
+     def __init__(self):
+-        Configuration.__init__(self, name=&quot;Server&quot;)
++        Configuration.__init__(self, name=&quot;Node&quot;)
+         self.node_id = None
+ 
+     def get_node_id(self):
+@@ -259,7 +259,7 @@
+ class ImageConfiguration(Configuration):
+     options = Configuration.options + [
+         ('thumbnails-dir',
+-         {'type' : &quot;string&quot;, 'metavar' : &quot;--thumbnailsdir&quot;, 'short' : &quot;-thumbs&quot;,
++         {'type' : &quot;string&quot;, 'metavar' : &quot;--thumbnailsdir&quot;,
+           'help' : &quot;Thumbnail files repository&quot;,
+           'default' : '.maay_thumbnails'},)]
+     config_file = 'image.ini'
+
+Deleted: trunk/maay/exif.py
+===================================================================
+--- trunk/maay/exif.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/exif.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,12 +0,0 @@
+-&quot;&quot;&quot;This module provides tools for
+-   the exploitation of EXIF codes
+-   embedded in image files.
+-&quot;&quot;&quot;
+-
+-#XXX: robustify this against missing PIL
+-try:
+-    import Image
+-except:
+-    print &quot;Python Imaging Library not installed for your version of Python.&quot;,
+-    print &quot;EXIF support will not work.&quot;
+-    
+
+Modified: trunk/maay/image.py
+===================================================================
+--- trunk/maay/image.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/image.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,5 +1,25 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ &quot;&quot;&quot;Some utilities to manipulate images&quot;&quot;&quot;
+ 
++__revision__ = '$Id$'
++
++from tempfile import mkdtemp
++import stat, os, os.path as osp
++
+ try:
+     import Image
+ except:
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/indexer.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -68,7 +68,7 @@
+         host = self.indexerConfig.host
+         port = self.indexerConfig.port
+         self.filesystemEncoding = sys.getfilesystemencoding()
+-        print &quot;Indexer connecting to server %s:%s&quot; % (host, port)
++        print &quot;Indexer connecting to Node %s:%s&quot; % (host, port)
+         self.serverProxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port),
+                                        allow_none=True,
+                                        encoding='utf-8')
+@@ -76,7 +76,7 @@
+         self.verbose = indexerConfig.verbose
+         if not self.cnxId:
+             if self.verbose:
+-                print &quot;Got failure from server:&quot;, errmsg
++                print &quot;Got failure from Node:&quot;, errmsg
+             raise MaayAuthenticationError(&quot;Failed to connect as '%s'&quot; % username)
+         # we might be asked to purge everything and just exit
+         if indexerConfig['purge']:
+@@ -163,7 +163,7 @@
+         filename = unicode(filename, self.filesystemEncoding)
+         answer = self.serverProxy.lastIndexationTimeAndState(self.cnxId, filename)
+         if answer is None:
+-            raise MaayAuthenticationError(&quot;Bad cnxId sent to the server&quot;)
++            raise MaayAuthenticationError(&quot;Bad cnxId sent to the Node&quot;)
+         lastTime, lastState = answer
+         return lastTime, lastState
+ 
+@@ -180,10 +180,10 @@
+ 
+         except (Fault, ProtocolError), exc:
+             if self.verbose:
+-                print &quot;An error occured on the server while indexing %s&quot; % \
++                print &quot;An error occured on the Node while indexing %s&quot; % \
+                       futureDoc.filename.encode('iso-8859-1')
+                 print exc
+-                print &quot;See server log for details&quot;
++                print &quot;See Node log for details&quot;
+             else:
+                 print &quot;Error indexing %s: %s&quot; % (futureDoc.filename.encode('iso-8859-1'), exc)
+         
+@@ -238,8 +238,8 @@
+             sys.exit(1)
+         indexer.start()
+     except socket.error, exc:
+-        print &quot;Cannot contact server:&quot;, exc
+-        print &quot;Check that the server is running on %s:%s&quot; % \
++        print &quot;Cannot contact Node:&quot;, exc
++        print &quot;Check that the Node is running on %s:%s&quot; % \
+               (indexerConfig.host, indexerConfig.port)
+         sys.exit(1)
+ 
+
+Copied: trunk/maay/node.py (from rev 404, trunk/maay/server.py)
+===================================================================
+--- trunk/maay/server.py	2005-11-10 14:04:37 UTC (rev 404)
++++ trunk/maay/node.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -0,0 +1,275 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++&quot;&quot;&quot;Maay Node
++
++The node is reponsible for running the web user interface and
++an xmlrpc server for the indexer and distributed queries.
++&quot;&quot;&quot;
++
++__revision__ = '$Id$'
++
++
++import platform
++import sha
++import time
++import os
++import socket
++
++from zope.interface import implements
++
++from twisted.cred import portal, error
++from twisted.cred.checkers import AllowAnonymousAccess, \
++     ICredentialsChecker
++from twisted.cred.credentials import IAnonymous, IUsernamePassword
++from twisted.internet import reactor, defer
++from twisted.web import server
++from twisted.python import failure
++from nevow import inevow, appserver, guard
++
++# These imports are not used, but they help py2exe tremendously.
++# Do not remove them (that is, unless we change the database backend
++# or drop twisted)
++import nevow.flat.flatstan
++import nevow.query
++import nevow.i18n
++import nevow.flat.flatmdom
++import MySQLdb
++# end of py2exe helping imports
++
++from maay.querier import MaayQuerier, IQuerier, AnonymousQuerier, \
++     MaayAuthenticationError, WEB_AVATARID
++from maay.rpc import MaayRPCServer
++from maay.configuration import NodeConfiguration
++from maay import presenceclient
++from maay.webapplication import Maay404, INodeConfiguration, SearchForm
++
++
++## nevow app/server setup ############################################
++
++# MaayMindFactory might be helpful to access request informations
++# in portal. (not sure it's really aimed to be used this way :-)
++class MaayMindFactory:
++    def __init__(self, request, credentials):
++        pass
++
++class MaayRealm:
++    &quot;&quot;&quot;simple realm for Maay application&quot;&quot;&quot;
++    implements(portal.IRealm)
++
++    def __init__(self):
++        self._sessions = {}
++
++    def createUserSession(self, avatarId, querier):
++        &quot;&quot;&quot;associate a querier to an avatarId.
++        Use avatarId=None for the internal private database connection&quot;&quot;&quot;
++        print &quot;MaayRealm : creating session for avatar&quot;, avatarId,
++        print &quot;with a&quot;, type(querier), &quot;querier.&quot;
++        self._sessions[avatarId] = querier
++
++
++    def requestAvatar(self, avatarId, mind, *interfaces):
++        &quot;&quot;&quot;Our realm provides 2 different kinds of avatars :
++          - HTML resources (for web applications)
++          - queriers (for XMLRPC queries)
++
++        Both kind of avatars rely on a querier instance
++        &quot;&quot;&quot;
++        print &quot;MaayRealm requestAvatar %s&quot; % avatarId
++        for iface in interfaces:
++            # if we were asked for a web resource
++            if iface is inevow.IResource:
++                querier = self._getQuerier(avatarId)
++                assert(MaayRPCServer.theP2pQuerier is not None)
++                resc = SearchForm(avatarId, querier, MaayRPCServer.theP2pQuerier)
++                return inevow.IResource, resc, resc.logout
++            # if we were asked for a querier
++            elif iface is IQuerier:
++                querier = self._getQuerier(avatarId)
++                if querier is None:
++                    return IQuerier, None, lambda: None
++                else:
++                    return IQuerier, querier, querier.close
++                
++    def _getQuerier(self, avatarId):
++        try:
++            querier = self._sessions[avatarId]
++            print &quot;MaayRealm : querier of type&quot;, type(querier), &quot;for avatar&quot;,
++            print avatarId, &quot;was in the session cache.&quot;
++        except KeyError:
++            print &quot;MaayRealm : no querier in cache for&quot;, str(avatarId)+ \
++                  &quot;. What are we supposed to do ?&quot;
++            querier = None
++        return querier
++
++
++class MaayPortal(object, portal.Portal):
++    &quot;&quot;&quot;Portal for Maay authentication system&quot;&quot;&quot;
++    def __init__(self, nodeConfig):
++        print &quot;Portal creation&quot;
++        realm = MaayRealm()
++        checker = DBAuthChecker(realm, nodeConfig.db_host,
++                                nodeConfig.db_name)
++        portal.Portal.__init__(self, realm, (checker,))
++        self.anonymousChecker = MaayAnonymousChecker()
++        self.registerChecker(self.anonymousChecker, IAnonymous)
++        self.config = nodeConfig
++        # Create default web querier, based on local configuration
++        try:
++            print &quot;Credentials : &quot;
++            print &quot;  - host&quot;, nodeConfig.db_host
++            print &quot;  - db&quot;, nodeConfig.db_name
++            print &quot;  - user&quot;, nodeConfig.user
++            print &quot;  - pass&quot;, nodeConfig.password
++            webQuerier = MaayQuerier(host=nodeConfig.db_host,
++                                     database=nodeConfig.db_name,
++                                     user=nodeConfig.user,
++                                     password=nodeConfig.password)
++        except Exception, exc:
++            # unable to create a web querier
++            print &quot;***&quot;
++            print &quot;*** Could not create web querier&quot;
++            print &quot;*** Got exception&quot;, exc
++            print &quot;*** This may hurt in unexpected ways&quot;
++            print &quot;***&quot;
++            webQuerier = None
++        else:
++            realm.createUserSession(WEB_AVATARID, webQuerier)
++            webQuerier.registerNode(self.config.get_node_id(),
++                                    ip=socket.gethostbyname(socket.gethostname()),
++                                    port=nodeConfig.rpcserver_port,
++                                    bandwidth=nodeConfig.bandwidth)
++        self.webQuerier = webQuerier
++        self.anonymousQuerier = AnonymousQuerier(host=nodeConfig.db_host,
++                                                 database=nodeConfig.db_name,
++                                                 user=nodeConfig.user,
++                                                 password=nodeConfig.password)
++
++
++    def getWebQuerier(self):
++        return getattr(self, '_webQuerier', None)
++
++    def setWebQuerier(self, value):
++        &quot;&quot;&quot;used to set 'anonymousAllowed' flag in anonymous checker&quot;&quot;&quot;
++        #XXX: now, check this seriously
++        if value is not None:
++            self.anonymousChecker.anonymousAllowed = True
++        self._webQuerier = value
++
++    webQuerier = property(getWebQuerier, setWebQuerier,
++                          doc=&quot;web querier&quot;)
++
++
++class MaayAnonymousChecker(AllowAnonymousAccess):
++    &quot;&quot;&quot;don't use default twisted.cred anonymous avatarId&quot;&quot;&quot;
++    def __init__(self):
++        self.anonymousAllowed = False
++        
++    def requestAvatarId(self, credentials):
++        print &quot;AnonymousChecker : requestAvatarId&quot;, credentials
++        if self.anonymousAllowed:
++            return WEB_AVATARID #XXX: FIXME
++        else:
++            return failure.Failure(error.UnauthorizedLogin(
++                &quot;No anonymous querier available !&quot;))
++
++
++class DBAuthChecker:
++    &quot;&quot;&quot;user authentication checker
++    cf. twisted's CRED system for more details
++    &quot;&quot;&quot;
++    implements(ICredentialsChecker)
++    credentialInterfaces = (IUsernamePassword,)
++    
++    def __init__(self, realm, dbhost, dbname):
++        print &quot;DBAuthChecker inits in realm&quot;, realm, &quot;dbhost&quot;, dbhost,
++        print &quot;and dbname&quot;, str(dbname)+&quot;.&quot;
++        self.realm = realm
++        self.dbhost = dbhost
++        self.dbname = dbname
++        self.querierCache = {}
++    
++    def requestAvatarId(self, creds):
++        print &quot;DBAuthChecker : checking credentials for DB access&quot;
++        try:
++            querier = self.querierCache[(creds.username, creds.password)]
++            print &quot; querier was in the cache for&quot;,
++        except KeyError:
++            print &quot; no querier in cache for&quot;,
++            try:
++                querier = MaayQuerier(host=self.dbhost, database=self.dbname,
++                                      user=creds.username,
++                                      password=creds.password)
++                self.querierCache[(creds.username, creds.password)] = querier
++            except MaayAuthenticationError:
++                print ; print &quot;DBAuthChecker : Authentication Error&quot;
++                return failure.Failure(error.UnauthorizedLogin())
++        print creds.username
++        self.realm.createUserSession(creds.username, querier)
++        return defer.succeed(creds.username)
++
++
++class MaaySessionWrapper(guard.SessionWrapper):
++    &quot;&quot;&quot;override guard.SessionWrapper to add an explicit errBack on
++    portal.login()
++
++    XXX: TODO check if we could not use SessionWrapper.incorrectLoginError()
++    &quot;&quot;&quot;
++    def login(self, request, session, credentials, segments):
++        # d = SessionWrapper.login()
++        # d.addErrback(..)
++        print &quot;MaaySessionWrapper login&quot;, credentials, session, request, segments
++        mind = self.mindFactory(request, credentials)
++        session.mind = mind
++        d = self.portal.login(credentials, mind, self.credInterface)
++        d.addCallback(self._cbLoginSuccess, session, segments)
++        #d.addErrback(self._forceLoginPage)
++        return d
++
++##     def _forceLoginPage(self, *args):
++##         return LoginForm(), ''
++    
++    
++def run():
++    nodeConfig = NodeConfiguration()
++    nodeConfig.load()
++    maayPortal = MaayPortal(nodeConfig)
++    website = appserver.NevowSite(MaaySessionWrapper(maayPortal,
++                                                     mindFactory=MaayMindFactory))
++    website.remember(Maay404(), inevow.ICanHandleNotFound)
++    website.remember(nodeConfig, INodeConfiguration)
++    presenceclient.notify(reactor,
++                          nodeConfig.presence_host, nodeConfig.presence_port,
++                          maayPortal.webQuerier,
++                          nodeConfig.get_node_id(),
++                          socket.gethostbyname(socket.gethostname()),
++                          nodeConfig.rpcserver_port,
++                          nodeConfig.bandwidth)
++    
++                             
++    rpcserver = server.Site(MaayRPCServer(nodeConfig.get_node_id(),
++                                          maayPortal))
++    reactor.listenTCP(nodeConfig.webserver_port, website)
++    reactor.listenTCP(nodeConfig.rpcserver_port, rpcserver)
++    try:
++        print &quot;-------------Starting Node mainloop-------------&quot;
++        reactor.run()
++    finally:
++        print &quot;-----------Shutting down Node----------&quot;
++        
++
++if __name__ == '__main__':
++    run()
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/p2pquerier.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -28,7 +28,7 @@
+ from twisted.web.xmlrpc import Proxy
+ from twisted.internet import reactor
+ from maay.texttool import makeAbstract, removeSpace, untagText
+-from configuration import WebappConfiguration
++from configuration import NodeConfiguration
+ 
+ def hashIt(item, uname=''.join(platform.uname())):
+     hasher = sha.sha()
+@@ -155,7 +155,7 @@
+         self._answerCallbacks = {}
+         # now, read a config. provided value for EXPIRATION_TIME
+         # and fire the garbage collector
+-        config = WebappConfiguration()
++        config = NodeConfiguration()
+         config.load()
+         P2pQuerier._EXPIRATION_TIME = max(config.query_life_time,
+                                           P2pQuerier._EXPIRATION_TIME)
+
+Deleted: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/server.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,271 +0,0 @@
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This program is free software; you can redistribute it and/or modify
+-#     it under the terms of the GNU General Public License as published by
+-#     the Free Software Foundation; either version 2 of the License, or
+-#     (at your option) any later version.
+-#
+-#     This program is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-#     GNU General Public License for more details.
+-#
+-#     You should have received a copy of the GNU General Public License
+-#     along with this program; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+-
+-&quot;&quot;&quot;maay local web UI script&quot;&quot;&quot;
+-
+-__revision__ = '$Id$'
+-
+-
+-import platform
+-import sha
+-import time
+-import os
+-import socket
+-
+-from zope.interface import implements
+-
+-from twisted.cred import portal, error
+-from twisted.cred.checkers import AllowAnonymousAccess, \
+-     ICredentialsChecker
+-from twisted.cred.credentials import IAnonymous, IUsernamePassword
+-from twisted.internet import reactor, defer
+-from twisted.web import server
+-from twisted.python import failure
+-from nevow import inevow, appserver, guard
+-
+-# These imports are not used, but they help py2exe tremendously.
+-# Do not remove them (that is, unless we change the database backend
+-# or drop twisted)
+-import nevow.flat.flatstan
+-import nevow.query
+-import nevow.i18n
+-import nevow.flat.flatmdom
+-import MySQLdb
+-# end of py2exe helping imports
+-
+-from maay.querier import MaayQuerier, IQuerier, AnonymousQuerier, \
+-     MaayAuthenticationError, WEB_AVATARID
+-from maay.rpc import MaayRPCServer
+-from maay.configuration import WebappConfiguration
+-from maay import presenceclient
+-from maay.webapplication import Maay404, IServerConfiguration, SearchForm
+-
+-
+-## nevow app/server setup ############################################
+-
+-# MaayMindFactory might be helpful to access request informations
+-# in portal. (not sure it's really aimed to be used this way :-)
+-class MaayMindFactory:
+-    def __init__(self, request, credentials):
+-        pass
+-
+-class MaayRealm:
+-    &quot;&quot;&quot;simple realm for Maay application&quot;&quot;&quot;
+-    implements(portal.IRealm)
+-
+-    def __init__(self):
+-        self._sessions = {}
+-
+-    def createUserSession(self, avatarId, querier):
+-        &quot;&quot;&quot;associate a querier to an avatarId.
+-        Use avatarId=None for the internal private database connection&quot;&quot;&quot;
+-        print &quot;MaayRealm : creating session for avatar&quot;, avatarId,
+-        print &quot;with a&quot;, type(querier), &quot;querier.&quot;
+-        self._sessions[avatarId] = querier
+-
+-
+-    def requestAvatar(self, avatarId, mind, *interfaces):
+-        &quot;&quot;&quot;Our realm provides 2 different kinds of avatars :
+-          - HTML resources (for web applications)
+-          - queriers (for XMLRPC queries)
+-
+-        Both kind of avatars rely on a querier instance
+-        &quot;&quot;&quot;
+-        print &quot;MaayRealm requestAvatar %s&quot; % avatarId
+-        for iface in interfaces:
+-            # if we were asked for a web resource
+-            if iface is inevow.IResource:
+-                querier = self._getQuerier(avatarId)
+-                assert(MaayRPCServer.theP2pQuerier is not None)
+-                resc = SearchForm(avatarId, querier, MaayRPCServer.theP2pQuerier)
+-                return inevow.IResource, resc, resc.logout
+-            # if we were asked for a querier
+-            elif iface is IQuerier:
+-                querier = self._getQuerier(avatarId)
+-                if querier is None:
+-                    return IQuerier, None, lambda: None
+-                else:
+-                    return IQuerier, querier, querier.close
+-                
+-    def _getQuerier(self, avatarId):
+-        try:
+-            querier = self._sessions[avatarId]
+-            print &quot;MaayRealm : querier of type&quot;, type(querier), &quot;for avatar&quot;,
+-            print avatarId, &quot;was in the session cache.&quot;
+-        except KeyError:
+-            print &quot;MaayRealm : no querier in cache for&quot;, str(avatarId)+ \
+-                  &quot;. What are we supposed to do ?&quot;
+-            querier = None
+-        return querier
+-
+-
+-class MaayPortal(object, portal.Portal):
+-    &quot;&quot;&quot;Portal for Maay authentication system&quot;&quot;&quot;
+-    def __init__(self, webappConfig):
+-        print &quot;Portal creation&quot;
+-        realm = MaayRealm()
+-        checker = DBAuthChecker(realm, webappConfig.db_host,
+-                                webappConfig.db_name)
+-        portal.Portal.__init__(self, realm, (checker,))
+-        self.anonymousChecker = MaayAnonymousChecker()
+-        self.registerChecker(self.anonymousChecker, IAnonymous)
+-        self.config = webappConfig
+-        # Create default web querier, based on local configuration
+-        try:
+-            print &quot;Credentials : &quot;
+-            print &quot;  - host&quot;, webappConfig.db_host
+-            print &quot;  - db&quot;, webappConfig.db_name
+-            print &quot;  - user&quot;, webappConfig.user
+-            print &quot;  - pass&quot;, webappConfig.password
+-            webQuerier = MaayQuerier(host=webappConfig.db_host,
+-                                     database=webappConfig.db_name,
+-                                     user=webappConfig.user,
+-                                     password=webappConfig.password)
+-        except Exception, exc:
+-            # unable to create a web querier
+-            print &quot;***&quot;
+-            print &quot;*** Could not create web querier&quot;
+-            print &quot;*** Got exception&quot;, exc
+-            print &quot;*** This may hurt in unexpected ways&quot;
+-            print &quot;***&quot;
+-            webQuerier = None
+-        else:
+-            realm.createUserSession(WEB_AVATARID, webQuerier)
+-            webQuerier.registerNode(self.config.get_node_id(),
+-                                    ip=socket.gethostbyname(socket.gethostname()),
+-                                    port=webappConfig.rpcserver_port,
+-                                    bandwidth=webappConfig.bandwidth)
+-        self.webQuerier = webQuerier
+-        self.anonymousQuerier = AnonymousQuerier(host=webappConfig.db_host,
+-                                                 database=webappConfig.db_name,
+-                                                 user=webappConfig.user,
+-                                                 password=webappConfig.password)
+-
+-
+-    def getWebQuerier(self):
+-        return getattr(self, '_webQuerier', None)
+-
+-    def setWebQuerier(self, value):
+-        &quot;&quot;&quot;used to set 'anonymousAllowed' flag in anonymous checker&quot;&quot;&quot;
+-        #XXX: now, check this seriously
+-        if value is not None:
+-            self.anonymousChecker.anonymousAllowed = True
+-        self._webQuerier = value
+-
+-    webQuerier = property(getWebQuerier, setWebQuerier,
+-                          doc=&quot;web querier&quot;)
+-
+-
+-class MaayAnonymousChecker(AllowAnonymousAccess):
+-    &quot;&quot;&quot;don't use default twisted.cred anonymous avatarId&quot;&quot;&quot;
+-    def __init__(self):
+-        self.anonymousAllowed = False
+-        
+-    def requestAvatarId(self, credentials):
+-        print &quot;AnonymousChecker : requestAvatarId&quot;, credentials
+-        if self.anonymousAllowed:
+-            return WEB_AVATARID #XXX: FIXME
+-        else:
+-            return failure.Failure(error.UnauthorizedLogin(
+-                &quot;No anonymous querier available !&quot;))
+-
+-
+-class DBAuthChecker:
+-    &quot;&quot;&quot;user authentication checker
+-    cf. twisted's CRED system for more details
+-    &quot;&quot;&quot;
+-    implements(ICredentialsChecker)
+-    credentialInterfaces = (IUsernamePassword,)
+-    
+-    def __init__(self, realm, dbhost, dbname):
+-        print &quot;DBAuthChecker inits in realm&quot;, realm, &quot;dbhost&quot;, dbhost,
+-        print &quot;and dbname&quot;, str(dbname)+&quot;.&quot;
+-        self.realm = realm
+-        self.dbhost = dbhost
+-        self.dbname = dbname
+-        self.querierCache = {}
+-    
+-    def requestAvatarId(self, creds):
+-        print &quot;DBAuthChecker : checking credentials for DB access&quot;
+-        try:
+-            querier = self.querierCache[(creds.username, creds.password)]
+-            print &quot; querier was in the cache for&quot;,
+-        except KeyError:
+-            print &quot; no querier in cache for&quot;,
+-            try:
+-                querier = MaayQuerier(host=self.dbhost, database=self.dbname,
+-                                      user=creds.username,
+-                                      password=creds.password)
+-                self.querierCache[(creds.username, creds.password)] = querier
+-            except MaayAuthenticationError:
+-                print ; print &quot;DBAuthChecker : Authentication Error&quot;
+-                return failure.Failure(error.UnauthorizedLogin())
+-        print creds.username
+-        self.realm.createUserSession(creds.username, querier)
+-        return defer.succeed(creds.username)
+-
+-
+-class MaaySessionWrapper(guard.SessionWrapper):
+-    &quot;&quot;&quot;override guard.SessionWrapper to add an explicit errBack on
+-    portal.login()
+-
+-    XXX: TODO check if we could not use SessionWrapper.incorrectLoginError()
+-    &quot;&quot;&quot;
+-    def login(self, request, session, credentials, segments):
+-        # d = SessionWrapper.login()
+-        # d.addErrback(..)
+-        print &quot;MaaySessionWrapper login&quot;, credentials, session, request, segments
+-        mind = self.mindFactory(request, credentials)
+-        session.mind = mind
+-        d = self.portal.login(credentials, mind, self.credInterface)
+-        d.addCallback(self._cbLoginSuccess, session, segments)
+-        #d.addErrback(self._forceLoginPage)
+-        return d
+-
+-##     def _forceLoginPage(self, *args):
+-##         return LoginForm(), ''
+-    
+-    
+-def run():
+-    webappConfig = WebappConfiguration()
+-    webappConfig.load()
+-    maayPortal = MaayPortal(webappConfig)
+-    website = appserver.NevowSite(MaaySessionWrapper(maayPortal,
+-                                                     mindFactory=MaayMindFactory))
+-    website.remember(Maay404(), inevow.ICanHandleNotFound)
+-    website.remember(webappConfig, IServerConfiguration)
+-    presenceclient.notify(reactor,
+-                          webappConfig.registration_host, webappConfig.registration_port,
+-                          maayPortal.webQuerier,
+-                          webappConfig.get_node_id(),
+-                          socket.gethostbyname(socket.gethostname()),
+-                          webappConfig.rpcserver_port,
+-                          webappConfig.bandwidth)
+-    
+-                             
+-    rpcserver = server.Site(MaayRPCServer(webappConfig.get_node_id(),
+-                                          maayPortal))
+-    reactor.listenTCP(webappConfig.webserver_port, website)
+-    reactor.listenTCP(webappConfig.rpcserver_port, rpcserver)
+-    try:
+-        print &quot;-------------Server mainloop-------------&quot;
+-        reactor.run()
+-    finally:
+-        print &quot;-----------Shutting down Server----------&quot;
+-        
+-
+-if __name__ == '__main__':
+-    run()
+
+Modified: trunk/maay/test/test_configuration.py
+===================================================================
+--- trunk/maay/test/test_configuration.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/test/test_configuration.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -23,9 +23,9 @@
+ import re
+ 
+ from maay import configuration
+-from maay.configuration import WebappConfiguration
++from maay.configuration import NodeConfiguration
+ 
+-class WebappConfigTC(unittest.TestCase):
++class NodeConfigTC(unittest.TestCase):
+ 
+     def testFromCommandLine(self):
+         &quot;&quot;&quot;For this test to not fail, the configuration file must
+@@ -37,7 +37,7 @@
+                 ('maay --db-host foo --db-name maille', ('foo', 'maille')),
+                 ]
+         for cmdLine, (expectedHost, expectedDatabase) in data:
+-            config = WebappConfiguration()
++            config = NodeConfiguration()
+             sys.argv = cmdLine.split()
+             config.load()
+             self.assertEquals(config.db_host, expectedHost)
+@@ -47,14 +47,14 @@
+     #      this test needs to be run first. This is a BUG that I
+     #      could not fix easily.
+     def test0FromConfigFile(self):
+-        config = WebappConfiguration()
++        config = NodeConfiguration()
+         config.config_file = osp.join(osp.dirname(__file__), 'data', 'webapp1.ini')
+         config.load()
+         self.assertEquals(config.db_host, 'eusebius')
+         self.assertEquals(config.db_name, 'maay')
+ 
+     def testFromBoth(self):
+-        config = WebappConfiguration()
++        config = NodeConfiguration()
+         sys.argv = 'maay --db-host truc'.split()
+         config.config_file = osp.join(osp.dirname(__file__), 'data', 'webapp2.ini')
+         config.load()
+
+Modified: trunk/maay/test/test_converter.py
+===================================================================
+--- trunk/maay/test/test_converter.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/test/test_converter.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,10 +1,3 @@
+-# Copyright (c) 2000-2003 LOGILAB S.A. (Paris, FRANCE).
+-# <A HREF="http://www.logilab.fr/">http://www.logilab.fr/</A> -- mailto:<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">contact at logilab.fr</A>
+-&quot;&quot;&quot;
+-
+-&quot;&quot;&quot;
+-
+-__revision__ = &quot;$Id$&quot;
+ #     Copyright (C) 2005 France Telecom R&amp;D
+ #
+ #     This program is free software; you can redistribute it and/or modify
+@@ -23,6 +16,8 @@
+ 
+ &quot;&quot;&quot;tests converters registry management&quot;&quot;&quot;
+ 
++__revision__ = &quot;$Id$&quot;
++
+ import unittest
+ from mimetypes import guess_type
+ 
+@@ -76,5 +71,9 @@
+                           'bogus.txt.gz')
+ 
+ 
++class MSWordConverterTC(unittest.TestCase):
++    pass
++
++
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/test/test_image.py
+===================================================================
+--- trunk/maay/test/test_image.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/test/test_image.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,2 +1,36 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
+ &quot;&quot;&quot;Module intended to test image.py&quot;&quot;&quot;
+ 
++__revision__ = '$Id$'
++
++import unittest
++
++import maay.image
++
++class SomeTestTC(unittest.TestCase):
++    def setUp(self):
++        pass
++
++    def tearDown(self):
++        pass
++
++    def testSomething(self):
++        pass
++
++if __name__ == '__main__':
++    unittest.main()
+
+Copied: trunk/maay/test/test_node.py (from rev 400, trunk/maay/test/test_server.py)
+===================================================================
+--- trunk/maay/test/test_server.py	2005-11-10 13:23:58 UTC (rev 400)
++++ trunk/maay/test/test_node.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -0,0 +1,23 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++import unittest
++import maay.node
++
++if __name__ == '__main__':
++    unittest.main()
++
++
+
+Modified: trunk/maay/test/test_rpc.py
+===================================================================
+--- trunk/maay/test/test_rpc.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/test/test_rpc.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -35,8 +35,8 @@
+ from maay import rpc
+ from maay.dbentity import Document
+ from maay.querier import MaayQuerier, AnonymousQuerier, ANONYMOUS_AVATARID
+-from maay.server import MaayPortal
+-from maay.configuration import WebappConfiguration
++from maay.node import MaayPortal
++from maay.configuration import NodeConfiguration
+ 
+ class FakeConnection:
+     def cursor(self):
+@@ -73,7 +73,7 @@
+ 
+ class RPCServerTC(unittest.TestCase):
+     def setUp(self):
+-        portal = MaayPortal(WebappConfiguration())
++        portal = MaayPortal(NodeConfiguration())
+         portal.registerChecker(FakeChecker(portal.realm))
+         self.portal = portal
+         rpcserver = server.Site(rpc.MaayRPCServer(None, portal))
+
+Deleted: trunk/maay/test/test_server.py
+===================================================================
+--- trunk/maay/test/test_server.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/test/test_server.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -1,23 +0,0 @@
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This program is free software; you can redistribute it and/or modify
+-#     it under the terms of the GNU General Public License as published by
+-#     the Free Software Foundation; either version 2 of the License, or
+-#     (at your option) any later version.
+-#
+-#     This program is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-#     GNU General Public License for more details.
+-#
+-#     You should have received a copy of the GNU General Public License
+-#     along with this program; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+-
+-import unittest
+-import maay.server
+-
+-if __name__ == '__main__':
+-    unittest.main()
+-
+-
+
+Modified: trunk/maay/updateconfig.py
+===================================================================
+--- trunk/maay/updateconfig.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/updateconfig.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -19,14 +19,14 @@
+ import sys
+ 
+ config = &quot;&quot;&quot;[INDEXER]
+-# Host on which the maay server is running
++# Host on which the maay node is running
+ host=localhost
+-#Port on which the maay server is listening
++#Port on which the maay node is listening
+ port=6789
+ 
+-# User login on the maay server 
++# User login on the maay node 
+ user=maay
+-# User password on the maay server
++# User password on the maay node
+ password=maay
+ 
+ # Which directories are to be indexed
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay/webapplication.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -36,7 +36,7 @@
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+ import maay.indexer
+ 
+-class IServerConfiguration(Interface):
++class INodeConfiguration(Interface):
+     &quot;&quot;&quot;provide an interface in order to be able to remember webappconfig&quot;&quot;&quot;
+ 
+ 
+@@ -72,7 +72,7 @@
+         self.querier = querier
+ 
+     def data_peers(self, context, data):
+-        webappConfig = IServerConfiguration(context)
++        webappConfig = INodeConfiguration(context)
+         myNodeId = webappConfig.get_node_id()
+         print &quot;PeerList data_peers : my_node_id =&quot;, myNodeId
+         peers = self.querier.getActiveNeighbors(myNodeId, 10)
+@@ -99,7 +99,7 @@
+ 
+     def logout(self):
+         print &quot;Bye %s !&quot; % (self.maayId,)
+-        # XXX: logout message should be forwarded to registration server
++        # XXX: logout message should be forwarded to presence server
+         return None
+ 
+     def child_peers(self, context):
+@@ -129,7 +129,7 @@
+         if not self.p2pquerier:
+             print &quot;BUG ? We don't have a P2pQuerier&quot;
+             return
+-        webappConfig = IServerConfiguration(context)
++        webappConfig = INodeConfiguration(context)
+         theDistributedQuery = P2pQuery(webappConfig.get_node_id(),
+                                        webappConfig.rpcserver_port,
+                                        query)
+@@ -151,7 +151,7 @@
+         # self._askForPeerResults(query, context)
+         resultsPage = FACTORY.clientFactory(context, self.maayId, localResults, query, offset)
+         #######################
+-        webappConfig = IServerConfiguration(context)
++        webappConfig = INodeConfiguration(context)
+         p2pQuery = P2pQuery(webappConfig.get_node_id(),
+                             webappConfig.rpcserver_port,
+                             query)
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maay.iss	2005-11-10 14:48:23 UTC (rev 408)
+@@ -9,7 +9,7 @@
+ AppVerName=Maay snapshot 2005-10-07
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+-UninstallDisplayIcon={app}\maay_server.exe
++UninstallDisplayIcon={app}\maay_node.exe
+ Compression=bzip
+ SolidCompression=yes
+ LicenseFile=thirdparty\mysql\COPYING.txt
+@@ -46,9 +46,9 @@
+ [Icons]
+ Name: &quot;{group}\README.txt&quot;; Filename: &quot;{app}\README.txt&quot;; Comment: &quot;Required reading before launching Maay&quot;
+ Name: &quot;{group}\ReleaseNotes.txt&quot;; Filename: &quot;{app}\ReleaseNotes&quot;; Comment: &quot;Required reading before launching Maay&quot;
+-Name: &quot;{group}\Maay Server&quot;; Filename: &quot;{app}\maay_server.exe&quot;; WorkingDir: &quot;{app}&quot;; Comment: &quot;The Maay server component&quot;
++Name: &quot;{group}\Maay Node&quot;; Filename: &quot;{app}\maay_node.exe&quot;; WorkingDir: &quot;{app}&quot;; Comment: &quot;The Maay node component&quot;
+ Name: &quot;{group}\Maay Indexer&quot;; Filename: &quot;{app}\maay_indexer.exe&quot;; WorkingDir: &quot;{app}&quot;; Comment: &quot;The Maay indexer component&quot;
+-Name: &quot;{group}\webapp.ini&quot;; Filename: &quot;{app}\webapp.ini&quot;; Comment: &quot;Maay server configuration&quot;
++Name: &quot;{group}\node.ini&quot;; Filename: &quot;{app}\node.ini&quot;; Comment: &quot;Maay node configuration&quot;
+ Name: &quot;{group}\indexer.ini&quot;; Filename: &quot;{app}\indexer.ini&quot;; Comment: &quot;Maay indexer configuration&quot;
+ Name: &quot;{group}\image.ini&quot;; Filename: &quot;{app}\image.ini&quot;; Comment: &quot;Maay indexer configuration&quot;
+ 
+@@ -60,7 +60,7 @@
+ Filename: &quot;{app}\updateconfig.exe&quot;; Parameters:&quot;&quot;&quot;{userdesktop}&quot;&quot; &quot;&quot;{userdocs}&quot;&quot;&quot;; WorkingDir:&quot;{app}&quot;; Flags:runhidden
+ Filename: &quot;{app}\maay.exe&quot;; Parameters:&quot;-install&quot;; StatusMsg: &quot;Registering Maay as a service&quot;; WorkingDir:&quot;{app}&quot;; Flags:runhidden
+ Filename: &quot;NET&quot;; Parameters: &quot;start Maay&quot;; StatusMsg: &quot;Starting Maay node&quot;; Flags:runhidden
+-;Filename: &quot;{app}\maay_server.exe&quot;; StatusMsg: &quot;Launching maay server&quot;; WorkingDir:&quot;{app}&quot;; Flags:postinstall nowait
++;Filename: &quot;{app}\maay_node.exe&quot;; StatusMsg: &quot;Launching maay node&quot;; WorkingDir:&quot;{app}&quot;; Flags:postinstall nowait
+ 
+ 
+ [UninstallRun]
+
+Modified: trunk/maayservice.py
+===================================================================
+--- trunk/maayservice.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/maayservice.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -34,7 +34,7 @@
+ 
+     def SvcDoRun(self):
+         import servicemanager
+-        from maay.server import run
++        from maay.node import run
+         win32evtlogutil.ReportEvent(self._svc_name_,
+                                     servicemanager.PYS_SERVICE_STARTED,
+                                     0, # category
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-11-10 14:21:43 UTC (rev 407)
++++ trunk/setup.py	2005-11-10 14:48:23 UTC (rev 408)
+@@ -30,18 +30,18 @@
+ packages = ['maay']
+ data_files = [('maay/data', glob('maay/data/*')+glob('maay/data/images/*')),
+                   ('maay/sql', glob('maay/sql/*.sql')),]
+-scripts = ['maay/bin/maay-server', 'maay/bin/maay-indexer']
++scripts = ['maay/bin/maay-node', 'maay/bin/maay-indexer']
+ 
+ 
+ class Target:
+     def __init__(self, **kw):
+         self.__dict__.update(kw)
+         
+-maay_server = Target(description = &quot;The maay server application&quot;,
++maay_node = Target(description = &quot;The maay server application&quot;,
+ 			    icon_resources=[(1,  &quot;maay/data/images/maay.ico&quot;),],
+-			    script = 'maay/server.py',
++			    script = 'maay/node.py',
+                             includes = [&quot;MySQLdb&quot;],
+-			    dest_base = &quot;maay_server&quot;)
++			    dest_base = &quot;maay_node&quot;)
+ maay_indexer = Target(description = &quot;The maay indexer application (CLI)&quot;,
+ 			    icon_resources=[(1,  &quot;maay/data/images/maay.ico&quot;),],
+ 			    script = 'maay/indexer.py',
+@@ -64,7 +64,7 @@
+             sys.argv.append('py2exe')
+             
+         
+-	setup(console = [maay_server, maay_indexer,
++	setup(console = [maay_node, maay_indexer,
+                          createdb, updateConfig],
+               service = [maay_service],
+ 		name = name,
+@@ -82,7 +82,7 @@
+ 		version = version,
+ 		author = author,
+                 author_email = author_email,
+-		copyright = copyright,
++#		copyright = copyright,
+ 		description = description,
+ 		url = url,
+ 		data_files = data_files,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000383.html">[Maay-svncheckins] r407 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000385.html">[Maay-svncheckins] r409 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#384">[ date ]</a>
+              <a href="thread.html#384">[ thread ]</a>
+              <a href="subject.html#384">[ subject ]</a>
+              <a href="author.html#384">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

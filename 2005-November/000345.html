@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r369 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r369%20-%20trunk/maay&In-Reply-To=%3C200511091228.jA9CSeRB008013%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000344.html">
+   <LINK REL="Next"  HREF="000346.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r369 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r369%20-%20trunk/maay&In-Reply-To=%3C200511091228.jA9CSeRB008013%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r369 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 13:28:40 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000344.html">[Maay-svncheckins] r368 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000346.html">[Maay-svncheckins] r370 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#345">[ date ]</a>
+              <a href="thread.html#345">[ thread ]</a>
+              <a href="subject.html#345">[ subject ]</a>
+              <a href="author.html#345">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 13:28:20 +0100 (Wed, 09 Nov 2005)
+New Revision: 369
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+only send back abstract of the 15 first found documents
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-09 12:24:53 UTC (rev 368)
++++ trunk/maay/p2pquerier.py	2005-11-09 12:28:20 UTC (rev 369)
+@@ -22,9 +22,10 @@
+ from logilab.common.compat import set
+ 
+ from twisted.web.xmlrpc import Proxy
+-
++from maay.texttool import makeAbstract, removeSpace, untagText
+ #TODO: add test for this
+ SEQ_DICT = {}
++MAX_P2P_ANSWER_LENGTH = 15
+ 
+ def incrementSequence(item):
+     &quot;&quot;&quot;Returns a growing monotone value for the
+@@ -95,6 +96,10 @@
+                 'mime_type': self.query.filetype or '',
+                 }
+ 
++    def getWords(self):
++        return self.query.words.split()
++
++
+ class P2pAnswer:
+     def __init__(self, queryId, documents):
+         self.queryId = queryId
+@@ -198,11 +203,15 @@
+             # TODO: record answer in database if local is False
+             # auc : to cache them ?
+             if not query.isKnown(document):
++                abstract = makeAbstract(document.text, query.getWords())
++                document.text = untagText(removeSpace(abstract))
+                 query.addMatch(document)
+                 #toSend.append(document.asDictionnary())
+                 # above was meant to be like .asKwargs() ?
+                 # anyway, this stuff is xmlrpc-serializable (auc)
+                 toSend.append(document)
++                if len(toSend) &gt; MAX_P2P_ANSWER_LENGTH:
++                    break
+         
+         if query.sender != self.nodeId: 
+             try:
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000344.html">[Maay-svncheckins] r368 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000346.html">[Maay-svncheckins] r370 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#345">[ date ]</a>
+              <a href="thread.html#345">[ thread ]</a>
+              <a href="subject.html#345">[ subject ]</a>
+              <a href="author.html#345">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

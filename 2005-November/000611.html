@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r639 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r639%20-%20trunk/maay&In-Reply-To=%3C200511232031.jANKV5eA000973%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000610.html">
+   <LINK REL="Next"  HREF="000612.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r639 - trunk/maay</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r639%20-%20trunk/maay&In-Reply-To=%3C200511232031.jANKV5eA000973%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r639 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 21:31:05 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000610.html">[Maay-svncheckins] r638 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000612.html">[Maay-svncheckins] r640 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#611">[ date ]</a>
+              <a href="thread.html#611">[ thread ]</a>
+              <a href="subject.html#611">[ subject ]</a>
+              <a href="author.html#611">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-23 21:31:04 +0100 (Wed, 23 Nov 2005)
+New Revision: 639
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+Log:
+fix the &quot;Non-unique&quot; docId bug
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-23 18:53:49 UTC (rev 638)
++++ trunk/maay/dbentity.py	2005-11-23 20:31:04 UTC (rev 639)
+@@ -380,24 +380,23 @@
+     def _selectQuery(cls, query, onlyLocal=False, onlyDistant=False):
+         # XXX: HARCODED LIMIT
+         limit = 15
+-        wheres = ['query_id=%(query_id)s']
+         if onlyDistant:
+-            wheres.append(&quot;host != 'localhost'&quot;)
++            where = &quot;WHERE T.host != 'localhost'&quot;
+         elif onlyLocal:
+-            wheres.append(&quot;host = 'localhost'&quot;)
++            where = &quot;WHERE T.host = 'localhost'&quot;
++        else:
++            where = ''
+         if query.order == 'publication_time':
+             orderClause = 'publication_time, relevance'
+         else:
+             orderClause = '%s, publication_time' % (query.order,)
+-        sqlQuery = 'SELECT %s FROM %s WHERE %s GROUP BY document_id ' \
+-            'HAVING record_ts=MIN(record_ts) ' \
+-            'ORDER BY %s %s ' \
+-            'LIMIT %s OFFSET %s' % (', '.join(cls.attributes),
+-                                    cls.tableName,
+-                                    ' AND '.join(wheres),
+-                                    orderClause, query.direction,
+-                                    limit, query.offset,
+-                                    )
++        aliasedAttrs = ['T.%s' % attr for attr in cls.attributes]
++        # If only Mysql4.1 supported VIEWS
++        subQuery = 'SELECT * FROM results WHERE query_id=%(query_id)s GROUP BY document_id HAVING record_ts=MIN(record_ts)'
++        sqlQuery = 'SELECT %s FROM (%s) AS T %s ORDER BY %s %s LIMIT %s OFFSET %s' % (
++            ', '.join(aliasedAttrs), subQuery, where,
++            orderClause, query.direction, limit, query.offset)
++        print &quot;QUERY =&quot;, sqlQuery
+         return sqlQuery, {'query_id' : query.qid}
+     _selectQuery = classmethod(_selectQuery)
+ 
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-23 18:53:49 UTC (rev 638)
++++ trunk/maay/querier.py	2005-11-23 20:31:04 UTC (rev 639)
+@@ -339,15 +339,16 @@
+         for &lt;qid&gt;
+         &quot;&quot;&quot;
+         cursor = self._cnx.cursor()
+-        localCountQuery = &quot;SELECT COUNT(*) from results WHERE query_id='%s' AND host='localhost';&quot; % (qid,)
+-        distantCountQuery = &quot;SELECT COUNT(*) from results WHERE query_id='%s' AND host!='localhost';&quot; % (qid,)
++        subQuery = &quot;SELECT * FROM results WHERE query_id='%s' GROUP BY document_id HAVING record_ts=MIN(record_ts)&quot; % qid
++        localCountQuery = &quot;SELECT COUNT(*) FROM (%s) AS T WHERE T.host='localhost'&quot; % subQuery
++        distantCountQuery = &quot;SELECT COUNT(*) FROM (%s) AS T WHERE T.host != 'localhost'&quot; % subQuery
+         cursor.execute(localCountQuery)
+         localCount = cursor.fetchall()[0][0]
+         cursor.execute(distantCountQuery)
+         distantCount = cursor.fetchall()[0][0]        
+         cursor.close()
+         return localCount, distantCount
+-    
++
+     def getQueryResults(self, query, onlyLocal=False, onlyDistant=False):
+         &quot;&quot;&quot;builds and returns Result' instances by searching in
+         the temporary table built for &lt;qid&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000610.html">[Maay-svncheckins] r638 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000612.html">[Maay-svncheckins] r640 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#611">[ date ]</a>
+              <a href="thread.html#611">[ thread ]</a>
+              <a href="subject.html#611">[ subject ]</a>
+              <a href="author.html#611">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

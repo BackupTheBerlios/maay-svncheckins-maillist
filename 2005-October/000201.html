@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r229 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C20051026171712.GA6814%40logilab.fr%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000200.html">
+   <LINK REL="Next"  HREF="000202.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r229 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C20051026171712.GA6814%40logilab.fr%3E"
+       TITLE="[Maay-svncheckins] r229 - trunk/maay">aurelien.campeas at logilab.fr
+       </A><BR>
+    <I>Wed Oct 26 19:17:12 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000200.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000202.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#201">[ date ]</a>
+              <a href="thread.html#201">[ thread ]</a>
+              <a href="subject.html#201">[ subject ]</a>
+              <a href="author.html#201">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Sorry, but this reintroduces the bug. Probably because id(cred) will
+be different each time even if the content is the same. I'll look at a
+whay to preserve your cache and get rid of the leak anyway, if possible.
+
+
+On Wed, Oct 26, 2005 at 02:21:42PM +0200, Adrien Di Mascio at BerliOS wrote:
+&gt;<i> Author: adimasci
+</I>&gt;<i> Date: 2005-10-26 14:21:23 +0200 (Wed, 26 Oct 2005)
+</I>&gt;<i> New Revision: 229
+</I>&gt;<i> 
+</I>&gt;<i> Modified:
+</I>&gt;<i>    trunk/maay/server.py
+</I>&gt;<i> Log:
+</I>&gt;<i> keep a cache of creds/queriers instead of keeping a single
+</I>&gt;<i> querier in cache, because we don't want to provide the same
+</I>&gt;<i> querier to 2 different users ! (Even if, for our current
+</I>&gt;<i> use cases, it can't happen)
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> Modified: trunk/maay/server.py
+</I>&gt;<i> ===================================================================
+</I>&gt;<i> --- trunk/maay/server.py	2005-10-26 10:55:47 UTC (rev 228)
+</I>&gt;<i> +++ trunk/maay/server.py	2005-10-26 12:21:23 UTC (rev 229)
+</I>&gt;<i> @@ -401,18 +401,23 @@
+</I>&gt;<i>          self.realm = realm
+</I>&gt;<i>          self.dbhost = dbhost
+</I>&gt;<i>          self.dbname = dbname
+</I>&gt;<i> -        self.querier = None # reusing the same querier has some benefits :)
+</I>&gt;<i> +	# Keeping a cache of queriers reusing the same has some benefits :)
+</I>&gt;<i> +        self.querierCache = {}
+</I>&gt;<i>      
+</I>&gt;<i>      def requestAvatarId(self, creds):
+</I>&gt;<i>          print &quot;DBAuthChecker : checking credentials for DB access&quot;
+</I>&gt;<i>          try:
+</I>&gt;<i> -            if not self.querier:
+</I>&gt;<i> -                self.querier = MaayQuerier(host=self.dbhost, database=self.dbname,
+</I>&gt;<i> -                                        user=creds.username, password=creds.password)
+</I>&gt;<i> +	    try:
+</I>&gt;<i> +		querier = self.querierCache[creds]
+</I>&gt;<i> +	    except KeyError:
+</I>&gt;<i> +		querier = MaayQuerier(host=self.dbhost, database=self.dbname,
+</I>&gt;<i> +				      user=creds.username,
+</I>&gt;<i> +				      password=creds.password)
+</I>&gt;<i> +		self.querierCache[creds] = querier
+</I>&gt;<i>          except MaayAuthenticationError:
+</I>&gt;<i>              print &quot;DBAuthChecker : Authentication Error&quot;
+</I>&gt;<i>              return failure.Failure(error.UnauthorizedLogin())
+</I>&gt;<i> -        self.realm.createUserSession(creds.username, self.querier)
+</I>&gt;<i> +        self.realm.createUserSession(creds.username, querier)
+</I>&gt;<i>          return defer.succeed(creds.username)
+</I>&gt;<i>  
+</I>&gt;<i>  
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Maay-svncheckins mailing list
+</I>&gt;<i> <A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">Maay-svncheckins at lists.berlios.de</A>
+</I>&gt;<i> <A HREF="http://lists.berlios.de/mailman/listinfo/maay-svncheckins">http://lists.berlios.de/mailman/listinfo/maay-svncheckins</A>
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000200.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000202.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#201">[ date ]</a>
+              <a href="thread.html#201">[ thread ]</a>
+              <a href="subject.html#201">[ subject ]</a>
+              <a href="author.html#201">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

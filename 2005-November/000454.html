@@ -1,0 +1,357 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r483 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r483%20-%20trunk&In-Reply-To=%3C200511150849.jAF8ngJl024973%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000453.html">
+   <LINK REL="Next"  HREF="000455.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r483 - trunk</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r483%20-%20trunk&In-Reply-To=%3C200511150849.jAF8ngJl024973%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r483 - trunk">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 09:49:42 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000453.html">[Maay-svncheckins] r482 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000455.html">[Maay-svncheckins] r484 - in trunk: . doc maay maay/win32
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#454">[ date ]</a>
+              <a href="thread.html#454">[ thread ]</a>
+              <a href="subject.html#454">[ subject ]</a>
+              <a href="author.html#454">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-15 09:49:34 +0100 (Tue, 15 Nov 2005)
+New Revision: 483
+
+Added:
+   trunk/README.html
+Modified:
+   trunk/README.txt
+Log:
+updated for 0.2
+
+Added: trunk/README.html
+===================================================================
+--- trunk/README.html	2005-11-15 08:25:46 UTC (rev 482)
++++ trunk/README.html	2005-11-15 08:49:34 UTC (rev 483)
+@@ -0,0 +1,147 @@
++&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
++&lt;head&gt;
++&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
++&lt;meta name=&quot;generator&quot; content=&quot;Docutils 0.3.9: <A HREF="http://docutils.sourceforge.net/">http://docutils.sourceforge.net/</A>&quot; /&gt;
++&lt;title&gt;Maay documentation&lt;/title&gt;
++&lt;link rel=&quot;stylesheet&quot; href=&quot;default.css&quot; type=&quot;text/css&quot; /&gt;
++&lt;/head&gt;
++&lt;body&gt;
++&lt;div class=&quot;document&quot; id=&quot;maay-documentation&quot;&gt;
++&lt;h1 class=&quot;title&quot;&gt;Maay documentation&lt;/h1&gt;
++&lt;div class=&quot;section&quot; id=&quot;warning&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;warning&quot;&gt;Warning&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;This is beta quality software. Before launching anything be sure to read 
++this document and the release notes for the program. On Windows systems, 
++the release notes are available through the start menu shortcut of Maay.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;what-is-maay&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;what-is-maay&quot;&gt;What is Maay?&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;Maay is a P2P indexation and search engine. You can use it to index
++files on your computer, and export them to other members of the Maay
++P2P network. You can also issue searches which will look for documents
++on your computer as well as on other nodes of the P2P network.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;what-is-in-the-current-implementation&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;what-is-in-the-current-implementation&quot;&gt;What is in the current implementation?&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;The current Maay implementation features:&lt;/p&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;the maay node, which acts as an XMLRPC and HTTP server. The XMLRPC
++interface is used to process indexation requests and distributed
++queries. The HTTP interface is available through a web browser to
++issue local and distributed queries, as well as indexation
++requests.&lt;/li&gt;
++&lt;li&gt;an indexer, which can handle the following document formats: raw
++text, HTML, Microsoft Word, Rich Text Format, Portable Document
++Format.&lt;/li&gt;
++&lt;li&gt;a presence server, which can handle presence information from maay
++nodes, in order to seed the node database.&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;how-do-i-install-maay-from-source&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;how-do-i-install-maay-from-source&quot;&gt;How do I install Maay from source?&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;These instruction are intended for people using a unix-like
++OS. Windows users are strongly advised to use the prebuilt package
++(see below).&lt;/p&gt;
++&lt;p&gt;A few Python libraries are required to make the whole think work. Most
++of them should be available in your OS distribution too :&lt;/p&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;logilab common libraries 0.12.1 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>&quot;&gt;<A HREF="http://www.logilab.org/projects/common&lt;/a">http://www.logilab.org/projects/common&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;mysql-python (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>&quot;&gt;<A HREF="http://sourceforge.net/projects/mysql-python&lt;/a">http://sourceforge.net/projects/mysql-python&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-twisted 2.0 or above ((&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/&lt;/a">http://twistedmatrix.com/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-twisted-web (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/&lt;/a">http://twistedmatrix.com/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-nevow 0.6 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://nevow.com/">http://nevow.com/</A>&quot;&gt;<A HREF="http://nevow.com/&lt;/a">http://nevow.com/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-imaging (www.pythonware.com/products/pil/)&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;p&gt;You will also need a few helper applications to perform the conversion
++of various binary formats to something that Maay can index. There is
++probably a prebuilt binary available for your OS distribution
++somewhere. You will need to download and install :&lt;/p&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;pdftohtml (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://pdftohtml.sourceforge.net/">http://pdftohtml.sourceforge.net/</A>&quot;&gt;<A HREF="http://pdftohtml.sourceforge.net/&lt;/a">http://pdftohtml.sourceforge.net/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;antiword (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>&quot;&gt;<A HREF="http://www.winfield.demon.nl/&lt;/a">http://www.winfield.demon.nl/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;unrtf (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>&quot;&gt;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html&lt;/a">http://www.gnu.org/software/unrtf/unrtf.html&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;p&gt;The indexation part uses a MySQL database (version 4.1). You
++will need to install such a database or get in touch with your
++DBA. The following assumes a local mysql installation, with no root
++password. Maay has not been tested with MySQL 5.0, but it should
++work. Please report if you encounter problems with this version of
++MySQL.&lt;/p&gt;
++&lt;p&gt;Once everything else is installed, you can point you web browser to
++&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and download the latest
++source tarball. Unpack it, go to the newly created directory and run:&lt;/p&gt;
++&lt;pre class=&quot;literal-block&quot;&gt;
++# python setup.py install
++&lt;/pre&gt;
++&lt;p&gt;It is now necessary to create the MySQL database instance that will
++store the indexation data:&lt;/p&gt;
++&lt;pre class=&quot;literal-block&quot;&gt;
++# mysql -u root mysql
++mysql&gt; \. sql/mysql.sql
++&lt;/pre&gt;
++&lt;p&gt;You're done !&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;how-do-i-install-maay-from-a-package&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;how-do-i-install-maay-from-a-package&quot;&gt;How do I install Maay from a package?&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;For now, only a Windows installer is available. Download it from
++&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and run it. This should
++install and setup everything properly.&lt;/p&gt;
++&lt;p&gt;A package for the Debian GNU/Linux distribution will soon be made
++available.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;how-do-i-start-using-maay&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;how-do-i-start-using-maay&quot;&gt;How do I start using Maay?&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;First, edit the configuration files. On Windows, they are in 
++C:Program FilesMaaywebapp.ini and C:Program
++FilesMaayindexer.ini. The Windows installer should have set the
++different configuration values
++On Unix systems, they are in /etc/maay, and you can copy them to 
++~/.maay/ if you want to have some personnalized settings. Pay attention 
++to the index-dir and skip-dir settings in indexer.ini.&lt;/p&gt;
++&lt;p&gt;Then, start the Maay service. On Windows, this is done automatically
++when your machine boots. On unix systems, use /usr/bin/maay-server&lt;/p&gt;
++&lt;p&gt;You can now visit &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://localhost:7777/">http://localhost:7777/</A>&quot;&gt;<A HREF="http://localhost:7777/&lt;/a">http://localhost:7777/&lt;/a</A>&gt; which will display the Maay
++search page. Issuing a search will probably not yield any result since
++you have not indexed any files yet.&lt;/p&gt;
++&lt;p&gt;Launch the indexer: visit &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://localhost:7777/indexation">http://localhost:7777/indexation</A>&quot;&gt;<A HREF="http://localhost:7777/indexation&lt;/a">http://localhost:7777/indexation&lt;/a</A>&gt;, check that
++the directories are correct and click on the &quot;index now&quot; button. On
++Windows, the indexation can also be launched manually through the
++start menu again by choosing &quot;Maay Indexer&quot;. On Unix systems, the
++manual indexation is done by running /usr/bin/maay-indexer.&lt;/p&gt;
++&lt;p&gt;The indexer will look for files on your hard disks and index them by
++sending indexation requests to the server. Once the indexation is
++done, queries issued through the web interface should give results.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;where-can-i-get-help&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;where-can-i-get-help&quot;&gt;Where can I get help?&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;For now the best place to ask for help is on the development mailing
++list of Maay. You can subscribe from&lt;/p&gt;
++&lt;p&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev">http://lists.berlios.de/mailman/listinfo/maay-dev</A>&quot;&gt;<A HREF="http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a">http://lists.berlios.de/mailman/listinfo/maay-dev&lt;/a</A>&gt;&lt;/p&gt;
++&lt;p&gt;You may also use the bug tracker on the Berlios project page at 
++&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt;&lt;/p&gt;
++&lt;p&gt;When reporting a bug or asking for help, don't forget to provide the
++following pieces of information:&lt;/p&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;operating system&lt;/li&gt;
++&lt;li&gt;version of maay&lt;/li&gt;
++&lt;li&gt;on unix: version of python&lt;/li&gt;
++&lt;li&gt;steps to reproduce the bug&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;p&gt;Be as precise as possible. Just saying &quot;the indexer does not work&quot;
++won't give us any clue to help you.&lt;/p&gt;
++&lt;blockquote&gt;
++Alexandre Fayolle &lt;&lt;a class=&quot;reference&quot; href=&quot;mailto:alexandre.fayolle&#64;logilab.fr&quot;&gt;alexandre.fayolle&#64;logilab.fr&lt;/a&gt;&gt;, Tue, 15 Nov 2005 09:41:54 +0100&lt;/blockquote&gt;
++&lt;/div&gt;
++&lt;/div&gt;
++&lt;/body&gt;
++&lt;/html&gt;
+
+Modified: trunk/README.txt
+===================================================================
+--- trunk/README.txt	2005-11-15 08:25:46 UTC (rev 482)
++++ trunk/README.txt	2005-11-15 08:49:34 UTC (rev 483)
+@@ -1,7 +1,12 @@
++==================
++Maay documentation
++==================
++
++
+ Warning
+ =======
+ 
+-This is alpha quality software. Before launching anything be sure to read 
++This is beta quality software. Before launching anything be sure to read 
+ this document and the release notes for the program. On Windows systems, 
+ the release notes are available through the start menu shortcut of Maay.
+ 
+@@ -18,14 +23,18 @@
+ 
+ The current Maay implementation features:
+ 
++ * the maay node, which acts as an XMLRPC and HTTP server. The XMLRPC
++   interface is used to process indexation requests and distributed
++   queries. The HTTP interface is available through a web browser to
++   issue local and distributed queries, as well as indexation
++   requests. 
++
+  * an indexer, which can handle the following document formats: raw
+    text, HTML, Microsoft Word, Rich Text Format, Portable Document
+    Format. 
+ 
+- * a web interface which can be used to issue queries (currently
+-   queries are ontly dispatched on the current node, i.e. the P2P
+-   functionnality is not available for now, though we are working on
+-   it). 
++ * a presence server, which can handle presence information from maay
++   nodes, in order to seed the node database. 
+ 
+ How do I install Maay from source?
+ ==================================
+@@ -37,11 +46,12 @@
+ A few Python libraries are required to make the whole think work. Most
+ of them should be available in your OS distribution too :
+ 
+- * logilab common libraries (<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>)
++ * logilab common libraries 0.12.1 or above (<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>)
+  * mysql-python (<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>)
+- * python-twisted (<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>)
++ * python-twisted 2.0 or above ((<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>)
+  * python-twisted-web (<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>)
+- * python-nevow (<A HREF="http://nevow.com/">http://nevow.com/</A>)
++ * python-nevow 0.6 or above (<A HREF="http://nevow.com/">http://nevow.com/</A>) 
++ * python-imaging (www.pythonware.com/products/pil/)
+ 
+ You will also need a few helper applications to perform the conversion
+ of various binary formats to something that Maay can index. There is
+@@ -52,7 +62,12 @@
+  * antiword (<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>)
+  * unrtf (<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>)
+ 
+-The indexation part uses a MySQL database, so 
++The indexation part uses a MySQL database (version 4.1). You
++will need to install such a database or get in touch with your
++DBA. The following assumes a local mysql installation, with no root
++password. Maay has not been tested with MySQL 5.0, but it should
++work. Please report if you encounter problems with this version of
++MySQL. 
+ 
+ Once everything else is installed, you can point you web browser to
+ <A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> and download the latest
+@@ -82,25 +97,30 @@
+ ==========================
+ 
+ First, edit the configuration files. On Windows, they are in 
+-C:\Program Files\Maay\webapp.ini and C:\Program Files\Maay\indexer.ini.
++C:\Program Files\Maay\webapp.ini and C:\Program
++Files\Maay\indexer.ini. The Windows installer should have set the
++different configuration values
+ On Unix systems, they are in /etc/maay, and you can copy them to 
+ ~/.maay/ if you want to have some personnalized settings. Pay attention 
+ to the index-dir and skip-dir settings in indexer.ini.
+ 
+-Then, start the Maay service. On Windows, use the start menu to
+-launch &quot;Maay Server&quot;. On unix systems, use /usr/bin/maay-server
++Then, start the Maay service. On Windows, this is done automatically
++when your machine boots. On unix systems, use /usr/bin/maay-server
+ 
+-You can now visit <A HREF="http://localhost:8080/">http://localhost:8080/</A> which will display the Maay
++You can now visit <A HREF="http://localhost:7777/">http://localhost:7777/</A> which will display the Maay
+ search page. Issuing a search will probably not yield any result since
+ you have not indexed any files yet.
+ 
+-Launch the indexer. On Windows, this is done through the start menu
+-again by choosing &quot;Maay Indexer&quot;. On Unix systems, use
+-/usr/bin/maay-indexer. The indexer will look for files on your hard
+-disks and index them by sending indexation requests to the
+-server. Once the indexation is done, queries issued through the web
+-interface should give results. 
++Launch the indexer: visit <A HREF="http://localhost:7777/indexation,">http://localhost:7777/indexation,</A> check that
++the directories are correct and click on the &quot;index now&quot; button. On
++Windows, the indexation can also be launched manually through the
++start menu again by choosing &quot;Maay Indexer&quot;. On Unix systems, the
++manual indexation is done by running /usr/bin/maay-indexer. 
+ 
++The indexer will look for files on your hard disks and index them by
++sending indexation requests to the server. Once the indexation is
++done, queries issued through the web interface should give results.
++
+ Where can I get help?
+ =====================
+ 
+@@ -112,5 +132,17 @@
+ You may also use the bug tracker on the Berlios project page at 
+ <A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>
+ 
++When reporting a bug or asking for help, don't forget to provide the
++following pieces of information:
+ 
+- Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;, Thu,  6 Oct 2005 15:50:15 +0200
++ * operating system
++ * version of maay
++ * on unix: version of python
++ * steps to reproduce the bug
++
++Be as precise as possible. Just saying &quot;the indexer does not work&quot;
++won't give us any clue to help you. 
++
++
++ Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;, Tue, 15 Nov 2005 09:41:54 +0100
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000453.html">[Maay-svncheckins] r482 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000455.html">[Maay-svncheckins] r484 - in trunk: . doc maay maay/win32
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#454">[ date ]</a>
+              <a href="thread.html#454">[ thread ]</a>
+              <a href="subject.html#454">[ subject ]</a>
+              <a href="author.html#454">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

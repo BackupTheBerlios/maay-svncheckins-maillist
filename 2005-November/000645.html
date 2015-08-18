@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r674 - in trunk: . maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r674%20-%20in%20trunk%3A%20.%20maay&In-Reply-To=%3C200511281325.jASDPLTT019489%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000647.html">
+   <LINK REL="Next"  HREF="000648.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r674 - in trunk: . maay</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r674%20-%20in%20trunk%3A%20.%20maay&In-Reply-To=%3C200511281325.jASDPLTT019489%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r674 - in trunk: . maay">adimasci at berlios.de
+       </A><BR>
+    <I>Mon Nov 28 14:25:21 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000647.html">[Maay-svncheckins] r673 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000648.html">[Maay-svncheckins] r675 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#645">[ date ]</a>
+              <a href="thread.html#645">[ thread ]</a>
+              <a href="subject.html#645">[ subject ]</a>
+              <a href="author.html#645">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-28 14:25:16 +0100 (Mon, 28 Nov 2005)
+New Revision: 674
+
+Modified:
+   trunk/ChangeLog
+   trunk/ReleaseNotes.txt
+   trunk/maay.iss
+   trunk/maay/__init__.py
+Log:
+prepare for new upstream release
+
+Modified: trunk/ChangeLog
+===================================================================
+--- trunk/ChangeLog	2005-11-28 13:24:16 UTC (rev 673)
++++ trunk/ChangeLog	2005-11-28 13:25:16 UTC (rev 674)
+@@ -1,3 +1,7 @@
++Maay-0.3.1 2005-11-28
++	* win32 bug fixes (systray, indexing)
++
++	
+ Maay-0.3.0 2005-11-25
+ 	* Ergonomic improvements
+ 	* Compute and use popularity and relevance scores
+
+Modified: trunk/ReleaseNotes.txt
+===================================================================
+--- trunk/ReleaseNotes.txt	2005-11-28 13:24:16 UTC (rev 673)
++++ trunk/ReleaseNotes.txt	2005-11-28 13:25:16 UTC (rev 674)
+@@ -1,11 +1,9 @@
+-Release Notes for version 0.3.0
++Release Notes for version 0.3.1
+ 
+ See README.txt for installation and quick start instructions. 
+ 
+ This release is beta-level software, which contains several bug fixes
+-and improvements over 0.2.2. The 0.2.3 version was not released
+-officially, and only contains a few bugfixes concerning the 
+-windows services management.
++over 0.3.0.
+ 
+ If you encounter any problem with the web interface (like 
+ never ending requests, pages not updated), please notify us and
+
+Modified: trunk/maay/__init__.py
+===================================================================
+--- trunk/maay/__init__.py	2005-11-28 13:24:16 UTC (rev 673)
++++ trunk/maay/__init__.py	2005-11-28 13:25:16 UTC (rev 674)
+@@ -22,5 +22,5 @@
+ &quot;&quot;&quot;MAAY project
+ &quot;&quot;&quot;
+ 
+-VERSION = '0.3.0'
++VERSION = '0.3.1'
+ __revision__ = '$Id$'
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-11-28 13:24:16 UTC (rev 673)
++++ trunk/maay.iss	2005-11-28 13:25:16 UTC (rev 674)
+@@ -6,7 +6,7 @@
+ 
+ [Setup]
+ AppName=Maay
+-AppVerName=Maay-0.3.0
++AppVerName=Maay-0.3.1
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+ UninstallDisplayIcon={app}\maay_node.exe
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000647.html">[Maay-svncheckins] r673 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000648.html">[Maay-svncheckins] r675 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#645">[ date ]</a>
+              <a href="thread.html#645">[ thread ]</a>
+              <a href="subject.html#645">[ subject ]</a>
+              <a href="author.html#645">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

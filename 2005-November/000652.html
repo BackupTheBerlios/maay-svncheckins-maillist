@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r680 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r680%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511291344.jATDiQ3R022978%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000651.html">
+   <LINK REL="Next"  HREF="000653.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r680 - in trunk/maay: . data</H1>
+    <B>dnf at berlios.de</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r680%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511291344.jATDiQ3R022978%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r680 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov 29 14:44:26 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000651.html">[Maay-svncheckins] r679 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000653.html">[Maay-svncheckins] r681 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#652">[ date ]</a>
+              <a href="thread.html#652">[ thread ]</a>
+              <a href="subject.html#652">[ subject ]</a>
+              <a href="author.html#652">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-29 14:44:13 +0100 (Tue, 29 Nov 2005)
+New Revision: 680
+
+Modified:
+   trunk/maay/data/skeleton.html
+   trunk/maay/webapplication.py
+Log:
+Move the javascript include (<A HREF="http://maay.netofpeers.net/version.js">http://maay.netofpeers.net/version.js</A>) at the end of
+the searchform.html page. So, the searchform page can be displayed even if
+the javascript is not reachable.
+
+
+
+Modified: trunk/maay/data/skeleton.html
+===================================================================
+--- trunk/maay/data/skeleton.html	2005-11-28 18:15:02 UTC (rev 679)
++++ trunk/maay/data/skeleton.html	2005-11-29 13:44:13 UTC (rev 680)
+@@ -16,5 +16,6 @@
+     &lt;/table&gt;
+     &lt;nevow:invisible nevow:macro=&quot;body&quot; /&gt;
+     &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
+-  &lt;/body&gt;  
++    &lt;nevow:invisible nevow:render=&quot;custom_htmlfooter&quot; /&gt;
++  &lt;/body&gt;
+ &lt;/html&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-28 18:15:02 UTC (rev 679)
++++ trunk/maay/webapplication.py	2005-11-29 13:44:13 UTC (rev 680)
+@@ -271,11 +271,15 @@
+ 
+     def render_custom_htmlheader(self, context):
+         return [
+-            tags.script(type='text/javascript', src='<A HREF="http://maay.netofpeers.net/version.js">http://maay.netofpeers.net/version.js</A>'),
+             tags.script(type='text/javascript', src=url.here.child('localversion.js')),
+             tags.script(type='text/javascript', src=url.here.child('versionjs')),
+             ]
+ 
++    def render_custom_htmlfooter(self, context):
++        return [
++            tags.script(type='text/javascript', src='<A HREF="http://maay.netofpeers.net/version.js">http://maay.netofpeers.net/version.js</A>'),
++            ]
++
+     def render_onload(self, context):
+         return 'checkNewRelease();'
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000651.html">[Maay-svncheckins] r679 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000653.html">[Maay-svncheckins] r681 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#652">[ date ]</a>
+              <a href="thread.html#652">[ thread ]</a>
+              <a href="subject.html#652">[ subject ]</a>
+              <a href="author.html#652">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

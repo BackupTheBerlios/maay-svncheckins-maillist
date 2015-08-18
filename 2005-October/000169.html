@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r198 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r198%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510191529.j9JFTZhQ027331%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000168.html">
+   <LINK REL="Next"  HREF="000170.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r198 - in trunk/maay: . test</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r198%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510191529.j9JFTZhQ027331%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r198 - in trunk/maay: . test">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Oct 19 17:29:35 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000168.html">[Maay-svncheckins] r197 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000170.html">[Maay-svncheckins] r199 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#169">[ date ]</a>
+              <a href="thread.html#169">[ thread ]</a>
+              <a href="subject.html#169">[ subject ]</a>
+              <a href="author.html#169">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-19 17:29:34 +0200 (Wed, 19 Oct 2005)
+New Revision: 198
+
+Modified:
+   trunk/maay/configuration.py
+   trunk/maay/test/test_configuration.py
+Log:
+- test updateEnvPath only on Win32 (inconsistent behaviour on non-win32 platform)
+
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-10-19 15:26:50 UTC (rev 197)
++++ trunk/maay/configuration.py	2005-10-19 15:29:34 UTC (rev 198)
+@@ -46,6 +46,9 @@
+     raise AssertionError(&quot;Unknown platform setup&quot;)
+ 
+ def _update_env_path(maay_dir):
++    &quot;&quot;&quot;Updates PATH to explicitly add antiword, mysql, etc.
++       default installation paths
++    &quot;&quot;&quot;
+     assert sys.platform == 'win32', 'This method must not be called on non windows platforms'
+     path = []
+     if os.environ.get('PATH'):
+@@ -55,7 +58,17 @@
+             path.append(os.path.join(maay_dir, directory))
+     os.environ['PATH'] =  os.pathsep.join(path)
+ 
+-        
++## XXX: proposed replacement for the above function (need to be
++##      accepted and tested on windows)
++## def XXX_update_env_path(maay_dir):
++##     assert sys.platform == 'win32', 'This method must not be called on non windows platforms'
++##     path = os.environ.get('PATH', '').split(os.pathsep)
++##     for otherPath in (u'pdftohtml', os.path.join(u'mysql', u'bin'), ur'c:\antiword'):
++##         if otherPath not in path:
++##             path.append(os.path.join(maay_dir, otherPath))
++##     os.environ['PATH'] = os.pathsep.join(path)
++
++
+ def get_path_of(datafile):
+     &quot;&quot;&quot;return the path of a data file, depending on the platform
+     Handles development paths for testing as well as deployed paths&quot;&quot;&quot;
+
+Modified: trunk/maay/test/test_configuration.py
+===================================================================
+--- trunk/maay/test/test_configuration.py	2005-10-19 15:26:50 UTC (rev 197)
++++ trunk/maay/test/test_configuration.py	2005-10-19 15:29:34 UTC (rev 198)
+@@ -59,20 +59,25 @@
+         self.assertEquals(config.db_name, 'muche')
+ 
+ 
+-class Win32ConfigTC(unittest.TestCase):
++if sys.platform == 'win32':
++    class Win32ConfigTC(unittest.TestCase):
++        def testUpdateEnvPath(self):
++            platform = sys.platform
++            oldpath = os.environ['PATH']
++            sys.platform = 'win32'
++            try:
++                configuration._update_env_path(&quot;tmp&quot;)
++                envpath = os.environ['PATH']
++                regexp = r'tmp[/\\]pdftohtml[:;]tmp[/\\]mysql[/\\]bin[:;]tmp[/\\]c:\antiword$'
++                self.failUnless(re.search(regexp, envpath)), envpath
++            finally:
++                sys.platform = platform
++                os.environ['PATH'] = oldpath
++else:
++    print &quot;****  Skipping Win32 tests on non-windows platforms&quot;
++    print &quot;****  (os.path.join(some_dir, 'c:\antiword') does not make&quot;
++    print &quot;****  sense on non-windows platform, and makes tests a lot &quot;
++    print &quot;****  more obfuscated and hard to read/maintain&quot;
+ 
+-    def test_update_env_path(self):
+-        platform = sys.platform
+-        oldpath = os.environ['PATH']
+-        sys.platform = 'win32'
+-        try:
+-            configuration._update_env_path(&quot;tmp&quot;)
+-            envpath = os.environ['PATH']
+-            regexp = r'.*[:;]tmp[/\\]antiword[:;]tmp[/\\]pdftohtml[:;]tmp[/\\]mysql[/\\]bin$'
+-            self.failUnless(re.match(regexp, envpath)), envpath
+-        finally:
+-            sys.platform = platform
+-            os.environ['PATH'] = oldpath 
+-            
+ if __name__ == '__main__':
+     unittest.main()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000168.html">[Maay-svncheckins] r197 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000170.html">[Maay-svncheckins] r199 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#169">[ date ]</a>
+              <a href="thread.html#169">[ thread ]</a>
+              <a href="subject.html#169">[ subject ]</a>
+              <a href="author.html#169">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

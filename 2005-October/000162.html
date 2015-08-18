@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r191 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r191%20-%20trunk/maay&In-Reply-To=%3C200510171528.j9HFSiY8014289%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000161.html">
+   <LINK REL="Next"  HREF="000163.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r191 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r191%20-%20trunk/maay&In-Reply-To=%3C200510171528.j9HFSiY8014289%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r191 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Oct 17 17:28:44 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000161.html">[Maay-svncheckins] r190 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000163.html">[Maay-svncheckins] r192 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#162">[ date ]</a>
+              <a href="thread.html#162">[ thread ]</a>
+              <a href="subject.html#162">[ subject ]</a>
+              <a href="author.html#162">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-17 17:28:41 +0200 (Mon, 17 Oct 2005)
+New Revision: 191
+
+Modified:
+   trunk/maay/converter.py
+   trunk/maay/indexer.py
+   trunk/maay/texttool.py
+Log:
+Fix union bug in Indexer.start, fix previous fix in FileIterator, add ImageBaseConverter and JpegConverter class to converters
+
+Modified: trunk/maay/converter.py
+===================================================================
+--- trunk/maay/converter.py	2005-10-17 13:07:19 UTC (rev 190)
++++ trunk/maay/converter.py	2005-10-17 15:28:41 UTC (rev 191)
+@@ -48,7 +48,7 @@
+ import gzip
+ import bz2
+ 
+-from maay.texttool import TextParser, MaayHTMLParser as HTMLParser, ParsingError
++from maay.texttool import TextParser, ExifParser, MaayHTMLParser as HTMLParser, ParsingError
+ 
+ # REGISTRY is a mimetype / converterList map
+ REGISTRY = {}
+@@ -102,6 +102,18 @@
+     OUTPUT_TYPE = 'html'
+     MIME_TYPE = 'text/html'
+ 
++class ImageBasedConverter(BaseConverter):
++    &quot;&quot;&quot;provides base Image converter
++       In the future, it may hold EXIF information retrieval methods&quot;&quot;&quot;
++    OUTPUT_TYPE = 'image'
++
++    def getParser(self):
++        return ExifParser ()
++
++class JpegConverter(ImageBasedConverter):
++    OUTPUT_TYPE = 'jpg'
++    MIME_TYPE = 'image/jpeg'
++
+ class CommandBasedConverter(BaseConverter):
+     COMMAND = None
+ 
+@@ -160,7 +172,6 @@
+     COMMAND = 'antiword &quot;%(input)s&quot; &gt; &quot;%(output)s&quot;'
+     MIME_TYPE = 'application/msword'
+ 
+-
+ def extractWordsFromFile(filename):
+     mimetype = guess_type(filename)[0]
+     converters = REGISTRY.get(mimetype, [])
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-17 13:07:19 UTC (rev 190)
++++ trunk/maay/indexer.py	2005-10-17 15:28:41 UTC (rev 191)
+@@ -39,7 +39,7 @@
+ from maay.texttool import removeControlChar
+ 
+ # grabbed from nevow
+-mimetypes.types_map.update(
++mimetypes.types_map.update( # is it really taken into account ? (python files seem not to appear)
+     {
+             '.conf':  'text/plain',
+             '.diff':  'text/plain',
+@@ -119,7 +119,7 @@
+     def start(self):
+         # we index private dirs first because public overrides private
+         existingFiles = self.runIndexer(isPrivate=True)
+-        existingFiles.union(self.runIndexer(isPrivate=False))
++        existingFiles |= self.runIndexer(isPrivate=False)
+         indexedFiles = Set(self.serverProxy.getIndexedFiles(self.cnxId))
+         oldFiles = indexedFiles - existingFiles
+         for filename in oldFiles:
+@@ -219,7 +219,7 @@
+                     except UnicodeError:
+                         dirpath = unicode(dirpath, 'iso-8859-1')
+                     for filename in filenames:
+-                        if os.access(dirpath+filename, os.R_OK): # Can we open it ?
++                        if os.access(dirpath+'/'+filename, os.R_OK): # Can we open it ?
+                             try:
+                                 filename = unicode(filename, 'utf-8')
+                             except UnicodeError:
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-17 13:07:19 UTC (rev 190)
++++ trunk/maay/texttool.py	2005-10-17 15:28:41 UTC (rev 191)
+@@ -186,6 +186,12 @@
+         return self.title, result, self.links, 0
+ 
+ 
++class ExifParser(AbstractParser):
++    &quot;&quot;&quot;A parser for Exif information found in image files&quot;&quot;&quot;
++
++    def parseString(self, source):
++        return u'An image', u'The image', [], 0
++
+         
+ _table = {}
+ for i in xrange(32):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000161.html">[Maay-svncheckins] r190 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000163.html">[Maay-svncheckins] r192 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#162">[ date ]</a>
+              <a href="thread.html#162">[ thread ]</a>
+              <a href="subject.html#162">[ subject ]</a>
+              <a href="author.html#162">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

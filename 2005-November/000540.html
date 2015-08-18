@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r568 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r568%20-%20trunk/maay&In-Reply-To=%3C200511181435.jAIEZxrx018807%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000539.html">
+   <LINK REL="Next"  HREF="000541.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r568 - trunk/maay</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r568%20-%20trunk/maay&In-Reply-To=%3C200511181435.jAIEZxrx018807%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r568 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 15:35:59 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000539.html">[Maay-svncheckins] r567 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000541.html">[Maay-svncheckins] r569 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#540">[ date ]</a>
+              <a href="thread.html#540">[ thread ]</a>
+              <a href="subject.html#540">[ subject ]</a>
+              <a href="author.html#540">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-18 15:35:59 +0100 (Fri, 18 Nov 2005)
+New Revision: 568
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/p2pquerier.py
+   trunk/maay/querier.py
+   trunk/maay/query.py
+Log:
+limit peer results to 50 / peer (be nice with the network)
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-18 14:28:13 UTC (rev 567)
++++ trunk/maay/dbentity.py	2005-11-18 14:35:59 UTC (rev 568)
+@@ -230,7 +230,10 @@
+         return self.text[:200]
+     abstract = property(get_abstract)
+ 
+-    def _selectContainingQuery(cls, words, mimetype=None, offset=0, allowPrivate=False):
++    # XXX Please rewrite this method. The way we build the SQL
++    #     query is quite messy
++    def _selectContainingQuery(cls, words, mimetype=None, offset=0,
++                               limit=None, allowPrivate=False):
+         # XXX mimetype handling is a HACK. It needs to be integrated
+         #     nicely in order to handle any kind of restrictions easily
+         #word = WORDS_RGX.finditer(normalizeText(' '.join(words)))
+@@ -265,16 +268,21 @@
+                  &quot;HAVING count(DS.db_document_id) = %%s &quot;
+                  &quot;ORDER BY D.publication_time DESC &quot; % \
+                  (', '.join(['%s'] * len(words)), restriction))
++        # XXX SQL: how to specify only the OFFSET ???????
++        if limit or offset:
++            query += &quot; LIMIT %s OFFSET %s&quot; % (limit or 50, offset)
+         return query, words + restrictionParams + [len(words)]
+ 
+     _selectContainingQuery = classmethod(_selectContainingQuery)
+ 
+-    def selectContaining(cls, cursor, words, mimetype=None, offset=0, allowPrivate=False):
++    def selectContaining(cls, cursor, words, mimetype=None, offset=0,
++                         limit=None, allowPrivate=False):
+         print &quot;Document selectContaining %s&quot; % words
+         if not words:
+             return []
+         query, params = cls._selectContainingQuery(words, mimetype,
+                                                    offset=offset,
++                                                   limit=limit,
+                                                    allowPrivate=allowPrivate)
+         if query:
+             cursor.execute(query, params)
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-18 14:28:13 UTC (rev 567)
++++ trunk/maay/p2pquerier.py	2005-11-18 14:35:59 UTC (rev 568)
+@@ -71,7 +71,15 @@
+         self.local_version = local_version
+         self.query_version = query_version
+ 
+-# XXX should P2pQuery derive from query.Query? (auc : no)
++# This variable is hardcoded for now and describes the maximum
++# number of results relayed by each peer.
++# This might cause the results to be very incomplete and it will
++# be improved in the future, but for now:
++#  - 50 results per node with a good ranking system is
++#    acceptable
++#  - it should lightweight the network
++LIMIT = 50
++
+ class P2pQuery:
+ 
+     _version = 2
+@@ -96,6 +104,8 @@
+         #self.port = originator_port
+         self.ttl = ttl
+         self.query = query
++        # explicitly set the 'limit' attribute for P2P queries
++        self.query.limit = LIMIT
+         self.documents_ids = set()
+         # *** client_host: IP adress of immediate client (computed at reception)
+         # *** client_port: rpc port of immediate client (provided by client)
+@@ -278,9 +288,7 @@
+         query.hop()        
+         if query.ttl &gt; 0:
+             self.sendQuery(query)
+-
+         documents = self.querier.findDocuments(query.query)
+-
+         if len(documents) == 0:
+             print &quot; ... no document matching the query, won't answer.&quot;
+             return
+@@ -313,7 +321,6 @@
+               % (query.client_host, query.client_port)
+         
+         toSend = []
+-        
+         for document in answer.documents:
+             if not isinstance(document, dict):
+                 document = document.__dict__
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-18 14:28:13 UTC (rev 567)
++++ trunk/maay/querier.py	2005-11-18 14:35:59 UTC (rev 568)
+@@ -156,7 +156,8 @@
+         try:
+             cursor = self._cnx.cursor()
+             return Document.selectContaining(cursor, words, query.filetype,
+-                                             query.offset, self.searchInPrivate)
++                                             query.offset, query.limit,
++                                             self.searchInPrivate)
+         finally:
+             traceback.print_exc()
+             cursor.close()
+
+Modified: trunk/maay/query.py
+===================================================================
+--- trunk/maay/query.py	2005-11-18 14:28:13 UTC (rev 567)
++++ trunk/maay/query.py	2005-11-18 14:35:59 UTC (rev 568)
+@@ -53,6 +53,7 @@
+         self.offset = offset
+         self.filetype = filetype
+         self.filename = filename
++        self.limit = None
+ 
+     def fromRawQuery(rawQuery, offset=0):
+         &quot;&quot;&quot;:type rawQuery: str&quot;&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000539.html">[Maay-svncheckins] r567 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000541.html">[Maay-svncheckins] r569 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#540">[ date ]</a>
+              <a href="thread.html#540">[ thread ]</a>
+              <a href="subject.html#540">[ subject ]</a>
+              <a href="author.html#540">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

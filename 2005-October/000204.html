@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r230 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r230%20-%20trunk/maay&In-Reply-To=%3C200510270915.j9R9FtID018716%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000203.html">
+   <LINK REL="Next"  HREF="000205.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r230 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r230%20-%20trunk/maay&In-Reply-To=%3C200510270915.j9R9FtID018716%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r230 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Oct 27 11:15:55 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000203.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000205.html">[Maay-svncheckins] r231 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#204">[ date ]</a>
+              <a href="thread.html#204">[ thread ]</a>
+              <a href="subject.html#204">[ subject ]</a>
+              <a href="author.html#204">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-27 11:15:48 +0200 (Thu, 27 Oct 2005)
+New Revision: 230
+
+Modified:
+   trunk/maay/querier.py
+   trunk/maay/server.py
+Log:
+Introduces WEB_AVATARID, resets ANONYMOUS_AVATARID to '__anonymous__', fixes the cache leak of DBAuthChecker, a few print fixes.
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-26 12:21:23 UTC (rev 229)
++++ trunk/maay/querier.py	2005-10-27 09:15:48 UTC (rev 230)
+@@ -38,7 +38,7 @@
+ class MaayAuthenticationError(Exception):
+     &quot;&quot;&quot;raised on db authentication failure&quot;&quot;&quot;
+ 
+-ANONYMOUS_AVATARID = '__anonymous__'
++ANONYMOUS_AVATARID = '__anonymous__' 
+     
+ class IQuerier(Interface):
+     &quot;&quot;&quot;defines the High-Level interface to Maay SQL database&quot;&quot;&quot;
+@@ -133,6 +133,10 @@
+     def close(self):
+         self._cnx.close()
+ 
++    def __del__(self):
++        print self, &quot;being GCed ...&quot;
++        self.close()
++
+     def findDocuments(self, query):
+         &quot;&quot;&quot;Find all indexed documents matching the query&quot;&quot;&quot;
+         # TODO: order results using document_scores information
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-26 12:21:23 UTC (rev 229)
++++ trunk/maay/server.py	2005-10-27 09:15:48 UTC (rev 230)
+@@ -64,14 +64,16 @@
+ from maay import registrationclient
+ from maay.query import Query
+ 
+-ANONYMOUS_AVATARID = 'maay' # it's only a matter of definition after all ...
++ANONYMOUS_AVATARID = '__anonymous__'
++WEB_AVATARID = 'maay' 
+ 
++
+ class MaayPage(rend.Page):
+     docFactory = loaders.xmlfile(get_path_of('skeleton.html'))
+     child_maaycss = static.File(get_path_of('maay.css'))
+     child_images = static.File(get_path_of('images/'))
+ 
+-    def __init__(self, maayId=ANONYMOUS_AVATARID):
++    def __init__(self, maayId=WEB_AVATARID):
+         rend.Page.__init__(self)
+         self.maayId = maayId
+ 
+@@ -314,10 +316,10 @@
+     def _getQuerier(self, avatarId):
+         try:
+             querier = self._sessions[avatarId]
+-            print &quot;Querier of type&quot;, type(querier), &quot;for avatar&quot;,
+-            print avatarId, &quot;was in the cache. Good.&quot;
++            print &quot;MaayRealm : querier of type&quot;, type(querier), &quot;for avatar&quot;,
++            print avatarId, &quot;was in the cache.&quot;
+         except KeyError:
+-            print &quot;No querier in cache for&quot;, str(avatarId)+ \
++            print &quot;MaayRealm : no querier in cache for&quot;, str(avatarId)+ \
+                   &quot;. What are we supposed to do ?&quot;
+             querier = None
+         return querier
+@@ -354,7 +356,7 @@
+             print &quot;***&quot;
+             webQuerier = None
+         else:
+-            realm.createUserSession(ANONYMOUS_AVATARID, webQuerier)
++            realm.createUserSession(WEB_AVATARID, webQuerier)
+             webQuerier.registerNode(self.config.get_node_id(),
+                                     ip=socket.gethostbyname(socket.gethostname()),
+                                     port=webappConfig.rpcserver_port,
+@@ -407,16 +409,19 @@
+     def requestAvatarId(self, creds):
+         print &quot;DBAuthChecker : checking credentials for DB access&quot;
+         try:
+-	    try:
+-		querier = self.querierCache[creds]
+-	    except KeyError:
+-		querier = MaayQuerier(host=self.dbhost, database=self.dbname,
+-				      user=creds.username,
+-				      password=creds.password)
+-		self.querierCache[creds] = querier
+-        except MaayAuthenticationError:
+-            print &quot;DBAuthChecker : Authentication Error&quot;
+-            return failure.Failure(error.UnauthorizedLogin())
++            querier = self.querierCache[(creds.username, creds.password)]
++            print &quot; querier was in the cache for&quot;,
++        except KeyError:
++            print &quot; no querier in cache for&quot;,
++            try:
++                querier = MaayQuerier(host=self.dbhost, database=self.dbname,
++                                      user=creds.username,
++                                      password=creds.password)
++                self.querierCache[(creds.username, creds.password)] = querier
++            except MaayAuthenticationError:
++                print ; print &quot;DBAuthChecker : Authentication Error&quot;
++                return failure.Failure(error.UnauthorizedLogin())
++        print creds.username
+         self.realm.createUserSession(creds.username, querier)
+         return defer.succeed(creds.username)
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000203.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000205.html">[Maay-svncheckins] r231 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#204">[ date ]</a>
+              <a href="thread.html#204">[ thread ]</a>
+              <a href="subject.html#204">[ subject ]</a>
+              <a href="author.html#204">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

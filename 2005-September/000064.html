@@ -1,0 +1,362 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r91 - in trunk/maay: . test test/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r91%20-%20in%20trunk/maay%3A%20.%20test%20test/data&In-Reply-To=%3C200509281555.j8SFtDDo023126%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000063.html">
+   <LINK REL="Next"  HREF="000065.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r91 - in trunk/maay: . test test/data</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r91%20-%20in%20trunk/maay%3A%20.%20test%20test/data&In-Reply-To=%3C200509281555.j8SFtDDo023126%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r91 - in trunk/maay: . test test/data">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Sep 28 17:55:13 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000063.html">[Maay-svncheckins] r90 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000065.html">[Maay-svncheckins] r92 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-28 17:55:12 +0200 (Wed, 28 Sep 2005)
+New Revision: 91
+
+Added:
+   trunk/maay/test/data/compressed_bzip2.txt.bz2
+   trunk/maay/test/data/compressed_gzip.txt.gz
+Modified:
+   trunk/maay/converter.py
+   trunk/maay/test/test_codecs.py
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+handle compressed documents
+
+Modified: trunk/maay/converter.py
+===================================================================
+--- trunk/maay/converter.py	2005-09-28 15:03:43 UTC (rev 90)
++++ trunk/maay/converter.py	2005-09-28 15:55:12 UTC (rev 91)
+@@ -23,13 +23,14 @@
+ __revision__ = '$Id$'
+ 
+ # TODO: add support for xls, ppt,  openoffice, mp3, ogg
+-# TODO: add support for compressed files (compress, gzip, bzip2)
+ 
+ # XXX: need to handle file encodings
+ 
+ import os
+ from mimetypes import guess_type
+ from tempfile import mkdtemp
++import gzip
++import bz2
+ 
+ from maay.texttool import TextParser, MaayHTMLParser as HTMLParser
+ 
+@@ -87,8 +88,23 @@
+ 
+     def extractWordsFromFile(self, filename):
+         outputDir = mkdtemp()
+-        outputFile = os.path.join(outputDir, 'out.txt')
+-        command_args = {'input' : filename, 'output' : outputFile}
++        if filename.endswith('.gz') or filename.endswith('.bz2'):
++            print &quot;Decompressing %s&quot; % filename
++            if filename.endswith('.gz'):
++                opener = gzip.open
++            else:
++                opener = bz2.BZ2File
++            compressed = opener(filename, 'rb')
++            uncompressedFile = os.path.join(outputDir, 'uncompressed')
++            uncompressed = file(uncompressedFile, 'wb')
++            uncompressed.write(compressed.read())
++            compressed.close()
++            uncompressed.close()
++            
++        else:
++            uncompressedFile = ''
++        outputFile = os.path.join(outputDir, 'outfile')
++        command_args = {'input' : uncompressedFile or filename, 'output' : outputFile}
+         cmd = self.COMMAND % command_args
+         print &quot;Executing %r&quot; % cmd
+         errcode = os.system(cmd)
+@@ -101,6 +117,8 @@
+         finally:
+             if os.path.isfile(outputFile):
+                 os.remove(outputFile)
++            if os.path.isfile(uncompressedFile):
++                os.remove(uncompressedFile)
+             os.rmdir(outputDir)
+ 
+ 
+
+Added: trunk/maay/test/data/compressed_bzip2.txt.bz2
+===================================================================
+(Binary files differ)
+
+
+Property changes on: trunk/maay/test/data/compressed_bzip2.txt.bz2
+___________________________________________________________________
+Name: svn:mime-type
+   + application/octet-stream
+
+Added: trunk/maay/test/data/compressed_gzip.txt.gz
+===================================================================
+(Binary files differ)
+
+
+Property changes on: trunk/maay/test/data/compressed_gzip.txt.gz
+___________________________________________________________________
+Name: svn:mime-type
+   + application/octet-stream
+
+Modified: trunk/maay/test/test_codecs.py
+===================================================================
+--- trunk/maay/test/test_codecs.py	2005-09-28 15:03:43 UTC (rev 90)
++++ trunk/maay/test/test_codecs.py	2005-09-28 15:55:12 UTC (rev 91)
+@@ -1,4 +1,4 @@
+-
++# -*- coding: iso-8859-1 -*-
+ import unittest
+ import codecs
+ import gzip
+@@ -6,16 +6,35 @@
+ import os
+ 
+ class CodecsTC(unittest.TestCase):
+-    def test_readCompressed(self):
++
++    def setUp(self):
+         f = gzip.open('toto.gz', 'wb')
+-        for i in range(10):
+-            f.write(('%d'%i)*50+'\n')
++        self.data = u&quot;L'&#233;t&#233; au bord de la mer&quot;
++        f.write(self.data.encode('utf-8'))
+         f.close()
+ 
+-        c = codecs.open('toto.gz', 'rb', 'zlib_codec')
++    def tearDown(self):
++        os.remove(&quot;toto.gz&quot;)
++        
++##     def test_readCompressedWithCodec(self):
++##         c = codecs.open('toto.gz', 'rb', 'zlib_codec')
++##         data = c.read()
++##         c.close()
++##         self.assertEquals(data, self.data.encode('utf-8'))
++
++    def test_readCompressedWithGzip(self):
++        c = gzip.open('toto.gz', 'rb')
+         data = c.read()
+-        c.close
+-        self.failUnless(data.startswith('0000'))
++        c.close()
++        self.assertEquals(data, self.data.encode('utf-8'))
+ 
++    def test_readCompressedWithGzipDecoded(self):
++        c = gzip.open('toto.gz', 'rb')
++        reader = codecs.getreader('utf-8')
++        f = reader(c)
++        data = f.read()
++        f.close()
++        self.assertEquals(data, self.data)
++
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-09-28 15:03:43 UTC (rev 90)
++++ trunk/maay/test/test_texttool.py	2005-09-28 15:55:12 UTC (rev 91)
+@@ -4,7 +4,7 @@
+ import unittest
+ from os.path import join, dirname
+ 
+-from maay.texttool import MaayHTMLParser, guessEncoding
++from maay.texttool import MaayHTMLParser, guessEncoding, open
+ 
+ ROW_TEXT = u&quot;foo &#233;t&#233; bar baz top bim bam boum&quot;
+ 
+@@ -52,6 +52,25 @@
+         self.assertEquals(text, 'hello ete world this is a link and this is another link')
+         self.assertEquals(links, ['something.com', 'somethingelse.com'])
+         
++    def test_normalizeHTMLEncoding(self):
++        data = [
++            'latin1', 'ISO-8859-1',
++            'iso-88591', 'ISO-8859-1',
++            
++            ]
++
++    def test_parseDifficultFile(self):
++        # This file has got some weird, non HTML compliant content
++        # and is not handled properly by HTMLParser 
++        stream = file(join(DATADIR, 'node22.html'))
++        data = stream.read()
++        stream.close()
++        title, text, links, offset = self.parser.parseString(data)
++        self.assertEquals(title, u'21 Porting to Python 2.3')
++        self.failUnless(len(text)&gt;10)
++        
++
++class GuessEncofingTC(unittest.TestCase):
+     def testGuessEncoding(self):
+         self.assertEquals(guessEncoding(join(DATADIR, 'utf8.txt')), 'UTF-8')
+         self.assertEquals(guessEncoding(join(DATADIR, 'utf16.txt')), 'UTF-16')
+@@ -68,24 +87,21 @@
+         enc = guessEncoding(filename)
+         self.assertEquals(enc, 'UTF-8')
+ 
+-    def test_normalizeHTMLEncoding(self):
+-        data = [
+-            'latin1', 'ISO-8859-1',
+-            'iso-88591', 'ISO-8859-1',
+-            
+-            ]
+ 
+-    def test_parseDifficultFile(self):
+-        # This file has got some weird, non HTML compliant content
+-        # and is not handled properly by HTMLParser 
+-        stream = file(join(DATADIR, 'node22.html'))
+-        data = stream.read()
+-        stream.close()
+-        title, text, links, offset = self.parser.parseString(data)
+-        self.assertEquals(title, u'21 Porting to Python 2.3')
+-        self.failUnless(len(text)&gt;10)
++class OpenTC(unittest.TestCase):
++    def testGzip(self):
++        f = open(join(DATADIR, 'compressed_gzip.txt.gz'), 'rb', 'utf-8')
++        data = f.read()
++        f.close()
++        self.assertEquals(type(data), unicode)
++        self.failUnless(u'ent&#234;te' in data)
+         
++    def testBz2(self):
++        f = open(join(DATADIR, 'compressed_bzip2.txt.bz2'), 'rb', 'utf-8')
++        data = f.read()
++        f.close()
++        self.assertEquals(type(data), unicode)
++        self.failUnless(u'ent&#234;te' in data)
+ 
+-
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-09-28 15:03:43 UTC (rev 90)
++++ trunk/maay/texttool.py	2005-09-28 15:55:12 UTC (rev 91)
+@@ -3,10 +3,12 @@
+ 
+ __revision__ = '$Id$'
+ 
+-from HTMLParser import HTMLParser
++from HTMLParser import HTMLParser, HTMLParseError
+ import codecs
+ import re
+ import mimetypes
++import gzip
++import bz2
+ 
+ WORD_MIN_LEN = 2
+ WORD_MAX_LEN = 50
+@@ -39,7 +41,12 @@
+         FF FE 	        UTF-16, little-endian
+         EF BB BF 	UTF-8
+     &quot;&quot;&quot;
+-    stream = file(filename, 'rb')
++    if filename.endswith(&quot;.gz&quot;):
++        stream = gzip.open(filename, 'rb')
++    elif filename.endswith(&quot;.bz2&quot;):
++        stream = bz2.BZ2File(filename, 'rb')
++    else:
++        stream = file(filename, 'rb')
+     try:
+         buffer = stream.read(4)
+         # try to guess from BOM
+@@ -70,6 +77,24 @@
+         stream.close()
+ 
+ 
++def open(filename, mode='rb', encoding='ascii', errors='strict'):
++    &quot;&quot;&quot;open potentially compressed files using a codec converter&quot;&quot;&quot;
++    if 'r' in mode:
++        converter = codecs.getreader(encoding)
++    elif 'w' in mode:
++        converter = codecs.getwriter(encoding)
++    else:
++        raise ValueError(&quot;Unsupported mode '%s'&quot; % mode)
++    
++    if filename.endswith('.gz'):
++        opener = gzip.open
++    elif filename.endswith('.bz2'):
++        opener = bz2.BZ2File
++    else:
++        opener = file
++
++    return converter(opener(filename, mode), errors)
++
+ class AbstractParser:
+     &quot;&quot;&quot;base-class for file parsers&quot;&quot;&quot;
+     def parseFile(self, filename, encoding=None):
+@@ -78,7 +103,7 @@
+         :param encoding: if None, then need to be guessed
+         &quot;&quot;&quot;
+         encoding = encoding or guessEncoding(filename)
+-        stream = codecs.open(filename, 'r', encoding, errors='ignore')
++        stream = open(filename, 'rb', encoding, errors='ignore')
+         try:
+             return self.parseString(stream.read())
+         finally:
+@@ -127,7 +152,10 @@
+             self.textbuf.append(data)
+     
+     def parseString(self, source):
+-        self.feed(source)
++        try:
++            self.feed(source)
++        except HTMLParseError, exc:
++            print &quot;Error parsing document: %s&quot; % exc
+         result = normalizeText(u''.join(self.textbuf))
+         return self.title, result, self.links, 0
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000063.html">[Maay-svncheckins] r90 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000065.html">[Maay-svncheckins] r92 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#64">[ date ]</a>
+              <a href="thread.html#64">[ thread ]</a>
+              <a href="subject.html#64">[ subject ]</a>
+              <a href="author.html#64">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

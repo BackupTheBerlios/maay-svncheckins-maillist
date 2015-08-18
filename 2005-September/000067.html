@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r94 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r94%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200509291042.j8TAgHlZ018933%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000066.html">
+   <LINK REL="Next"  HREF="000068.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r94 - in trunk/maay: . data</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r94%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200509291042.j8TAgHlZ018933%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r94 - in trunk/maay: . data">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Sep 29 12:42:17 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000066.html">[Maay-svncheckins] r93 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000068.html">[Maay-svncheckins] r95 - trunk/doc
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#67">[ date ]</a>
+              <a href="thread.html#67">[ thread ]</a>
+              <a href="subject.html#67">[ subject ]</a>
+              <a href="author.html#67">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-29 12:42:14 +0200 (Thu, 29 Sep 2005)
+New Revision: 94
+
+Modified:
+   trunk/maay/data/resultpage.html
+   trunk/maay/dbentity.py
+   trunk/maay/main.py
+   trunk/maay/querier.py
+Log:
+handle document downloading in a crude fashion
+
+Modified: trunk/maay/data/resultpage.html
+===================================================================
+--- trunk/maay/data/resultpage.html	2005-09-29 10:40:27 UTC (rev 93)
++++ trunk/maay/data/resultpage.html	2005-09-29 10:42:14 UTC (rev 94)
+@@ -19,7 +19,7 @@
+       &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+ 	&lt;td&gt;
+ 	  &lt;div class=&quot;resultItem&quot;&gt;
+-	    &lt;a class=&quot;docTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;
++	    &lt;a class=&quot;docTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/download?docid=&lt;nevow:slot name=&quot;docid&quot; /&gt;&amp;words=&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;
+ 	    &lt;pre class=&quot;resultDesc&quot;&gt;
+ 	      &lt;nevow:slot name=&quot;abstract&quot;&gt;doc abstract&lt;/nevow:slot&gt;
+ 	    &lt;/pre&gt;
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-09-29 10:40:27 UTC (rev 93)
++++ trunk/maay/dbentity.py	2005-09-29 10:42:14 UTC (rev 94)
+@@ -189,7 +189,8 @@
+         # that we are looking for, group them by their identifier, and
+         # only keep those identifier which appeared once for each word
+         # we were looking for.
+-        query = (&quot;SELECT D.document_id, &quot;
++        query = (&quot;SELECT D.db_document_id, &quot;
++                        &quot;D.document_id, &quot;
+                         &quot;D.title, &quot;
+                         &quot;D.size, &quot;
+                         &quot;D.text, &quot;
+@@ -211,7 +212,7 @@
+         if query:
+             cursor.execute(query, params)
+             results = cursor.fetchall()
+-            return [cls(**dict(zip(['document_id', 'title', 'size', 'text', 'url', 'mime_type'],
++            return [cls(**dict(zip(['db_document_id', 'document_id', 'title', 'size', 'text', 'url', 'mime_type'],
+                                    row)))
+                     for row in results]
+         else:
+
+Modified: trunk/maay/main.py
+===================================================================
+--- trunk/maay/main.py	2005-09-29 10:40:27 UTC (rev 93)
++++ trunk/maay/main.py	2005-09-29 10:42:14 UTC (rev 94)
+@@ -28,8 +28,9 @@
+ class MaayPage(rend.Page):
+     child_maaycss = static.File(get_path_of('maay.css'))
+     child_images = static.File(get_path_of('images/'))
+-    
+ 
++
++
+ class LoginForm(MaayPage):
+     &quot;&quot;&quot;a basic login form. This page is rendered until the user
+     is logged.
+@@ -64,7 +65,7 @@
+     addSlash = True
+ 
+     def __init__(self, maayId, querier):
+-        rend.Page.__init__(self)
++        MaayPage.__init__(self)
+         self.maayId = maayId
+         self.querier = querier
+ 
+@@ -74,32 +75,49 @@
+         return None
+ 
+     def child_search(self, context):
+-        words = context.arg('words')
+-        if isinstance(words, basestring):
+-            words = (words,)
++        words = context.arg('words').split()
+         results = self.querier.findDocuments(words)
+-        return ResultsPage(results)
++        return ResultsPage(results, words)
+ 
++    # XXX make sure that the requested document is really in the database
++    # XXX don't forget to update the download statistics of the document
++    def child_download(self, context):
++        docid = context.arg('docid')
++        words = context.arg('words').split()
++        
++        docurl = self.querier.notifyDownload(docid, words)
++        if docurl:
++            return  static.File(docurl)
++        else:
++            return NotFoundPage()
+ 
+-
+ class ResultsPage(MaayPage):
+     &quot;&quot;&quot;default results page&quot;&quot;&quot;
+     docFactory = loaders.xmlfile(get_path_of('resultpage.html'))
+     addSlash = False
+     
+-    def __init__(self, results):
++    def __init__(self, results, words):
+         MaayPage.__init__(self)
+         self.results = results
++        self.words = words
+ 
+     def data_results(self, context, data):
+         return self.results
+     
+     def render_row(self, context, data):
++        # FIXME : put words in the download url for stats
+         document = data
+         context.fillSlots('doctitle',  document.title)
+         # XXX abstract attribute should be a unicode string
+-        context.fillSlots('abstract', normalize_text(unicode(document.abstract)))
++        try:
++            abstract = normalize_text(unicode(document.abstract))
++        except Exception, exc:
++            print exc
++            abstract = u'No abstract available for this document [%s]' % exc
++        context.fillSlots('abstract', abstract)
++        context.fillSlots('docid', document.db_document_id)
+         context.fillSlots('docurl', document.url)
++        context.fillSlots('words', u' '.join(self.words))
+         context.fillSlots('readable_size', document.readable_size())
+         return context.tag
+ 
+@@ -115,6 +133,7 @@
+     def createUserSession(self, avatarId, querier):
+         self._sessions[avatarId] = querier
+ 
++
+     def requestAvatar(self, avatarId, mind, *interfaces):
+         for iface in interfaces:
+             if iface is inevow.IResource:
+@@ -177,6 +196,9 @@
+         return defer.succeed(creds.username)
+ 
+ 
++class NotFoundPage(rend.FourOhFour):
++    pass
++
+ class WebappConfiguration(Configuration):
+     options = [
+         ('db-name',
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-29 10:40:27 UTC (rev 93)
++++ trunk/maay/querier.py	2005-09-29 10:42:14 UTC (rev 94)
+@@ -50,6 +50,13 @@
+         `document_providers` table reference them, as well as the
+         corresponding `document_scores` rows&quot;&quot;&quot;
+         
++    def notifyDownload(self, docId, words):
++        &quot;&quot;&quot;check that a document is downloadable and update the
++        download statistics for the document.
++
++        Return document url if the document is downloadable and and
++        empty string otherwise&quot;&quot;&quot;
++        
+     def close():
+         &quot;&quot;&quot;closes the DB connection&quot;&quot;&quot;
+ 
+@@ -74,7 +81,7 @@
+                 # the autodetection of the charset guesses latin-1 and
+                 # this obviously does not work with unicode
+                 connection.charset='utf-8'
+-            except dpapiMod.OperationalError:
++            except dbapiMod.OperationalError:
+                 raise MaayAuthenticationError(&quot;Failed to authenticate user %r&quot;
+                                               % user)
+         self._cnx = connection
+@@ -275,3 +282,12 @@
+             score = _scores.pop()
+             db_scores[score.word] = score
+         return db_scores
++
++    def notifyDownload(self, db_document_id, words):
++        cursor = self._cnx.cursor()
++        try:
++            doc = Document.selectWhere(cursor, db_document_id=db_document_id)[0]
++            # TODO: update statistics
++            return doc.url
++        except IndexError:
++            return ''
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000066.html">[Maay-svncheckins] r93 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000068.html">[Maay-svncheckins] r95 - trunk/doc
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#67">[ date ]</a>
+              <a href="thread.html#67">[ thread ]</a>
+              <a href="subject.html#67">[ subject ]</a>
+              <a href="author.html#67">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r447 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r447%20-%20trunk/maay&In-Reply-To=%3C200511131215.jADCFKb0000065%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000417.html">
+   <LINK REL="Next"  HREF="000419.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r447 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r447%20-%20trunk/maay&In-Reply-To=%3C200511131215.jADCFKb0000065%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r447 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Sun Nov 13 13:15:20 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000417.html">[Maay-svncheckins] r446 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000419.html">[Maay-svncheckins] r448 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#418">[ date ]</a>
+              <a href="thread.html#418">[ thread ]</a>
+              <a href="subject.html#418">[ subject ]</a>
+              <a href="author.html#418">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-13 13:15:16 +0100 (Sun, 13 Nov 2005)
+New Revision: 447
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+Log:
+Download works again, and now from a document_id, not pathname.
+
+.. however, we can't yet increment the download stats, because we
+    lack the query in the context of the download op.
+    A possible fix would be to make the context be :
+     /search/distantfile...., instead of just
+     /distantfile
+
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-13 12:10:35 UTC (rev 446)
++++ trunk/maay/dbentity.py	2005-11-13 12:15:16 UTC (rev 447)
+@@ -282,8 +282,15 @@
+                     for row in results]
+         else:
+             return [] 
+-        
+     selectContaining = classmethod(selectContaining)
++
++    def selectUrlWhereDocid(cls, cursor, document_id):
++        query = &quot;SELECT url FROM documents WHERE document_id=%s&quot;
++        cursor.execute(query, [document_id])
++        results = cursor.fetchall()
++        return results[0]
++    selectUrlWhereDocid = classmethod(selectUrlWhereDocid)
++
+     
+ class Result(Document):
+     &quot;&quot;&quot;Results are temporary relations created/destroyed on the fly
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-13 12:10:35 UTC (rev 446)
++++ trunk/maay/querier.py	2005-11-13 12:15:16 UTC (rev 447)
+@@ -30,7 +30,7 @@
+ 
+ from logilab.common.db import get_dbapi_compliant_module
+ 
+-from maay.dbentity import Document, FileInfo, \
++from maay.dbentity import Document, FileInfo, DBEntity, \
+      DocumentProvider, DocumentScore, Word, Node, Result
+ from maay.texttool import normalizeText, WORDS_RGX, MAX_STORED_SIZE
+ 
+@@ -217,14 +217,13 @@
+         self._cnx.commit()
+ 
+     def justDownloadAndShutUp(self, document_id):
+-        print db_document_id
+         try:
+             try:
+                 cursor = self._cnx.cursor()
+-                doc = Document.selectWhere(cursor, document_id=document_id)[0]
++                url = Document.selectUrlWhereDocid(cursor, document_id)[0]
+             finally:
+                 cursor.close()
+-            return doc.url
++            return url
+         except IndexError:
+             #XXX: that was not a smart thing to do, debugging-wise
+             #return ''
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000417.html">[Maay-svncheckins] r446 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000419.html">[Maay-svncheckins] r448 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#418">[ date ]</a>
+              <a href="thread.html#418">[ thread ]</a>
+              <a href="subject.html#418">[ subject ]</a>
+              <a href="author.html#418">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

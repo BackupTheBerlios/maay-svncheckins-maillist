@@ -1,0 +1,417 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r52 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r52%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509201610.j8KGAPRH023756%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000025.html">
+   <LINK REL="Next"  HREF="000027.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r52 - in trunk/maay: . test</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r52%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509201610.j8KGAPRH023756%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r52 - in trunk/maay: . test">adimasci at berlios.de
+       </A><BR>
+    <I>Tue Sep 20 18:10:25 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000025.html">[Maay-svncheckins] r51 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000027.html">[Maay-svncheckins] r53 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-09-20 18:10:24 +0200 (Tue, 20 Sep 2005)
+New Revision: 52
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+   trunk/maay/test/test_dbentity.py
+   trunk/maay/test/test_querier.py
+Log:
+- fixed update/insert query generation
+- fixed missing cursor parameter in several MayQuerier's methods
+- test_querier now works on a real database
+- added a small test for querier.indexDocument that checks a newly
+  indexed document is correctly inserted in the database
+- formatting fix
+
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-09-20 13:30:09 UTC (rev 51)
++++ trunk/maay/dbentity.py	2005-09-20 16:10:24 UTC (rev 52)
+@@ -18,9 +18,13 @@
+                    &quot;invalid value for key: %s&quot; % keyattr
+ 
+     def buildStateDict(self):
+-        return dict([(attr, getattr(self, attr)) for attr in self.attributes])
++        return dict([(attr, getattr(self, attr)) for attr in self.boundAttributes()])
+     stateDict = property(buildStateDict, doc=&quot;current object's state&quot;)
+ 
++    def boundAttributes(self):
++        &quot;&quot;&quot;returns the list of attributes for which a value is specified&quot;&quot;&quot;
++        return [attr for attr in self.attributes if hasattr(self, attr)]
++
+     def _selectQuery(cls, whereColumns=()):
+         if whereColumns:
+             wheres = ['%s=%%(%s)s' % (attr, attr) for attr in whereColumns]
+@@ -50,8 +54,7 @@
+ 
+     def _updateQuery(self):
+         &quot;&quot;&quot;generates an UPDATE query according to object's state&quot;&quot;&quot;
+-        attrClauses = ['%s=%%(%s)s' % (attr, attr) for attr in self.attributes
+-                       if getattr(self, attr, None)]
++        attrClauses = ['%s=%%(%s)s' % (attr, attr) for attr in self.boundAttributes()]
+         wheres = ['%s=%%(%s)s' % (keyattr, keyattr) for keyattr in self.key]
+         where = ' AND '.join(wheres)
+         query = 'UPDATE %s SET %s WHERE %s' % (self.tableName,
+@@ -62,9 +65,9 @@
+     def _insertQuery(self):
+         &quot;&quot;&quot;generates an INSERT query according to object's state&quot;&quot;&quot;
+         values = ['%%(%s)s' % attr for attr in self.attributes
+-                  if getattr(self, attr, None)]
++                  if hasattr(self, attr)]
+         query = 'INSERT INTO %s (%s) VALUES (%s)' % (self.tableName,
+-                                                     ', '.join(self.attributes),
++                                                     ', '.join(self.boundAttributes()),
+                                                      ', '.join(values))
+         return query
+ 
+@@ -145,7 +148,7 @@
+     attributes = ('db_document_id', 'document_id', 'mime_type', 'title',
+                   'size', 'text', 'publication_time', 'state', 'download_count',
+                   'url', 'matching', 'indexed')
+-    tableName = 'document'
++    tableName = 'documents'
+     key = ('db_document_id',)
+     
+     def readable_size(self):
+@@ -189,7 +192,7 @@
+     attributes = ('file_name', 'file_time', 'db_document_id',
+                   'state', 'file_state')
+     tableName = 'files'
+-    key = ('db_document_id',)
++    key = ('file_name',)
+     
+     REMOVED_FILE_STATE = 0
+     CREATED_FILE_STATE = 1
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-20 13:30:09 UTC (rev 51)
++++ trunk/maay/querier.py	2005-09-20 16:10:24 UTC (rev 52)
+@@ -13,7 +13,8 @@
+ from zope.interface import Interface, implements
+ import MySQLdb
+ 
+-from maay.dbentity import Document, FileInfo, DocumentProvider, DocumentScore
++from maay.dbentity import Document, FileInfo, DocumentProvider, DocumentScore, \
++     Word
+ 
+ 
+ WORD_MIN_LEN = 2
+@@ -58,7 +59,7 @@
+     def __init__(self, host='', database='', user='', password='', connection=None):
+         if connection is None:
+             connection = MySQLdb.connect(host=host, db=database,
+-                                        user=user, passwd=password)
++                                         user=user, passwd=password)
+         self._cnx = connection
+ 
+     def _execute(self, query, args=None):
+@@ -68,6 +69,8 @@
+             cursor.execute(query, args)
+             results = cursor.fetchall()
+         except:
++            import traceback
++            traceback.print_exc()
+             print &quot;GOT ERROR while executing %r/%s ... rollback&quot; % (query, args)
+             cursor.close()
+             self._cnx.rollback()
+@@ -114,22 +117,24 @@
+         cursor = self._cnx.cursor()
+ 
+         # insert or update in table document
+-        doc = Document.selectWhere(cursor, document_id = content_hash)
++        doc = Document.selectWhere(cursor, document_id=content_hash)
+         if not doc:
+             doc = Document(document_id = content_hash,
+-                           title = title,
+-                           text = text,
+-                           size = fileSize,
+-                           publication_time = lastModifiedOn,
+-                           download_count = 0.,
+-                           url = filename,
+-                           matching = 0.,
+-                           indexed = '1',
+-                           state = state)
++                           title=title,
++                           text=text,
++                           size=fileSize,
++                           publication_time=lastModifiedOn,
++                           download_count=0.,
++                           url=filename,
++                           matching=0.,
++                           indexed='1',
++                           state=state)
+             doc.commit(cursor, update=False)
+-            doc = Document.selectWhere(cursor, document_id = content_hash)[0]
++            doc = Document.selectWhere(cursor, document_id=content_hash)[0]
++        else:
++            #FIXME : update db
++            pass
+ 
+-
+         # insert or update in table file_info
+         files = FileInfo.selectWhere(cursor,
+                                      db_document_id=doc.db_document_id,
+@@ -141,24 +146,24 @@
+             file_info.file_state = file_state
+             file_info.commit(cursor, update=True)
+         else:
+-            file_info = FileInfo(db_document_id = doc.db_document_id,
+-                                 file_name = filename,
+-                                 file_time = lastModifiedOn,
+-                                 state = state,
+-                                 file_state = file_state)
+-            file_info.commit(cursor, update = False)
++            file_info = FileInfo(db_document_id=doc.db_document_id,
++                                 file_name=filename,
++                                 file_time=lastModifiedOn,
++                                 state=state,
++                                 file_state=file_state)
++            file_info.commit(cursor, update=False)
+ 
+-        self._updateScores(self, cursor, doc.db_document_id, text)
++        self._updateScores(cursor, doc.db_document_id, text)
+         cursor.close()
+ 
+ 
+     def _updateScores(self, cursor, db_document_id, text):
+         # insert or update in table document_score
+-        db_scores = self._getScoresDict(db_document_id)
++        db_scores = self._getScoresDict(cursor, db_document_id)
+         doc_scores = {}
+         # We update the document_score table only for the first
+         # occurence of the word in the document
+-        for match in WORDS_RGX.finditer(normalize_word(text)):
++        for match in WORDS_RGX.finditer(normalize_text(text)):
+             word = match.group(0)
+             if word in doc_scores:
+                 continue
+@@ -170,7 +175,7 @@
+                     db_scores[word].commit(cursor, update=True)
+             else:
+                 # insert a row in the Word table if required
+-                self._ensureWordInDatabase(word)
++                self._ensureWordInDatabase(cursor, word)
+                 db_score = DocumentScore(db_document_id = db_document_id,
+                                          word = word,
+                                          position = position,
+@@ -188,8 +193,8 @@
+                            download_count = 0.)
+             db_word.commit(cursor, update = False)
+         
+-    def _getScoresDict(self, db_document_id):
+-        _scores = DocumentScore.selectWhere(cursor, db_document_id = db_document_id)
++    def _getScoresDict(self, cursor, db_document_id):
++        _scores = DocumentScore.selectWhere(cursor, db_document_id=db_document_id)
+         db_scores = {}
+         while _scores:
+             score = _scores.pop()
+@@ -236,7 +241,8 @@
+                    'uuuu'
+                    'y'
+                    )
+-def normalize_word(word, table=_table):
++
++def normalize_text(word, table=_table):
+     &quot;&quot;&quot;turns everything to lowercase, and converts accentuated
+     characters to non accentuated chars.&quot;&quot;&quot;
+     word = word.lower()
+
+Modified: trunk/maay/test/test_dbentity.py
+===================================================================
+--- trunk/maay/test/test_dbentity.py	2005-09-20 13:30:09 UTC (rev 51)
++++ trunk/maay/test/test_dbentity.py	2005-09-20 16:10:24 UTC (rev 52)
+@@ -3,26 +3,38 @@
+ import unittest
+ from mimetypes import guess_type
+ 
+-from logilab.common.testlib import MockConnection
+-
+ from maay.dbentity import *
+ 
+ class NodeInterest_TC(unittest.TestCase):
+     def setUp(self):
+-        self.entity = NodeInterest(node_id=&quot;0&quot;*40, word=&quot;espadon&quot;,claim_count=0.5,
+-                              specialisation=.25, expertise = .75)
++        self.entity = NodeInterest(node_id=&quot;0&quot;*40, word=&quot;espadon&quot;,
++                                   claim_count=0.5, specialisation=.25,
++                                   expertise=.75)
+ 
+     def tearDown(self):
+         pass
+ 
+     def testInsertQuery(self):
++        &quot;&quot;&quot;tests basic INSERT query generation&quot;&quot;&quot;
+         query = self.entity._insertQuery()
+         self.assertEquals(query,
+                           &quot;INSERT INTO node_interests (node_id, word, &quot;
+                           &quot;claim_count, specialisation, expertise) &quot;
+                           &quot;VALUES (%(node_id)s, %(word)s, %(claim_count)s, &quot;
+                           &quot;%(specialisation)s, %(expertise)s)&quot;)
++
++    def testIncompleteInsertQuery(self):
++        &quot;&quot;&quot;tests INSERT query generation when only some of the instance's
++        attributes are set
++        &quot;&quot;&quot;
++        entity = Word(word='foo', claim_count=2)
++        query = entity._insertQuery()
++        self.assertEquals(query,
++                          &quot;INSERT INTO words (word, claim_count) &quot;
++                          &quot;VALUES (%(word)s, %(claim_count)s)&quot;)
++        
+     def testUpdateQuery(self):
++        &quot;&quot;&quot;tests UPDATE query generation&quot;&quot;&quot;
+         query = self.entity._updateQuery()
+         self.assertEquals(query,
+                           &quot;UPDATE node_interests SET node_id=%(node_id)s, word=%(word)s, &quot;
+@@ -30,10 +42,21 @@
+                           &quot;specialisation=%(specialisation)s, expertise=%(expertise)s &quot;
+                           &quot;WHERE node_id=%(node_id)s AND word=%(word)s&quot;)
+ 
++    def testIncompleteUpdateQuery(self):
++        &quot;&quot;&quot;tests UPDATE query generation when only some of the instance's
++        attributes are set
++        &quot;&quot;&quot;
++        entity = Word(word='foo', claim_count=2)
++        query = entity._updateQuery()
++        self.assertEquals(query,
++                          &quot;UPDATE words SET word=%(word)s, claim_count=%(claim_count)s &quot;
++                          &quot;WHERE word=%(word)s&quot;)
++
+     def testSelectQuery(self):
+         query = NodeInterest._selectQuery()
+         self.assertEquals(query,
+                           &quot;SELECT node_id, word, claim_count, specialisation, expertise FROM node_interests&quot;)
++        
+     def testSelectQueryWhere(self):
+         query = NodeInterest._selectQuery(('word', 'node_id'))
+         self.assertEquals(query,
+
+Modified: trunk/maay/test/test_querier.py
+===================================================================
+--- trunk/maay/test/test_querier.py	2005-09-20 13:30:09 UTC (rev 51)
++++ trunk/maay/test/test_querier.py	2005-09-20 16:10:24 UTC (rev 52)
+@@ -5,43 +5,54 @@
+ import sha
+ 
+ from logilab.common.testlib import MockConnection
++from logilab.common.db import get_connection
++from maay.querier import MaayQuerier, normalize_text, Document, FileInfo
+ 
+-from maay.querier import MaayQuerier, normalize_word, Document, FileInfo
+ 
+ 
+-
+ class QuerierTC(unittest.TestCase):
+     def setUp(self):
+-        self.cnx = MockConnection([])
+-        self.querier = MaayQuerier(connection = self.cnx)
++        self.cnx = get_connection(driver='mysql', host='crater',
++                                  database='maay_test', user='adim',
++                                  password='adim')
++        self.querier = MaayQuerier(connection=self.cnx)
++
+     def tearDown(self):
++        cursor = self.cnx.cursor()
++        for table in ('document_providers', 'document_scores', 'documents',
++                      'files', 'node_interests', 'nodes', 'words'):
++            cursor.execute('DELETE FROM %s' % table)
++        cursor.close()
+         self.cnx.close()
+ 
++        
+     def test_execute(self):
+-        answ = self.querier._execute('SELECT * FROM titi')
+-        self.assertEquals(answ, [])
++        answ = self.querier._execute('SELECT * from documents')
++        self.assertEquals(list(answ), [])
+ 
+     def testIndexDocument(self):
+         text = &quot;&quot;&quot;Le tartuffe, de Jean-Baptiste Poquelin, dit Moli&#232;re.
+ 
+ Le petit chat est mort.&quot;&quot;&quot;
+-        
++        digest = sha.sha(text).hexdigest()
+         self.querier.indexDocument('/tmp/Tartuffe.txt',
+                                    'Le Tartuffe',
+                                    text,
+                                    len(text),
+                                    30000,
+-                                   sha.sha(text).hexdigest(),
++                                   digest,
+                                    'text',
+                                    Document.PUBLISHED_STATE,
+                                    FileInfo.CREATED_FILE_STATE)
+-                                   
+-                                   
++        cursor = self.cnx.cursor()
++        matchingDocs = Document.selectWhere(cursor, document_id=digest)
++        self.assertEquals(len(matchingDocs), 1)
++        self.assertEquals(matchingDocs[0].text, text)
++        
+ 
++    def test_normalize_text(self):
++        self.assertEquals(normalize_text(&quot;&#201;t&#249;&#239;&#196;&#231;&quot;), &quot;etuiac&quot;)
+ 
+-    def test_normalize_word(self):
+-        self.assertEquals(normalize_word(&quot;&#201;t&#249;&#239;&#196;&#231;&quot;), &quot;etuiac&quot;)
+ 
+-
+ if __name__ == '__main__':
+     unittest.main()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000025.html">[Maay-svncheckins] r51 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000027.html">[Maay-svncheckins] r53 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

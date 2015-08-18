@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r372 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r372%20-%20trunk/maay&In-Reply-To=%3C200511091236.jA9CaFjQ010949%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000347.html">
+   <LINK REL="Next"  HREF="000349.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r372 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r372%20-%20trunk/maay&In-Reply-To=%3C200511091236.jA9CaFjQ010949%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r372 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 13:36:15 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000347.html">[Maay-svncheckins] r371 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000349.html">[Maay-svncheckins] r373 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#348">[ date ]</a>
+              <a href="thread.html#348">[ thread ]</a>
+              <a href="subject.html#348">[ subject ]</a>
+              <a href="author.html#348">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-09 13:36:07 +0100 (Wed, 09 Nov 2005)
+New Revision: 372
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+Give the p2pqueries a decent id
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-09 12:31:29 UTC (rev 371)
++++ trunk/maay/p2pquerier.py	2005-11-09 12:36:07 UTC (rev 372)
+@@ -19,26 +19,27 @@
+ &quot;&quot;&quot;
+ __revision__ = '$Id$'
+ 
++import sha
++import platform
++import time
++
+ from logilab.common.compat import set
+ 
+ from twisted.web.xmlrpc import Proxy
+ from maay.texttool import makeAbstract, removeSpace, untagText
+-#TODO: add test for this
+-SEQ_DICT = {}
+ MAX_P2P_ANSWER_LENGTH = 15
+ 
+-def incrementSequence(item):
++def hashIt(item):
+     &quot;&quot;&quot;Returns a growing monotone value for the
+        associated item (starting from 0 when
+        item is seen first)
+     &quot;&quot;&quot;
+-    if not SEQ_DICT.has_key(item):
+-        SEQ_DICT[item] = 1
+-    count = SEQ_DICT[item]
+-    SEQ_DICT[item] = count + 1
+-    return count
++    hasher = sha.sha()
++    hasher.update(''.join(platform.uname()))
++    hasher.update('%s' % id(item))
++    hasher.update('%s' % time.time())
++    return hasher.hexdigest()
+ 
+-
+ # XXX should P2pQuery derive from query.Query?
+ class P2pQuery:
+     def __init__(self, sender, port, query, ttl=5, qid=None):
+@@ -54,7 +55,7 @@
+         if qid:
+             self.qid = qid
+         else:
+-            self.qid = incrementSequence(sender.__hash__())
++            self.qid = hashIt(sender)
+         self.sender = sender
+         self.port = port
+         self.ttl = ttl
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000347.html">[Maay-svncheckins] r371 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000349.html">[Maay-svncheckins] r373 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#348">[ date ]</a>
+              <a href="thread.html#348">[ thread ]</a>
+              <a href="subject.html#348">[ subject ]</a>
+              <a href="author.html#348">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

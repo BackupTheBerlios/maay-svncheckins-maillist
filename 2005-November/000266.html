@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r293 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r293%20-%20trunk/maay&In-Reply-To=%3C200511031758.jA3Hw9dM004480%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000265.html">
+   <LINK REL="Next"  HREF="000267.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r293 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r293%20-%20trunk/maay&In-Reply-To=%3C200511031758.jA3Hw9dM004480%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r293 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov  3 18:58:09 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000265.html">[Maay-svncheckins] r292 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000267.html">[Maay-svncheckins] r294 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#266">[ date ]</a>
+              <a href="thread.html#266">[ thread ]</a>
+              <a href="subject.html#266">[ subject ]</a>
+              <a href="author.html#266">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-03 18:58:08 +0100 (Thu, 03 Nov 2005)
+New Revision: 293
+
+Modified:
+   trunk/maay/webapplication.py
+Log:
+Remove dead code.
+
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-03 17:57:30 UTC (rev 292)
++++ trunk/maay/webapplication.py	2005-11-03 17:58:08 UTC (rev 293)
+@@ -56,82 +56,10 @@
+         rend.Page.__init__(self)
+         self.maayId = maayId
+ 
+-#     def render_loginurl(self, context, data):
+-#         url = URL.fromContext(context)
+-#         store current URL into  'goThereAfter' to be able to return here
+-#         after login
+-#         goThereAfter = URL(url.scheme, url.netloc, url.pathList())
+-#         if self.maayId != ANONYMOUS_AVATARID:
+-#            goThereAfter = URL(url.scheme, url.netloc,
+-#                               ['logout'] + url.pathList())
+-#            context.fillSlots('actionlabel', 'Logout')
+-#         else:
+-#            goThereAfter = URL(url.scheme, url.netloc,
+-#                               ['login'] + url.pathList())
+-#            context.fillSlots('actionlabel', 'Login')            
+-#         for param, value in url.queryList():
+-#            goThereAfter = goThereAfter.add(param, value)
+-#         context.fillSlots('loginurl', str(goThereAfter))
+-#         return context.tag
+-
+     def macro_body(self, context):
+         return self.bodyFactory
+ 
+-#     def child_login(self, context):
+-#         return LoginForm(self.maayId)
+ 
+-#     def child_logout(self, context):
+-#         print &quot;sure we're not here ?&quot;
+-#         req = inevow.IRequest(context)
+-#         req.getSession().expire()
+-#         req.redirect('/' + guard.LOGOUT_AVATAR)
+-
+-class LoginForm(MaayPage):
+-    &quot;&quot;&quot;a basic login form. This page is rendered until the user
+-    is logged.
+-    &quot;&quot;&quot;
+-    # addSlash = True
+-
+-#     def path(self, context, data):
+-#         here = URL.fromContext(context)
+-#         # transform /login/somePathAndQuery into /__login__/somePathAndQuery
+-#         # to benefit from nevow.guard redirection magic
+-#         pathList = ['__login__'] + here.pathList()[1:]
+-#         goThereAfter = URL(here.scheme, here.netloc,
+-#                            pathList, here.queryList())
+-#         return str(goThereAfter)
+-
+-#     bodyFactory = loaders.stan(
+-#         tags.html[
+-#             tags.head[tags.title[&quot;Maay Login Page&quot;,],
+-#                       tags.link(rel='stylesheet', type='text/css', href='maay.css'),
+-#                       tags.link(rel='shortcut icon', href='images/maay.ico'),
+-#                       ],
+-            
+-#             tags.body[
+-#                 # tags.form(action='/'+guard.LOGIN_AVATAR, render=path, method='post')[
+-#                 tags.form(action=path, method='post')[
+-#                     tags.table(_class=&quot;loginTable&quot;)[
+-#                         tags.tr[
+-#                             tags.td[ &quot;Username :&quot; ],
+-#                             tags.td[ tags.input(type='text', name='username') ],
+-#                             ],
+-#                         tags.tr[
+-#                             tags.td[ &quot;Password :&quot; ],
+-#                             tags.td[ tags.input(type='password', name='password') ],
+-#                             ]
+-#                         ],
+-#                     tags.input(type='submit'),
+-#                     tags.p,
+-#                     ]
+-#                 ]
+-#             ]
+-#         )
+-
+-#     def childFactory(self, context, segments):
+-#         print &quot; child factory&quot;
+-#         return LoginForm()
+-
+ class PeersList(MaayPage):
+     &quot;&quot;&quot;display list of registered peers&quot;&quot;&quot;
+     bodyFactory = loaders.xmlfile(get_path_of('peers.html'))
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000265.html">[Maay-svncheckins] r292 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000267.html">[Maay-svncheckins] r294 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#266">[ date ]</a>
+              <a href="thread.html#266">[ thread ]</a>
+              <a href="subject.html#266">[ subject ]</a>
+              <a href="author.html#266">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

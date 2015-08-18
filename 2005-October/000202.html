@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r229 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C437de8500510261537m34f6b50evaaa9b5857feea07b%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000201.html">
+   <LINK REL="Next"  HREF="000203.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r229 - trunk/maay</H1>
+    <B>Adrien Di Mascio</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r229%20-%20trunk/maay&In-Reply-To=%3C437de8500510261537m34f6b50evaaa9b5857feea07b%40mail.gmail.com%3E"
+       TITLE="[Maay-svncheckins] r229 - trunk/maay">adimasci at gmail.com
+       </A><BR>
+    <I>Thu Oct 27 00:37:52 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000201.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000203.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#202">[ date ]</a>
+              <a href="thread.html#202">[ thread ]</a>
+              <a href="subject.html#202">[ subject ]</a>
+              <a href="author.html#202">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/26/05, Aur&#233;lien Camp&#233;as &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">aurelien.campeas at logilab.fr</A>&gt; wrote:
+&gt;<i> Sorry, but this reintroduces the bug. Probably because id(cred) will
+</I>&gt;<i> be different each time even if the content is the same. I'll look at a
+</I>&gt;<i> whay to preserve your cache and get rid of the leak anyway, if possible.
+</I>
+I see. I should have imagined that. I guess the easiest solution would
+then be to directly use the (creds.username, creds.password) tuple
+as the dictionary key instead of the credential instance.
+
+But ... there is still the problem (If I understood correctly from the last
+mails / checkins) that the connection to the database is not closed
+when the querier is not used anymore, and that should be solved.
+
+BTW, why (where) do we instantiate several queriers ? Should we
+call &quot;cnx.close()&quot; in the Querier.__del__ method ?
+
+Cheers,
+Adrien.
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000201.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000203.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#202">[ date ]</a>
+              <a href="thread.html#202">[ thread ]</a>
+              <a href="subject.html#202">[ subject ]</a>
+              <a href="author.html#202">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

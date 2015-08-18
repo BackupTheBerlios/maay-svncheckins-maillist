@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r589 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r589%20-%20trunk/maay&In-Reply-To=%3C200511210946.jAL9kEDA022025%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000560.html">
+   <LINK REL="Next"  HREF="000562.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r589 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r589%20-%20trunk/maay&In-Reply-To=%3C200511210946.jAL9kEDA022025%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r589 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Nov 21 10:46:14 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000560.html">[Maay-svncheckins] r588 - in trunk/maay: . sql
+</A></li>
+        <LI>Next message: <A HREF="000562.html">[Maay-svncheckins] r590 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#561">[ date ]</a>
+              <a href="thread.html#561">[ thread ]</a>
+              <a href="subject.html#561">[ subject ]</a>
+              <a href="author.html#561">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-21 10:46:12 +0100 (Mon, 21 Nov 2005)
+New Revision: 589
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+Fix inline doc
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-21 09:40:56 UTC (rev 588)
++++ trunk/maay/p2pquerier.py	2005-11-21 09:46:12 UTC (rev 589)
+@@ -107,10 +107,9 @@
+         # explicitly set the 'limit' attribute for P2P queries
+         self.query.limit = LIMIT
+         self.documents_ids = set()
+-        # *** client_host: IP adress of immediate client (computed at reception)
+-        # *** client_port: rpc port of immediate client (provided by client)
+-        # default args are typically used from webapplication instantiation
+-        # but NOT at rpc level, where we MUST use the transmited values
++        # *** client_{host, port} belong to the immediate client
++        # *** default args are typically used from webapplication instantiation
++        # *** but NOT at rpc level, where we MUST use the transmited values
+         self.client_host = client_host or NODE_HOST
+         self.client_port = client_port or NODE_PORT
+         
+@@ -132,8 +131,6 @@
+         #       we have to restrict to Twisted and Python world)
+         return {'qid':          self.qid,
+                 'sender':       self.sender,
+-                #'host': self.host,
+-                #'port':self.port,
+                 'client_host' : self.client_host,
+                 'client_port' : self.client_port,
+                 'ttl':          self.ttl,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000560.html">[Maay-svncheckins] r588 - in trunk/maay: . sql
+</A></li>
+	<LI>Next message: <A HREF="000562.html">[Maay-svncheckins] r590 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#561">[ date ]</a>
+              <a href="thread.html#561">[ thread ]</a>
+              <a href="subject.html#561">[ subject ]</a>
+              <a href="author.html#561">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

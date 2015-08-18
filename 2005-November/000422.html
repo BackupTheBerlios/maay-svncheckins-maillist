@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r451 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r451%20-%20trunk/maay&In-Reply-To=%3C200511131724.jADHOOAE004255%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000421.html">
+   <LINK REL="Next"  HREF="000423.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r451 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r451%20-%20trunk/maay&In-Reply-To=%3C200511131724.jADHOOAE004255%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r451 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Sun Nov 13 18:24:24 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000421.html">[Maay-svncheckins] r450 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000423.html">[Maay-svncheckins] r452 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#422">[ date ]</a>
+              <a href="thread.html#422">[ thread ]</a>
+              <a href="subject.html#422">[ subject ]</a>
+              <a href="author.html#422">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-13 18:24:24 +0100 (Sun, 13 Nov 2005)
+New Revision: 451
+
+Modified:
+   trunk/maay/querier.py
+   trunk/maay/rpc.py
+   trunk/maay/webapplication.py
+Log:
+Download stats properly updated
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-13 17:00:43 UTC (rev 450)
++++ trunk/maay/querier.py	2005-11-13 17:24:24 UTC (rev 451)
+@@ -66,10 +66,6 @@
+         &quot;&quot;&quot;remove rows in `documents` table when no row in `files` or
+         `document_providers` table reference them, as well as the
+         corresponding `document_scores` rows&quot;&quot;&quot;
+-
+-    def justDownloadAndShutUp(db_document_id):
+-        &quot;&quot;&quot;a lesser notifyDownload, to be removed soon anyway
+-        &quot;&quot;&quot;
+         
+     def notifyDownload(docId, query):
+         &quot;&quot;&quot;check that a document is downloadable and update the
+@@ -216,31 +212,19 @@
+         cursor.close()
+         self._cnx.commit()
+ 
+-    def justDownloadAndShutUp(self, document_id):
++    def notifyDownload(self, document_id, words):
++        words = WORDS_RGX.findall(normalizeText(unicode(words)))
++        print &quot;WORDS&quot;, words
+         try:
+             try:
+                 cursor = self._cnx.cursor()
+-                url, mime_type = Document.selectUrlAndTypeWhereDocid(cursor, document_id)
++                doc = Document.selectWhere(cursor, document_id=document_id)[0]
+             finally:
+                 cursor.close()
+-            return url, mime_type
+-        except IndexError:
+-            #XXX: that was not a smart thing to do, debugging-wise
+-            #return ''
+-            raise
+-
+-    def notifyDownload(self, document_id, query):
+-        words = WORDS_RGX.findall(normalizeText(query))
+-        try:
+-            try:
+-                cursor = self._cnx.cursor()
+-                doc = Document.selectWhere(cursor, db_document_id=db_document_id)[0]
+-            finally:
+-                cursor.close()
+             self._updateDownloadStatistics(doc, words)
+             return doc.url
+         except IndexError:
+-            return ''
++            raise
+ 
+     def _updateDownloadStatistics(self, document, words):
+         cursor = self._cnx.cursor()
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-13 17:00:43 UTC (rev 450)
++++ trunk/maay/rpc.py	2005-11-13 17:24:24 UTC (rev 451)
+@@ -174,24 +174,18 @@
+         reactor.callLater(.01, getP2pQuerier().relayAnswer, answer)
+         return self.nodeId
+ 
+-    def xmlrpc_downloadFile(self, doc_id):
+-        &quot;&quot;&quot;dummy implementation for now&quot;&quot;&quot;
++    def xmlrpc_downloadFile(self, doc_id, words):
+         print &quot;MayRPCServer downloadFile %s&quot; % doc_id
+-        query = None
+         try:
+             querier = self._sessions[ANONYMOUS_AVATARID]
+-            if query:
+-                filepath, mime_type = querier.notifyDownload(doc_id, query)
+-            else:
+-                filepath, mime_type = querier.justDownloadAndShutUp(doc_id)
++            filepath = querier.notifyDownload(doc_id, words)
+             fp = file(filepath, 'rb')
+             data = Binary(fp.read())
+             fp.close()
+         except Exception, exc:
+             import traceback
+             traceback.print_exc()
+-            #FIXME: this is not correctly handled on the other side
+-            return &quot;Could not get %r, cause %s&quot; % (docid, exc)
++            return &quot;Could not get %r, cause %s&quot; % (doc_id, exc)
+         return data
+     
+     def cnxIsValid(self, cnxId):
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-13 17:00:43 UTC (rev 450)
++++ trunk/maay/webapplication.py	2005-11-13 17:24:24 UTC (rev 451)
+@@ -151,40 +151,28 @@
+     def child_distantfile(self, context):
+         host = context.arg('host')
+         port = context.arg('port')
+-        #XXX: we *must* be able to get the query words here
+-        #     for now we can't
++        words = context.arg('words').split()
+         filename = context.arg('filename')
+         docid = context.arg('docid')
+         if not host or not port or not docid:
+             return Maay404()
+         proxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port))
+         try:
+-            rpcFriendlyData = proxy.downloadFile(docid)
++            rpcFriendlyData = proxy.downloadFile(docid, words)
+             fileData = rpcFriendlyData.data
+         except:
+-            print &quot;there was nothing to return, unfortunately ... try later ?&quot;
+-            return
+-        try:
+-            filepath = osp.join(self.downloads, filename)
+-            f=file(filepath,'wb')
+-            f.write(fileData)
+-            f.close()
+-        except Exception:
+-            import traceback
+-            print traceback.print_exc()
+-            return
++            return # peer might be down
++        filepath = osp.join(self.downloads, filename)
++        f=file(filepath,'wb')
++        f.write(fileData)
++        f.close()
+         return DistantFilePage(filepath)
+ 
+ class DistantFilePage(static.File):
+     def __init__(self, filepath):
+         static.File.__init__(self, filepath)
+-        #self.fileContent = fileContent
+         self.filepath = filepath
+         
+-##     def openForReading(self):
+-##         from cStringIO import StringIO
+-##         return StringIO(self.fileContent)
+-
+     def __del__(self):
+         try:
+             os.unlink(self.filepath)
+@@ -367,9 +355,9 @@
+     def render_row(self, context, data):
+         document = data
+         ResultsPageMixIn.render_row(self, context, data)
+-        context.fillSlots('distanturl', '/distantfile?filename=%s&amp;docid=%s&amp;host=%s&amp;port=%s'\
+-                          % (osp.basename(document.url), document.document_id,
+-                             self.peerHost, self.peerPort))
++        context.fillSlots('distanturl', '/distantfile?filename=%s&amp;words=%s&amp;host=%s&amp;port=%s&amp;docid=%s'\
++                          % (osp.basename(document.url), self.query.words,
++                             self.peerHost, self.peerPort, document.document_id))
+         return context.tag
+ 
+     def render_nextset_url(self, context, data):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000421.html">[Maay-svncheckins] r450 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000423.html">[Maay-svncheckins] r452 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#422">[ date ]</a>
+              <a href="thread.html#422">[ thread ]</a>
+              <a href="subject.html#422">[ subject ]</a>
+              <a href="author.html#422">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

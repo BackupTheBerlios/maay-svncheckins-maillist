@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r689 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-December/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r689%20-%20trunk&In-Reply-To=%3C200512011401.jB1E15id015668%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000658.html">
+   <LINK REL="Next"  HREF="000660.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r689 - trunk</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r689%20-%20trunk&In-Reply-To=%3C200512011401.jB1E15id015668%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r689 - trunk">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Dec  1 15:01:05 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000658.html">[Maay-svncheckins] r688 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000660.html">[Maay-svncheckins] r690 - in trunk: . maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#659">[ date ]</a>
+              <a href="thread.html#659">[ thread ]</a>
+              <a href="subject.html#659">[ subject ]</a>
+              <a href="author.html#659">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-12-01 15:01:04 +0100 (Thu, 01 Dec 2005)
+New Revision: 689
+
+Modified:
+   trunk/ChangeLog
+   trunk/ReleaseNotes.txt
+   trunk/maay.iss
+Log:
+Bump version number to 3.2 for next release.
+
+
+Modified: trunk/ChangeLog
+===================================================================
+--- trunk/ChangeLog	2005-12-01 13:52:54 UTC (rev 688)
++++ trunk/ChangeLog	2005-12-01 14:01:04 UTC (rev 689)
+@@ -1,6 +1,8 @@
++Maay-0.3.2 2005-12-01
++	* ensure proper indexing/download of document regardless of the filename encoding and origin
++
+ Maay-0.3.1 2005-11-28
+ 	* win32 bug fixes (systray, indexing)
+-
+ 	
+ Maay-0.3.0 2005-11-25
+ 	* Ergonomic improvements
+
+Modified: trunk/ReleaseNotes.txt
+===================================================================
+--- trunk/ReleaseNotes.txt	2005-12-01 13:52:54 UTC (rev 688)
++++ trunk/ReleaseNotes.txt	2005-12-01 14:01:04 UTC (rev 689)
+@@ -1,9 +1,9 @@
+-Release Notes for version 0.3.1
++Release Notes for version 0.3.2
+ 
+ See README.txt for installation and quick start instructions. 
+ 
+-This release is beta-level software, which contains several bug fixes
+-over 0.3.0.
++This release is beta-level software, which contains one important fix
++over 0.3.1
+ 
+ If you encounter any problem with the web interface (like 
+ never ending requests, pages not updated), please notify us and
+@@ -12,6 +12,4 @@
+ 
+ The windows installer will install and set up all the required
+ dependencies (including mysql and twisted). It uses Inno Setup and
+-Py2exe.
+-
+-
++Py2exe.
+\ No newline at end of file
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-12-01 13:52:54 UTC (rev 688)
++++ trunk/maay.iss	2005-12-01 14:01:04 UTC (rev 689)
+@@ -6,7 +6,7 @@
+ 
+ [Setup]
+ AppName=Maay
+-AppVerName=Maay-0.3.1
++AppVerName=Maay-0.3.2
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+ UninstallDisplayIcon={app}\maay_node.exe
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000658.html">[Maay-svncheckins] r688 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000660.html">[Maay-svncheckins] r690 - in trunk: . maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#659">[ date ]</a>
+              <a href="thread.html#659">[ thread ]</a>
+              <a href="subject.html#659">[ subject ]</a>
+              <a href="author.html#659">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

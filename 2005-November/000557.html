@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r585 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r585%20-%20trunk&In-Reply-To=%3C200511181822.jAIIMHSI005209%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000556.html">
+   <LINK REL="Next"  HREF="000558.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r585 - trunk</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r585%20-%20trunk&In-Reply-To=%3C200511181822.jAIIMHSI005209%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r585 - trunk">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 19:22:17 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000556.html">[Maay-svncheckins] r584 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000558.html">[Maay-svncheckins] r586 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#557">[ date ]</a>
+              <a href="thread.html#557">[ thread ]</a>
+              <a href="subject.html#557">[ subject ]</a>
+              <a href="author.html#557">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-18 19:22:15 +0100 (Fri, 18 Nov 2005)
+New Revision: 585
+
+Added:
+   trunk/ReleaseNotes.txt
+Removed:
+   trunk/ReleaseNotes
+Modified:
+   trunk/maay.iss
+Log:
+updated windows installer
+
+Deleted: trunk/ReleaseNotes
+===================================================================
+--- trunk/ReleaseNotes	2005-11-18 17:55:19 UTC (rev 584)
++++ trunk/ReleaseNotes	2005-11-18 18:22:15 UTC (rev 585)
+@@ -1,18 +0,0 @@
+-Release Notes for version 0.2.2
+-
+-See README.txt for installation and quick start instructions. 
+-
+-This release is beta-level software, which contains several bug fixes
+-and improvements over 0.2.1. 
+-
+-There may be some problems with the web interface when accessed
+-through Microsoft Internet Explorer. Please give some feedback on
+-using Maay with this web browser.  Using Firefox or Mozilla should
+-work fine.
+-
+-The windows installer will install and set up all the required
+-dependencies (including mysql and twisted). It uses Inno Setup and
+-Py2exe.
+-
+-
+-
+
+Copied: trunk/ReleaseNotes.txt (from rev 571, trunk/ReleaseNotes)
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-11-18 17:55:19 UTC (rev 584)
++++ trunk/maay.iss	2005-11-18 18:22:15 UTC (rev 585)
+@@ -6,17 +6,18 @@
+ 
+ [Setup]
+ AppName=Maay
+-AppVerName=Maay-0.2.1
++AppVerName=Maay-0.2.2
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+ UninstallDisplayIcon={app}\maay_node.exe
++Uninstallable=yes
+ SolidCompression=yes
+ LicenseFile=COPYING
+ ; Require 50 MB for the database files. We can tune this later.
+ ExtraDiskSpaceRequired=50000000
+ ; Win9x is not supported
+ MinVersion=0,4.0
+-InfoBeforeFile=ReleaseNotes
++InfoBeforeFile=ReleaseNotes.txt
+ InfoAfterFile=README.txt
+ 
+ [Dirs]
+@@ -40,19 +41,19 @@
+ Source: &quot;thirdparty\antiword\*&quot;; DestDir: &quot;\antiword&quot; ; Flags: recursesubdirs
+ Source: &quot;thirdparty\pdftohtml-0.36\*&quot;; DestDir: &quot;{app}\pdftohtml&quot; ; Flags: recursesubdirs
+ Source: &quot;maay\configuration\win32\*.ini&quot;; DestDir: &quot;{app}&quot;
++Source: &quot;maay\configuration\win32\Maay.url&quot;; DestDir: &quot;{app}&quot;
++Source: &quot;maay\configuration\win32\Maay.url&quot;; DestDir: &quot;{userdesktop}&quot;
++Source: &quot;maay\configuration\win32\Maay.url&quot;; DestDir: &quot;{userstartmenu}\Programs\Maay\&quot;
+ Source: &quot;doc\README.html&quot;; DestDir: &quot;{app}\documentation&quot;
+ Source: &quot;doc\default.css&quot;; DestDir: &quot;{app}\documentation&quot;
+ Source: &quot;ChangeLog&quot;; DestDir: &quot;{app}&quot;
+-Source: &quot;ReleaseNotes&quot;; DestDir: &quot;{app}&quot;
++Source: &quot;ReleaseNotes.txt&quot;; DestDir: &quot;{app}\&quot;
+ 
+ [Icons]
+-Name: &quot;{group}\Documentation.html&quot;; Filename: &quot;{app}\documentation\README.html&quot;; Comment: &quot;Required reading before launching Maay&quot;
+-Name: &quot;{group}\ReleaseNotes.txt&quot;; Filename: &quot;{app}\ReleaseNotes&quot;; Comment: &quot;Required reading before launching Maay&quot;
+-Name: &quot;{group}\Maay Node&quot;; Filename: &quot;{app}\maay_node.exe&quot;; WorkingDir: &quot;{app}&quot;; Comment: &quot;The Maay node component&quot;
+-Name: &quot;{group}\Maay Indexer&quot;; Filename: &quot;{app}\maay_indexer.exe&quot;; WorkingDir: &quot;{app}&quot;; Comment: &quot;The Maay indexer component&quot;
+-Name: &quot;{group}\node.ini&quot;; Filename: &quot;{app}\node.ini&quot;; Comment: &quot;Maay node configuration&quot;
+-Name: &quot;{group}\indexer.ini&quot;; Filename: &quot;{app}\indexer.ini&quot;; Comment: &quot;Maay indexer configuration&quot;
+-Name: &quot;{group}\image.ini&quot;; Filename: &quot;{app}\image.ini&quot;; Comment: &quot;Maay indexer configuration&quot;
++Name: &quot;{group}\Documentation&quot;; Filename: &quot;{app}\documentation\README.html&quot;; Comment: &quot;Required reading before launching Maay&quot;
++Name: &quot;{group}\Node Configuration&quot;; Filename: &quot;{app}\node.ini&quot;; Comment: &quot;Maay node configuration&quot;
++Name: &quot;{group}\Release Notes&quot;; Filename: &quot;{app}\ReleaseNotes.txt&quot;; Comment: &quot;Required reading before launching Maay&quot;
++Name: &quot;{group}\Uninstall&quot;; Filename: &quot;{app}\unins000.exe&quot;; Comment: &quot;Maay uninstaller&quot;
+ 
+ 
+ [Run]
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000556.html">[Maay-svncheckins] r584 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000558.html">[Maay-svncheckins] r586 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#557">[ date ]</a>
+              <a href="thread.html#557">[ thread ]</a>
+              <a href="subject.html#557">[ subject ]</a>
+              <a href="author.html#557">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

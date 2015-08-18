@@ -1,0 +1,766 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r290 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r290%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511031720.jA3HKb3E012950%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000290.html">
+   <LINK REL="Next"  HREF="000265.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r290 - in trunk/maay: . test</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r290%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511031720.jA3HKb3E012950%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r290 - in trunk/maay: . test">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov  3 18:20:37 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000290.html">[Maay-svncheckins] r289 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000265.html">[Maay-svncheckins] r292 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#264">[ date ]</a>
+              <a href="thread.html#264">[ thread ]</a>
+              <a href="subject.html#264">[ subject ]</a>
+              <a href="author.html#264">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-03 18:20:36 +0100 (Thu, 03 Nov 2005)
+New Revision: 290
+
+Added:
+   trunk/maay/webapplication.py
+Modified:
+   trunk/maay/server.py
+   trunk/maay/test/test_configuration.py
+   trunk/maay/test/test_rpc.py
+Log:
+Big split of server into server and webapplication.
+
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-11-03 17:18:29 UTC (rev 289)
++++ trunk/maay/server.py	2005-11-03 17:20:36 UTC (rev 290)
+@@ -18,11 +18,6 @@
+ 
+ __revision__ = '$Id$'
+ 
+-from datetime import datetime
+-import warnings
+-warnings.filterwarnings(&quot;ignore&quot;, &quot;.*&quot;, DeprecationWarning, &quot;nevow.static&quot;)
+-warnings.filterwarnings(&quot;ignore&quot;, &quot;.*&quot;, DeprecationWarning, &quot;twisted.python.reflect&quot;)
+-warnings.filterwarnings(&quot;ignore&quot;, &quot;.*&quot;, DeprecationWarning, &quot;twisted.web.woven&quot;)
+ 
+ import platform
+ import sha
+@@ -30,22 +25,18 @@
+ import os
+ import re
+ import socket
+-from xmlrpclib import ServerProxy
+ 
+-from zope.interface import implements, Interface
++from zope.interface import implements
+ 
+-from twisted.cred import portal, checkers, error
+-from twisted.cred.checkers import ANONYMOUS, AllowAnonymousAccess, \
++from twisted.cred import portal, error
++from twisted.cred.checkers import AllowAnonymousAccess, \
+      ICredentialsChecker
+ from twisted.cred.credentials import IAnonymous, IUsernamePassword
+ from twisted.internet import reactor, defer
+ from twisted.web import server
+-from twisted.web import static
+ from twisted.python import failure
++from nevow import inevow, appserver, guard
+ 
+-from nevow import inevow, rend, tags, guard, loaders, appserver
+-from nevow.url import URL
+-
+ # These imports are not used, but they help py2exe tremendously.
+ # Do not remove them (that is, unless we change the database backend
+ # or drop twisted)
+@@ -55,245 +46,14 @@
+ import MySQLdb
+ # end of py2exe helping imports
+ 
+-from logilab.common.textutils import normalize_text
+-
+ from maay.querier import MaayQuerier, IQuerier, AnonymousQuerier, \
+-     MaayAuthenticationError, ANONYMOUS_AVATARID, WEB_AVATARID
++     MaayAuthenticationError, WEB_AVATARID
+ from maay.rpc import MaayRPCServer
+-from maay.configuration import get_path_of, Configuration
+-from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
++from maay.configuration import Configuration
+ from maay import registrationclient
+-from maay.query import Query
++from maay.webapplication import Maay404, IServerConfiguration, SearchForm
+ 
+ 
+-class MaayPage(rend.Page):
+-    docFactory = loaders.xmlfile(get_path_of('skeleton.html'))
+-    child_maaycss = static.File(get_path_of('maay.css'))
+-    child_images = static.File(get_path_of('images/'))
+-
+-    def __init__(self, maayId=WEB_AVATARID):
+-        rend.Page.__init__(self)
+-        self.maayId = maayId
+-
+-#     def render_loginurl(self, context, data):
+-#         url = URL.fromContext(context)
+-#         store current URL into  'goThereAfter' to be able to return here
+-#         after login
+-#         goThereAfter = URL(url.scheme, url.netloc, url.pathList())
+-#         if self.maayId != ANONYMOUS_AVATARID:
+-#            goThereAfter = URL(url.scheme, url.netloc,
+-#                               ['logout'] + url.pathList())
+-#            context.fillSlots('actionlabel', 'Logout')
+-#         else:
+-#            goThereAfter = URL(url.scheme, url.netloc,
+-#                               ['login'] + url.pathList())
+-#            context.fillSlots('actionlabel', 'Login')            
+-#         for param, value in url.queryList():
+-#            goThereAfter = goThereAfter.add(param, value)
+-#         context.fillSlots('loginurl', str(goThereAfter))
+-#         return context.tag
+-
+-    def macro_body(self, context):
+-        return self.bodyFactory
+-
+-    def child_login(self, context):
+-        return LoginForm(self.maayId)
+-
+-    def child_logout(self, context):
+-        print &quot;sure we're not here ?&quot;
+-        req = inevow.IRequest(context)
+-        req.getSession().expire()
+-        req.redirect('/' + guard.LOGOUT_AVATAR)
+-
+-# class LoginForm(MaayPage):
+-#     &quot;&quot;&quot;a basic login form. This page is rendered until the user
+-#     is logged.
+-#     &quot;&quot;&quot;
+-#     # addSlash = True
+-
+-#     def path(self, context, data):
+-#         here = URL.fromContext(context)
+-#         # transform /login/somePathAndQuery into /__login__/somePathAndQuery
+-#         # to benefit from nevow.guard redirection magic
+-#         pathList = ['__login__'] + here.pathList()[1:]
+-#         goThereAfter = URL(here.scheme, here.netloc,
+-#                            pathList, here.queryList())
+-#         return str(goThereAfter)
+-
+-#     bodyFactory = loaders.stan(
+-#         tags.html[
+-#             tags.head[tags.title[&quot;Maay Login Page&quot;,],
+-#                       tags.link(rel='stylesheet', type='text/css', href='maay.css'),
+-#                       tags.link(rel='shortcut icon', href='images/maay.ico'),
+-#                       ],
+-            
+-#             tags.body[
+-#                 # tags.form(action='/'+guard.LOGIN_AVATAR, render=path, method='post')[
+-#                 tags.form(action=path, method='post')[
+-#                     tags.table(_class=&quot;loginTable&quot;)[
+-#                         tags.tr[
+-#                             tags.td[ &quot;Username :&quot; ],
+-#                             tags.td[ tags.input(type='text', name='username') ],
+-#                             ],
+-#                         tags.tr[
+-#                             tags.td[ &quot;Password :&quot; ],
+-#                             tags.td[ tags.input(type='password', name='password') ],
+-#                             ]
+-#                         ],
+-#                     tags.input(type='submit'),
+-#                     tags.p,
+-#                     ]
+-#                 ]
+-#             ]
+-#         )
+-
+-#     def childFactory(self, context, segments):
+-#         print &quot; child factory&quot;
+-#         return LoginForm()
+-
+-class PeersList(MaayPage):
+-    &quot;&quot;&quot;display list of registered peers&quot;&quot;&quot;
+-    bodyFactory = loaders.xmlfile(get_path_of('peers.html'))
+-    addSlash = True
+-
+-    def __init__(self, maayId, querier):
+-        MaayPage.__init__(self, maayId)
+-        self.querier = querier
+-
+-    def data_peers(self, context, data):
+-        webappConfig = IWebappConfiguration(context)
+-        myNodeId = webappConfig.get_node_id()
+-        print &quot;PeerList data_peers : my_node_id =&quot;, myNodeId
+-        peers = self.querier.getActiveNeighbors(myNodeId, 10)
+-        return peers
+-    
+-    def render_peer(self, context, peerNode):
+-        # Note: might be convenient to register a special flattener for
+-        #       Node objects
+-        for attrname in ('node_id', 'ip', 'port', 'last_seen_time',
+-                         'claim_count', 'affinity', 'bandwidth'):
+-            context.fillSlots(attrname, getattr(peerNode, attrname, 'N/A'))
+-        return context.tag
+-                    
+-class SearchForm(MaayPage):
+-    &quot;&quot;&quot;default search form&quot;&quot;&quot;
+-    bodyFactory = loaders.xmlfile(get_path_of('searchform.html'))
+-    addSlash = True
+-
+-    def __init__(self, maayId, querier):
+-        MaayPage.__init__(self, maayId)
+-        self.querier = querier
+-
+-    def logout(self):
+-        print &quot;Bye %s !&quot; % (self.maayId,)
+-        # XXX: logout message should be forwarded to registration server
+-        return None
+-
+-    def child_peers(self, context):
+-        return PeersList(self.maayId, self.querier)
+-
+-    def _harvest_peer_results(self, query, context):
+-        results = []
+-        webappConfig = IWebappConfiguration(context)
+-        peers = self.querier.getActiveNeighbors(webappConfig.get_node_id(), 10)
+-        print &quot;SearchForm child_search peers = &quot;, peers
+-        for peer in peers:
+-            server = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (peer.ip, peer.port),
+-                                 allow_none=True,
+-                                 encoding='utf-8')
+-            try:
+-                cnxid, errmsg = server.authenticate('', '')
+-            except Exception, e:
+-                errmsg = &quot;%s&quot; % e
+-            if errmsg:
+-                print &quot;For reason '%s', we couldn't authenticate with node %s:%s&quot; \
+-                      % (errmsg, peer.ip, peer.port)
+-                continue # for whatever reason, we couldn't authenticate
+-            try: #XXX: xmlrpc serialization problems arise here
+-                results += server.findDocuments(cnxid, query)
+-            except Exception, e:
+-                print &quot;SearchForm _harvest_peer_results pb : %s&quot;, e
+-        return results
+-
+-    def child_search(self, context):
+-        # query = unicode(context.arg('words'))        
+-        offset = int(context.arg('offset', 0))
+-        rawQuery = unicode(context.arg('words'), 'utf-8')
+-        query = Query.fromRawQuery(rawQuery, offset)
+-        localResults = self.querier.findDocuments(query)
+-        peerResults = self._harvest_peer_results(rawQuery, context)
+-        print &quot;Results from the peers :&quot;, peerResults
+-        results = localResults + peerResults
+-        return ResultsPage(self.maayId, results, query)
+-
+-    # XXX make sure that the requested document is really in the database
+-    # XXX don't forget to update the download statistics of the document
+-    def child_download(self, context):
+-        docid = context.arg('docid')
+-        # query = unicode(context.arg('words'))
+-        query = Query.fromRawQuery(unicode(context.arg('words'), 'utf-8'))
+-        docurl = self.querier.notifyDownload(docid, query.words)
+-        if docurl:
+-            return static.File(docurl)
+-        else:
+-            return Maay404()
+-
+-
+-class ResultsPage(MaayPage):
+-    &quot;&quot;&quot;default results page&quot;&quot;&quot;
+-    bodyFactory = loaders.xmlfile(get_path_of('resultpage.html'))
+-    addSlash = False
+-    
+-    def __init__(self, maayId, results, query):
+-        MaayPage.__init__(self, maayId)
+-        self.results = results
+-        self.query = query.words # unicode(query)
+-
+-    def data_results(self, context, data):
+-        return self.results
+-
+-    def render_title(self, context, data):
+-        context.fillSlots('words', self.query)
+-        return context.tag
+-
+-    def render_searchfield(self, context, data):
+-        context.fillSlots('words', self.query)
+-        return context.tag
+-
+-    def render_prevset_url(self, context, data):
+-        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
+-        offset = int(context.arg('offset', 0))
+-        if offset:
+-            offset -= 15
+-        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
+-
+-    def render_nextset_url(self, context, data):
+-        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
+-        offset = int(context.arg('offset', 0)) + 15
+-        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
+-
+-    
+-    def render_row(self, context, data):
+-        document = data
+-	words = self.query.split()
+-        context.fillSlots('mime_type', re.sub(&quot;/&quot;, &quot;_&quot;, document.mime_type))
+-        context.fillSlots('doctitle', tags.xml(boldifyText(document.title, words)))
+-        # XXX abstract attribute should be a unicode string
+-        try:
+-            abstract = makeAbstract(document.text, words)
+-            abstract = normalize_text(unicode(abstract))
+-        except Exception, exc:
+-            print exc
+-            abstract = u'No abstract available for this document [%s]' % exc
+-        context.fillSlots('abstract', tags.xml(abstract))
+-        context.fillSlots('docid', document.db_document_id)
+-        context.fillSlots('docurl', tags.xml(boldifyText(document.url, words)))
+-        context.fillSlots('words', self.query)
+-        context.fillSlots('readable_size', document.readable_size())
+-        date = datetime.fromtimestamp(document.publication_time)
+-        context.fillSlots('publication_date', date.strftime('%d %b %Y'))
+-        return context.tag
+-
+ ## nevow app/server setup ############################################
+ 
+ # MaayMindFactory might be helpful to access request informations
+@@ -460,19 +220,9 @@
+         return defer.succeed(creds.username)
+ 
+ 
+-class Maay404(rend.FourOhFour):
+-    &quot;&quot;&quot;Maay specific resource for 404 errors&quot;&quot;&quot;
+-    loader = loaders.xmlfile(get_path_of('notfound.html'))
+ 
+-    def renderHTTP_notFound(self, context):
+-        &quot;&quot;&quot;Render a not found message to the given request.
+-        &quot;&quot;&quot;
+-        return self.loader.load(context)[0]
+ 
+-class IWebappConfiguration(Interface):
+-    &quot;&quot;&quot;provide an interface in order to be able to remember webappconfig&quot;&quot;&quot;
+-
+-class WebappConfiguration(Configuration):
++class ServerConfiguration(Configuration):
+     options = Configuration.options + [
+         ('db-name',
+          {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;dbname&gt;&quot;, 'short' : &quot;d&quot;,
+@@ -606,13 +356,13 @@
+     
+     
+ def run():
+-    webappConfig = WebappConfiguration()
++    webappConfig = ServerConfiguration()
+     webappConfig.load()
+     maayPortal = MaayPortal(webappConfig)
+     website = appserver.NevowSite(MaaySessionWrapper(maayPortal,
+                                                      mindFactory=MaayMindFactory))
+     website.remember(Maay404(), inevow.ICanHandleNotFound)
+-    website.remember(webappConfig, IWebappConfiguration)
++    website.remember(webappConfig, IServerConfiguration)
+     registrationclient.login(reactor,
+                              webappConfig.registration_host, webappConfig.registration_port,
+                              maayPortal.webQuerier,
+@@ -631,10 +381,13 @@
+         reactor.run()
+     finally:
+         print &quot;-----------Shutting down Server----------&quot;
++        
+         registrationclient.logout(reactor,
+                                   webappConfig.registration_host,
+                                   webappConfig.registration_port,
+                                   webappConfig.get_node_id())
++        
++        
+ 
+ if __name__ == '__main__':
+     run()
+
+Modified: trunk/maay/test/test_configuration.py
+===================================================================
+--- trunk/maay/test/test_configuration.py	2005-11-03 17:18:29 UTC (rev 289)
++++ trunk/maay/test/test_configuration.py	2005-11-03 17:20:36 UTC (rev 290)
+@@ -23,7 +23,7 @@
+ import re
+ 
+ from maay import configuration
+-from maay.server import WebappConfiguration
++from maay.server import ServerConfiguration
+ 
+ class WebappConfigTC(unittest.TestCase):
+ 
+@@ -34,7 +34,7 @@
+                 ('maay --db-host foo --db-name maille', ('foo', 'maille')),
+                 ]
+         for cmdLine, (expectedHost, expectedDatabase) in data:
+-            config = WebappConfiguration()
++            config = ServerConfiguration()
+             sys.argv = cmdLine.split()
+             config.load()
+             self.assertEquals(config.db_host, expectedHost)
+@@ -44,14 +44,14 @@
+     #      this test needs to be run first. This is a BUG that I
+     #      could not fix easily.
+     def test0FromConfigFile(self):
+-        config = WebappConfiguration()
++        config = ServerConfiguration()
+         config.config_file = osp.join(osp.dirname(__file__), 'data', 'webapp1.ini')
+         config.load()
+         self.assertEquals(config.db_host, 'eusebius')
+         self.assertEquals(config.db_name, 'maay')
+ 
+     def testFromBoth(self):
+-        config = WebappConfiguration()
++        config = ServerConfiguration()
+         sys.argv = 'maay --db-host truc'.split()
+         config.config_file = osp.join(osp.dirname(__file__), 'data', 'webapp2.ini')
+         config.load()
+
+Modified: trunk/maay/test/test_rpc.py
+===================================================================
+--- trunk/maay/test/test_rpc.py	2005-11-03 17:18:29 UTC (rev 289)
++++ trunk/maay/test/test_rpc.py	2005-11-03 17:20:36 UTC (rev 290)
+@@ -35,7 +35,7 @@
+ from maay import rpc
+ from maay.dbentity import Document
+ from maay.querier import MaayQuerier, AnonymousQuerier, ANONYMOUS_AVATARID
+-from maay.server import MaayPortal, WebappConfiguration
++from maay.server import MaayPortal, ServerConfiguration
+ 
+ class FakeConnection:
+     def cursor(self):
+@@ -72,7 +72,7 @@
+ 
+ class RPCServerTC(unittest.TestCase):
+     def setUp(self):
+-        portal = MaayPortal(WebappConfiguration())
++        portal = MaayPortal(ServerConfiguration())
+         portal.registerChecker(FakeChecker(portal.realm))
+         self.portal = portal
+         rpcserver = server.Site(rpc.MaayRPCServer(None, portal))
+
+Added: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-03 17:18:29 UTC (rev 289)
++++ trunk/maay/webapplication.py	2005-11-03 17:20:36 UTC (rev 290)
+@@ -0,0 +1,278 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++
++&quot;&quot;&quot;maay local web UI script&quot;&quot;&quot;
++
++__revision__ = '$Id: server.py 281 2005-11-03 11:00:56Z aurelienc $'
++
++from datetime import datetime
++import re
++from xmlrpclib import ServerProxy
++
++from zope.interface import Interface
++from twisted.web import static
++from nevow import rend, tags, loaders
++
++from logilab.common.textutils import normalize_text
++
++from maay.querier import WEB_AVATARID
++from maay.configuration import get_path_of
++from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
++from maay.query import Query
++
++class IServerConfiguration(Interface):
++    &quot;&quot;&quot;provide an interface in order to be able to remember webappconfig&quot;&quot;&quot;
++
++
++class Maay404(rend.FourOhFour):
++    &quot;&quot;&quot;Maay specific resource for 404 errors&quot;&quot;&quot;
++    loader = loaders.xmlfile(get_path_of('notfound.html'))
++
++    def renderHTTP_notFound(self, context):
++        &quot;&quot;&quot;Render a not found message to the given request.
++        &quot;&quot;&quot;
++        return self.loader.load(context)[0]
++
++class MaayPage(rend.Page):
++    docFactory = loaders.xmlfile(get_path_of('skeleton.html'))
++    child_maaycss = static.File(get_path_of('maay.css'))
++    child_images = static.File(get_path_of('images/'))
++
++    def __init__(self, maayId=WEB_AVATARID):
++        rend.Page.__init__(self)
++        self.maayId = maayId
++
++#     def render_loginurl(self, context, data):
++#         url = URL.fromContext(context)
++#         store current URL into  'goThereAfter' to be able to return here
++#         after login
++#         goThereAfter = URL(url.scheme, url.netloc, url.pathList())
++#         if self.maayId != ANONYMOUS_AVATARID:
++#            goThereAfter = URL(url.scheme, url.netloc,
++#                               ['logout'] + url.pathList())
++#            context.fillSlots('actionlabel', 'Logout')
++#         else:
++#            goThereAfter = URL(url.scheme, url.netloc,
++#                               ['login'] + url.pathList())
++#            context.fillSlots('actionlabel', 'Login')            
++#         for param, value in url.queryList():
++#            goThereAfter = goThereAfter.add(param, value)
++#         context.fillSlots('loginurl', str(goThereAfter))
++#         return context.tag
++
++    def macro_body(self, context):
++        return self.bodyFactory
++
++#     def child_login(self, context):
++#         return LoginForm(self.maayId)
++
++#     def child_logout(self, context):
++#         print &quot;sure we're not here ?&quot;
++#         req = inevow.IRequest(context)
++#         req.getSession().expire()
++#         req.redirect('/' + guard.LOGOUT_AVATAR)
++
++class LoginForm(MaayPage):
++    &quot;&quot;&quot;a basic login form. This page is rendered until the user
++    is logged.
++    &quot;&quot;&quot;
++    # addSlash = True
++
++#     def path(self, context, data):
++#         here = URL.fromContext(context)
++#         # transform /login/somePathAndQuery into /__login__/somePathAndQuery
++#         # to benefit from nevow.guard redirection magic
++#         pathList = ['__login__'] + here.pathList()[1:]
++#         goThereAfter = URL(here.scheme, here.netloc,
++#                            pathList, here.queryList())
++#         return str(goThereAfter)
++
++#     bodyFactory = loaders.stan(
++#         tags.html[
++#             tags.head[tags.title[&quot;Maay Login Page&quot;,],
++#                       tags.link(rel='stylesheet', type='text/css', href='maay.css'),
++#                       tags.link(rel='shortcut icon', href='images/maay.ico'),
++#                       ],
++            
++#             tags.body[
++#                 # tags.form(action='/'+guard.LOGIN_AVATAR, render=path, method='post')[
++#                 tags.form(action=path, method='post')[
++#                     tags.table(_class=&quot;loginTable&quot;)[
++#                         tags.tr[
++#                             tags.td[ &quot;Username :&quot; ],
++#                             tags.td[ tags.input(type='text', name='username') ],
++#                             ],
++#                         tags.tr[
++#                             tags.td[ &quot;Password :&quot; ],
++#                             tags.td[ tags.input(type='password', name='password') ],
++#                             ]
++#                         ],
++#                     tags.input(type='submit'),
++#                     tags.p,
++#                     ]
++#                 ]
++#             ]
++#         )
++
++#     def childFactory(self, context, segments):
++#         print &quot; child factory&quot;
++#         return LoginForm()
++
++class PeersList(MaayPage):
++    &quot;&quot;&quot;display list of registered peers&quot;&quot;&quot;
++    bodyFactory = loaders.xmlfile(get_path_of('peers.html'))
++    addSlash = True
++
++    def __init__(self, maayId, querier):
++        MaayPage.__init__(self, maayId)
++        self.querier = querier
++
++    def data_peers(self, context, data):
++        webappConfig = IServerConfiguration(context)
++        myNodeId = webappConfig.get_node_id()
++        print &quot;PeerList data_peers : my_node_id =&quot;, myNodeId
++        peers = self.querier.getActiveNeighbors(myNodeId, 10)
++        return peers
++    
++    def render_peer(self, context, peerNode):
++        # Note: might be convenient to register a special flattener for
++        #       Node objects
++        for attrname in ('node_id', 'ip', 'port', 'last_seen_time',
++                         'claim_count', 'affinity', 'bandwidth'):
++            context.fillSlots(attrname, getattr(peerNode, attrname, 'N/A'))
++        return context.tag
++                    
++class SearchForm(MaayPage):
++    &quot;&quot;&quot;default search form&quot;&quot;&quot;
++    bodyFactory = loaders.xmlfile(get_path_of('searchform.html'))
++    addSlash = True
++
++    def __init__(self, maayId, querier):
++        MaayPage.__init__(self, maayId)
++        self.querier = querier
++
++    def logout(self):
++        print &quot;Bye %s !&quot; % (self.maayId,)
++        # XXX: logout message should be forwarded to registration server
++        return None
++
++    def child_peers(self, context):
++        return PeersList(self.maayId, self.querier)
++
++    def _harvest_peer_results(self, query, context):
++        results = []
++        webappConfig = IServerConfiguration(context)
++        peers = self.querier.getActiveNeighbors(webappConfig.get_node_id(), 10)
++        print &quot;SearchForm child_search peers = &quot;, peers
++        for peer in peers:
++            server = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (peer.ip, peer.port),
++                                 allow_none=True,
++                                 encoding='utf-8')
++            try:
++                cnxid, errmsg = server.authenticate('', '')
++            except Exception, e:
++                errmsg = &quot;%s&quot; % e
++            if errmsg:
++                print &quot;For reason '%s', we couldn't authenticate with node %s:%s&quot; \
++                      % (errmsg, peer.ip, peer.port)
++                continue # for whatever reason, we couldn't authenticate
++            try: #XXX: xmlrpc serialization problems arise here
++                results += server.findDocuments(cnxid, query)
++            except Exception, e:
++                print &quot;SearchForm _harvest_peer_results pb : %s&quot;, e
++        return results
++
++    def child_search(self, context):
++        # query = unicode(context.arg('words'))        
++        offset = int(context.arg('offset', 0))
++        rawQuery = unicode(context.arg('words'), 'utf-8')
++        query = Query.fromRawQuery(rawQuery, offset)
++        localResults = self.querier.findDocuments(query)
++        peerResults = self._harvest_peer_results(rawQuery, context)
++        print &quot;Results from the peers :&quot;, peerResults
++        results = localResults + peerResults
++        return ResultsPage(self.maayId, results, query)
++
++    # XXX make sure that the requested document is really in the database
++    # XXX don't forget to update the download statistics of the document
++    def child_download(self, context):
++        docid = context.arg('docid')
++        # query = unicode(context.arg('words'))
++        query = Query.fromRawQuery(unicode(context.arg('words'), 'utf-8'))
++        docurl = self.querier.notifyDownload(docid, query.words)
++        if docurl:
++            return static.File(docurl)
++        else:
++            return Maay404()
++
++
++class ResultsPage(MaayPage):
++    &quot;&quot;&quot;default results page&quot;&quot;&quot;
++    bodyFactory = loaders.xmlfile(get_path_of('resultpage.html'))
++    addSlash = False
++    
++    def __init__(self, maayId, results, query):
++        MaayPage.__init__(self, maayId)
++        self.results = results
++        self.query = query.words # unicode(query)
++
++    def data_results(self, context, data):
++        return self.results
++
++    def render_title(self, context, data):
++        context.fillSlots('words', self.query)
++        return context.tag
++
++    def render_searchfield(self, context, data):
++        context.fillSlots('words', self.query)
++        return context.tag
++
++    def render_prevset_url(self, context, data):
++        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
++        offset = int(context.arg('offset', 0))
++        if offset:
++            offset -= 15
++        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
++
++    def render_nextset_url(self, context, data):
++        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
++        offset = int(context.arg('offset', 0)) + 15
++        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
++
++    
++    def render_row(self, context, data):
++        document = data
++        words = self.query.split()
++        context.fillSlots('mime_type', re.sub(&quot;/&quot;, &quot;_&quot;, document.mime_type))
++        context.fillSlots('doctitle',
++                          tags.xml(boldifyText(document.title, words)))
++        # XXX abstract attribute should be a unicode string
++        try:
++            abstract = makeAbstract(document.text, words)
++            abstract = normalize_text(unicode(abstract))
++        except Exception, exc:
++            print exc
++            abstract = u'No abstract available for this document [%s]' % exc
++        context.fillSlots('abstract', tags.xml(abstract))
++        context.fillSlots('docid', document.db_document_id)
++        context.fillSlots('docurl', tags.xml(boldifyText(document.url, words)))
++        context.fillSlots('words', self.query)
++        context.fillSlots('readable_size', document.readable_size())
++        date = datetime.fromtimestamp(document.publication_time)
++        context.fillSlots('publication_date', date.strftime('%d %b %Y'))
++        return context.tag
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000290.html">[Maay-svncheckins] r289 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000265.html">[Maay-svncheckins] r292 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#264">[ date ]</a>
+              <a href="thread.html#264">[ thread ]</a>
+              <a href="subject.html#264">[ subject ]</a>
+              <a href="author.html#264">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

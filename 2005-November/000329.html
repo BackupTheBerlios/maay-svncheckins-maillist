@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r353 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r353%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511090843.jA98h15B028459%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000328.html">
+   <LINK REL="Next"  HREF="000330.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r353 - in trunk/maay: . data</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r353%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511090843.jA98h15B028459%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r353 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 09:43:01 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000328.html">[Maay-svncheckins] r352 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000330.html">[Maay-svncheckins] r354 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#329">[ date ]</a>
+              <a href="thread.html#329">[ thread ]</a>
+              <a href="subject.html#329">[ subject ]</a>
+              <a href="author.html#329">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-09 09:42:54 +0100 (Wed, 09 Nov 2005)
+New Revision: 353
+
+Added:
+   trunk/maay/data/liveresults.html
+Modified:
+   trunk/maay/webapplication.py
+Log:
+added an example (still in comment) of something that should serve
+as a basis to implement the auto-update feature in the results page
+
+
+
+Added: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-09 08:37:16 UTC (rev 352)
++++ trunk/maay/data/liveresults.html	2005-11-09 08:42:54 UTC (rev 353)
+@@ -0,0 +1,53 @@
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
++    &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
++  &lt;head&gt;
++    &lt;title&gt;Live results&lt;/title&gt;
++    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
++    &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
++    &lt;nevow:invisible nevow:render=&quot;liveglue&quot; /&gt;
++    &lt;script type='text/javascript' language='javascript'&gt;
++function updateResults(source) {
++  alert(&quot;I'm alive .... alive !!!&quot;);
++  div = document.getElementById('resultsDiv');
++  div.innerHTML = source;
++}
++function startConnection() {
++  alert(&quot;Hello !&quot;);
++  var d = server.callRemote('foo');
++}
++    &lt;/script&gt;
++
++  &lt;/head&gt;
++ 
++  &lt;body onload=&quot;startConnection()&quot;&gt;
++  &lt;!-- &lt;a nevow:render=&quot;loginurl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;loginurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;actionlabel&quot; /&gt;&lt;/a&gt; --&gt;
++  &lt;div class=&quot;reSearch&quot;&gt;
++    &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
++      &lt;table&gt;
++        &lt;tr&gt;
++          &lt;td&gt;&lt;img src=&quot;images/smallmaay.png&quot; /&gt;&lt;/td&gt;
++          &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;words&quot; nevow:render=&quot;searchfield&quot;&gt;&lt;nevow:attr name=&quot;value&quot; &gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;/input&gt;&lt;/td&gt;
++          &lt;td&gt;&lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;&lt;/td&gt;
++	&lt;/tr&gt;
++      &lt;/table&gt;
++    &lt;/form&gt;      
++  &lt;/div&gt;
++  &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results for &quot;&lt;nevow:slot name=&quot;words&quot; /&gt;&quot;&lt;/div&gt;
++  &lt;div id=&quot;resultsDiv&quot;&gt;&lt;/div&gt;
++  &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
++    &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
++      &lt;td&gt;
++	&lt;div class=&quot;resultItem&quot;&gt;
++	  &lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot; /&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;&lt;td&gt;&lt;a class=&quot;docTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/download?docid=&lt;nevow:slot name=&quot;docid&quot; /&gt;&amp;words=&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
++	  &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
++	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
++	&lt;/div&gt;
++      &lt;/td&gt;
++    &lt;/tr&gt;
++  &lt;/table&gt;
++  &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
++  nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
++  name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
++  &lt;/body&gt;
++&lt;/html&gt;
+\ No newline at end of file
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-09 08:37:16 UTC (rev 352)
++++ trunk/maay/webapplication.py	2005-11-09 08:42:54 UTC (rev 353)
+@@ -152,6 +152,7 @@
+             return ResultsPage(self.maayId, localResults, query, offset)
+         else:
+             return ResultsPage(self.maayId, results, query, offset)
++        # return FACTORY.clientFactory(context, self.maayId, results, query)
+ 
+     # XXX make sure that the requested document is really in the database
+     # XXX don't forget to update the download statistics of the document
+@@ -180,18 +181,19 @@
+         context.fillSlots('msg', self.__msg)
+         return context.tag
+ 
++
+ class ResultsPage(MaayPage):
+     &quot;&quot;&quot;default results page&quot;&quot;&quot;
+     bodyFactory = loaders.xmlfile(get_path_of('resultpage.html'))
+-    addSlash = False
++    addSlash = False    
+     
+-    
+     def __init__(self, maayId, results, query, offset):
+         MaayPage.__init__(self, maayId)
+         self.results = results
+         self.query = query.words # unicode(query)
+         self.offset = offset
+ 
++
+     def data_results(self, context, data):
+         return self.results
+ 
+@@ -240,3 +242,107 @@
+         context.fillSlots('publication_date', date.strftime('%d %b %Y'))
+         return context.tag
+ 
++
++
++## from twisted.internet import reactor
++## from nevow import athena
++## class ResultsPage(athena.LivePage):
++##     &quot;&quot;&quot;default results page&quot;&quot;&quot;
++##     child_maaycss = static.File(get_path_of('maay.css'))
++##     child_images = static.File(get_path_of('images/'))
++##     docFactory = loaders.xmlfile(get_path_of('liveresults.html'))
++##     addSlash = False
++    
++##     def __init__(self, maayId, results, query, offset):
++##         athena.LivePage.__init__(self)
++##         self.maayId = maayId
++##         self.results = results
++##         self.offset = offset
++##         self.query = query.words # unicode(query)
++##         reactor.callLater(5, self.updatePage)
++
++
++##     def data_results(self, context, data):
++##         return self.results
++
++##     def render_title(self, context, data):
++##         context.fillSlots('words', self.query)
++##         context.fillSlots('start_result', min(len(self.results), self.offset + 1))
++##         context.fillSlots('end_result', self.offset + len(self.results))
++##         return context.tag
++
++##     def render_searchfield(self, context, data):
++##         context.fillSlots('words', self.query)
++##         return context.tag
++
++##     def render_prevset_url(self, context, data):
++##         words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
++##         offset = int(context.arg('offset', 0))
++##         if offset:
++##             offset -= 15
++##         return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
++
++##     def render_nextset_url(self, context, data):
++##         words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
++##         offset = int(context.arg('offset', 0)) + 15
++##         return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
++
++    
++##     def render_row(self, context, data):
++##         document = data
++##         words = self.query.split()
++##         context.fillSlots('mime_type', re.sub(&quot;/&quot;, &quot;_&quot;, document.mime_type))
++##         context.fillSlots('doctitle',
++##                           tags.xml(boldifyText(document.title, words)))
++##         # XXX abstract attribute should be a unicode string
++##         try:
++##             abstract = makeAbstract(document.text, words)
++##             abstract = normalize_text(unicode(abstract))
++##         except Exception, exc:
++##             print exc
++##             abstract = u'No abstract available for this document [%s]' % exc
++##         context.fillSlots('abstract', tags.xml(abstract))
++##         context.fillSlots('docid', document.db_document_id)
++##         context.fillSlots('docurl', tags.xml(boldifyText(document.url, words)))
++##         context.fillSlots('words', self.query)
++##         context.fillSlots('readable_size', document.readable_size())
++##         date = datetime.fromtimestamp(document.publication_time)
++##         context.fillSlots('publication_date', date.strftime('%d %b %Y'))
++##         return context.tag
++
++
++##     def updatePage(self):
++##         print &quot;ZOUuuuuuuuuuuuuuuuuuuuuuuuuuuu&quot;
++##         source = u&quot;&lt;h3&gt;YO !!!!!!&lt;/h3&gt;&quot;
++##         self.callRemote('updateResults', source)
++
++##     def xmlrpc_foo(self):
++##         print &quot;le client m'appelle !!&quot;
++##         return 0
++
++
++## class ResultsPageFactory(athena.LivePageFactory):
++##     def clientFactory(self, context, maayId, results, query):
++##         livepageId = inevow.IRequest(context).getHeader('Livepage-Id')
++##         if livepageId is not None:
++##             livepage = self.clients.get(livepageId)
++##             if livepage is not None:
++##                 # A returning, known client.  Give them their page.
++##                 return livepage
++##             else:
++##                 # A really old, expired client.  Or maybe an evil
++##                 # hax0r.  Give them a fresh new page and log the
++##                 # occurrence.
++##                 if self.noisy:
++##                     log.msg(&quot;Unknown Livepage-Id: %r&quot; % (livepageId,))
++##                 return self._manufactureClient(maayId, results, query)
++##         else:
++##             # A brand new client.  Give them a brand new page!
++##             return self._manufactureClient(maayId, results, query)
++
++##     def _manufactureClient(self, maayId, results, query):
++##         cl = self._pageFactory(maayId, results, query)
++##         cl.factory = self
++##         return cl
++
++## FACTORY = ResultsPageFactory(ResultsPage)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000328.html">[Maay-svncheckins] r352 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000330.html">[Maay-svncheckins] r354 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#329">[ date ]</a>
+              <a href="thread.html#329">[ thread ]</a>
+              <a href="subject.html#329">[ subject ]</a>
+              <a href="author.html#329">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

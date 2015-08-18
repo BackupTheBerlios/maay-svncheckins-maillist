@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r479 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r479%20-%20trunk/maay&In-Reply-To=%3C200511150700.jAF70tMp023500%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000449.html">
+   <LINK REL="Next"  HREF="000451.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r479 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r479%20-%20trunk/maay&In-Reply-To=%3C200511150700.jAF70tMp023500%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r479 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 08:00:55 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000449.html">[Maay-svncheckins] r478 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000451.html">[Maay-svncheckins] r480 - in trunk: . maay maay/bin maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#450">[ date ]</a>
+              <a href="thread.html#450">[ thread ]</a>
+              <a href="subject.html#450">[ subject ]</a>
+              <a href="author.html#450">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-15 08:00:43 +0100 (Tue, 15 Nov 2005)
+New Revision: 479
+
+Modified:
+   trunk/maay/updateconfig.py
+Log:
+added autoconfiguration of presence server
+
+Modified: trunk/maay/updateconfig.py
+===================================================================
+--- trunk/maay/updateconfig.py	2005-11-15 00:06:18 UTC (rev 478)
++++ trunk/maay/updateconfig.py	2005-11-15 07:00:43 UTC (rev 479)
+@@ -15,6 +15,8 @@
+ #     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ 
+ &quot;&quot;&quot; helper to create the indexer.ini configuration file at install time on windows&quot;&quot;&quot;
++
++__revision__ = '$Id$'
+ import os
+ import sys
+ 
+@@ -51,8 +53,9 @@
+ user=maay
+ password=maay
+ presence-host=%(presence)s
+-presence-port=2345
++presence-port=%(port)d
+ &quot;&quot;&quot;
++import socket
+ 
+ def createConfigFile(myDesktop, myDocuments):
+     f=open(&quot;indexer.ini&quot;, &quot;w&quot;)
+@@ -65,12 +68,29 @@
+     f.close()
+ 
+     f = open(&quot;node.ini&quot;, &quot;w&quot;)
+-    values = {'presence': get_presence_name()}
++    presence, port = probe_presence_config()
++    values = {'presence': presence,
++              'port': port}
+     f.write(node_config % values)
+     f.close()
+ 
+-def get_presence_name():
+-    for host in ('172.17.1.4', '192.168.74.105', )
++def probe_presence_config():
++    for addr in (('maay.rd.francetelecom.fr', 2345), # private FT server
++                 ('192.33.178.29', 2345), # public FT server
++                 ('172.17.1.4', 2345),    # private logilab server
++                 ('192.168.74.105', 2345),# private logilab server
++                 ):
++        print 'probing', addr
++        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++        try:
++            s.connect(addr)
++            s.close()
++        except socket.error, exc:
++            continue
++        else:
++            return addr
++    return '192.33.178.29', 2345
++        
+     
+ if __name__ == '__main__':
+     createConfigFile(sys.argv[1], sys.argv[2])
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000449.html">[Maay-svncheckins] r478 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000451.html">[Maay-svncheckins] r480 - in trunk: . maay maay/bin maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#450">[ date ]</a>
+              <a href="thread.html#450">[ thread ]</a>
+              <a href="subject.html#450">[ subject ]</a>
+              <a href="author.html#450">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

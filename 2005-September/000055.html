@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r82 - in trunk/maay: . test test/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r82%20-%20in%20trunk/maay%3A%20.%20test%20test/data&In-Reply-To=%3C200509281318.j8SDIous003371%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000054.html">
+   <LINK REL="Next"  HREF="000056.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r82 - in trunk/maay: . test test/data</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r82%20-%20in%20trunk/maay%3A%20.%20test%20test/data&In-Reply-To=%3C200509281318.j8SDIous003371%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r82 - in trunk/maay: . test test/data">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Sep 28 15:18:50 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000054.html">[Maay-svncheckins] r81 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000056.html">[Maay-svncheckins] r83 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-28 15:18:50 +0200 (Wed, 28 Sep 2005)
+New Revision: 82
+
+Added:
+   trunk/maay/test/data/guess_encoding.txt
+Modified:
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+fixed some encoding problems
+
+Added: trunk/maay/test/data/guess_encoding.txt
+===================================================================
+--- trunk/maay/test/data/guess_encoding.txt	2005-09-27 17:03:17 UTC (rev 81)
++++ trunk/maay/test/data/guess_encoding.txt	2005-09-28 13:18:50 UTC (rev 82)
+@@ -0,0 +1,8 @@
++Conversation with <A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">devel at conference.jabber.logilab.org</A> at 2005-08-25 08:32:29 on <A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alf at jabber.logilab.org</A>/Gaim (jabber)
++(17:25:23) alf: j'ai une piste
++(17:25:44) alf: si j'&#233;dite le mail (le second), dans les ent&#234;tes j'ai:
++(17:25:46) alf: Content-Type: text/plain; charset=&quot;utf-8&quot; Content-Transfer-Encoding: base64 
++(17:26:01) adim: hmm ...
++(17:26:04) alf: et le corpts du message, c'est du base64
++(17:26:04) adim: vous utilisez mutt ?
++(17:26:07) alf: yop
+
+
+Property changes on: trunk/maay/test/data/guess_encoding.txt
+___________________________________________________________________
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-09-27 17:03:17 UTC (rev 81)
++++ trunk/maay/test/test_texttool.py	2005-09-28 13:18:50 UTC (rev 82)
+@@ -63,6 +63,11 @@
+         self.assertEquals(guessEncoding(join(DATADIR, 'latin1.xml')), 'ISO-8859-1')
+         self.assertEquals(guessEncoding(join(DATADIR, 'encoded.html')), 'ISO-8859-1')
+ 
++    def test_guessEncodingRawUTF8Text(self):
++        filename = join(DATADIR, 'guess_encoding.txt')
++        enc = guessEncoding(filename)
++        self.assertEquals(enc, 'UTF-8')
++
+     def test_normalizeHTMLEncoding(self):
+         data = [
+             'latin1', 'ISO-8859-1',
+@@ -80,5 +85,7 @@
+         self.assertEquals(title, u'21 Porting to Python 2.3')
+         self.failUnless(len(text)&gt;10)
+         
++
++
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-09-27 17:03:17 UTC (rev 81)
++++ trunk/maay/texttool.py	2005-09-28 13:18:50 UTC (rev 82)
+@@ -6,6 +6,7 @@
+ from HTMLParser import HTMLParser
+ import codecs
+ import re
++import mimetypes
+ 
+ WORD_MIN_LEN = 2
+ WORD_MAX_LEN = 50
+@@ -18,7 +19,7 @@
+ 
+ 
+ CHARSET_RGX = re.compile('charset=([^\s&quot;]*)', re.I | re.S | re.U)
+-XML_ENCODING_RGX = re.compile('&lt;\?xml version=[^\s]*\s*encoding=([^\s]*)\s*\?&gt;', re.I | re.S | re.U)
++XML_ENCODING_RGX = re.compile('^&lt;\?xml version=[^\s]*\s*encoding=([^\s]*)\s*\?&gt;', re.I | re.S | re.U)
+ 
+ def normalizeHtmlEncoding(htmlEncoding):
+     # XXX FIXME: this function probably already exists somewhere ...
+@@ -49,11 +50,10 @@
+         elif buffer[:3] == codecs.BOM_UTF8:
+             return 'UTF-8'
+         buffer += stream.read()
+-        # try to get charset declaration
+-        # FIXME: should we check it's html before ?
+-        m = CHARSET_RGX.search(buffer)
+-        if m is not None:
+-            return normalizeHtmlEncoding(m.group(1))
++        if mimetypes.guess_type(filename)[0] == 'text/html':
++            m = CHARSET_RGX.search(buffer)
++            if m is not None:
++                return normalizeHtmlEncoding(m.group(1))
+         # check for xml encoding declaration
+         if buffer.lstrip().startswith('&lt;?xml'):
+             m = XML_ENCODING_RGX.match(buffer)
+@@ -78,7 +78,7 @@
+         :param encoding: if None, then need to be guessed
+         &quot;&quot;&quot;
+         encoding = encoding or guessEncoding(filename)
+-        stream = codecs.open(filename, 'r', encoding)
++        stream = codecs.open(filename, 'r', encoding, errors='ignore')
+         try:
+             return self.parseString(stream.read())
+         finally:
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000054.html">[Maay-svncheckins] r81 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000056.html">[Maay-svncheckins] r83 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

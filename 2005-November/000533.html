@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r561 - in trunk/maay: . sql
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r561%20-%20in%20trunk/maay%3A%20.%20sql&In-Reply-To=%3C200511181050.jAIAoQsS001141%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000532.html">
+   <LINK REL="Next"  HREF="000534.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r561 - in trunk/maay: . sql</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r561%20-%20in%20trunk/maay%3A%20.%20sql&In-Reply-To=%3C200511181050.jAIAoQsS001141%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r561 - in trunk/maay: . sql">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 11:50:26 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000532.html">[Maay-svncheckins] r560 - trunk/maay/win32
+</A></li>
+        <LI>Next message: <A HREF="000534.html">[Maay-svncheckins] r562 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#533">[ date ]</a>
+              <a href="thread.html#533">[ thread ]</a>
+              <a href="subject.html#533">[ subject ]</a>
+              <a href="author.html#533">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-18 11:50:18 +0100 (Fri, 18 Nov 2005)
+New Revision: 561
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+   trunk/maay/sql/mysql.sql
+Log:
+Ensure nodeId &lt;=&gt; (ip, port) relationship at database level. Update your schema.
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-18 10:42:21 UTC (rev 560)
++++ trunk/maay/dbentity.py	2005-11-18 10:50:18 UTC (rev 561)
+@@ -214,6 +214,8 @@
+     key = ('db_document_id',)
+     
+     def readable_size(self):
++        if not self.size:
++            return 'XXX NO KNOWN SIZE'
+         bytes = int(self.size)
+         if bytes &lt; 1000:
+             return u'%s' % bytes
+@@ -473,15 +475,31 @@
+     tableName = 'nodes'
+     attributes = ('node_id', 'ip', 'port', 'last_seen_time', 'counter',
+                   'claim_count', 'affinity', 'bandwidth')
+-    key = ('node_id',)
++    key = ('ip', 'port')
+ 
+-    #TODO: ensure nodeID &lt;=&gt; (ip, port)
++    ## def _insertQuery(self):
++##         &quot;&quot;&quot;generates an INSERT query according to object's state
++##            also update node_id on collisions on (ip, port)&quot;&quot;&quot;
++##         values = ['%%(%s)s' % attr for attr in self.attributes
++##                   if hasattr(self, attr)]
++##         query = &quot;INSERT INTO %s (%s) VALUES (%s) &quot; %\
++##                 (self.tableName,
++##                  ', '.join(self.boundAttributes()),
++##                  ', '.join(values))
++##         query += &quot;ON DUPLICATE KEY UPDATE node_id='%s'&quot; % getattr(self, 'node_id')
++##         # update facultative queries
++##         for attr in ('last_seen_time', 'bandwidth', 'counter', 'claim_count', 'affinity'):
++##             if hasattr(self, attr):
++##                 query += &quot;, %s=%s&quot; % (attr, getattr(self, attr))
++##         return query
+ 
++    # here, insert manages all the cases
++    #_updateQuery = _insertQuery
++
+     def _selectRegisteredNodesQuery(cls):
+         query = cls._selectQuery()
+         query += &quot; WHERE node_id != %s ORDER BY last_seen_time DESC LIMIT %s&quot;
+         return query
+-    
+     _selectRegisteredNodesQuery = classmethod(_selectRegisteredNodesQuery)
+ 
+     def selectRegistered(cls, cursor, currentNodeId, maxResults):
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-18 10:42:21 UTC (rev 560)
++++ trunk/maay/querier.py	2005-11-18 10:50:18 UTC (rev 561)
+@@ -277,7 +277,7 @@
+             return
+         lastSeenTime = lastSeenTime or int(time.time())
+         cursor = self._cnx.cursor()
+-        node = Node.selectOrInsertWhere(cursor, node_id=nodeId)[0]
++        node = Node.selectOrInsertWhere(cursor, ip=ip, port=port, node_id=nodeId)[0]
+         node.ip = ip
+         node.port = port
+         node.bandwidth = bandwidth or 1
+
+Modified: trunk/maay/sql/mysql.sql
+===================================================================
+--- trunk/maay/sql/mysql.sql	2005-11-18 10:42:21 UTC (rev 560)
++++ trunk/maay/sql/mysql.sql	2005-11-18 10:50:18 UTC (rev 561)
+@@ -119,16 +119,16 @@
+ -- 
+ 
+ CREATE TABLE `nodes` (
+-  `node_id` char(40) NOT NULL default '',
+-  `ip` char(15) NOT NULL default '',
++  `node_id` char(40) NOT NULL default '' UNIQUE,
++  `ip` char(15) NOT NULL, -- default '', oh !
+ -- FIXME: this should be unsigned smallint
+-  `port` smallint(11) NOT NULL default '0',
+-  `last_seen_time` int(11) default NULL,
++  `port` smallint(11) NOT NULL, -- default '0', why ?
++  `last_seen_time` int(11) default 0,
+   `counter` int(11) NOT NULL default '0',
+   `claim_count` float NOT NULL default '0',
+   `affinity` double NOT NULL default '0',
+   `bandwidth` int(11) NOT NULL default '0',
+-  PRIMARY KEY  (`node_id`)
++  PRIMARY KEY  (`ip`, `port`)
+ ) TYPE=MyISAM;
+ 
+ -- --------------------------------------------------------
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000532.html">[Maay-svncheckins] r560 - trunk/maay/win32
+</A></li>
+	<LI>Next message: <A HREF="000534.html">[Maay-svncheckins] r562 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#533">[ date ]</a>
+              <a href="thread.html#533">[ thread ]</a>
+              <a href="subject.html#533">[ subject ]</a>
+              <a href="author.html#533">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

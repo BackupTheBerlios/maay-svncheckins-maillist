@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r614 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r614%20-%20trunk/maay&In-Reply-To=%3C200511230959.jAN9xvdu022534%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000585.html">
+   <LINK REL="Next"  HREF="000587.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r614 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r614%20-%20trunk/maay&In-Reply-To=%3C200511230959.jAN9xvdu022534%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r614 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 10:59:57 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000585.html">[Maay-svncheckins] r613 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000587.html">[Maay-svncheckins] r615 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#586">[ date ]</a>
+              <a href="thread.html#586">[ thread ]</a>
+              <a href="subject.html#586">[ subject ]</a>
+              <a href="author.html#586">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-23 10:59:57 +0100 (Wed, 23 Nov 2005)
+New Revision: 614
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+Restore socket sane    timeout after probing
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-23 08:57:50 UTC (rev 613)
++++ trunk/maay/p2pquerier.py	2005-11-23 09:59:57 UTC (rev 614)
+@@ -405,7 +405,7 @@
+ ##                                          +------(sleeping nodes ?)-----+
+ 
+ SLEEPING_NODES = {}
+-CHECK_DELAY = 15 # time in secs before we probe the oldest sleeping node
++CHECK_DELAY = 20 # time in secs before we probe the oldest sleeping node
+ 
+ 
+ def registerSleeping(node):
+@@ -451,13 +451,18 @@
+     if len(SLEEPING_NODES) &gt; 0:
+         reactor.callLater(abs(CHECK_DELAY - right_now + now), checkOldest)
+ 
+-socket.setdefaulttimeout(3)
++
+ def nodeSleeps(node_ip, node_port):
++    socket.setdefaulttimeout(5)
+     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     try:
+-        s.connect((node_ip, node_port))
+-        s.close()
+-    except socket.error, exc:
+-        return True 
+-    else:
+-        return False
++        try:
++            s.connect((node_ip, node_port))
++            s.close()
++        except socket.error, exc:
++            return True 
++        else:
++            return False
++    finally:
++        socket.setdefaulttimeout(30)
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000585.html">[Maay-svncheckins] r613 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000587.html">[Maay-svncheckins] r615 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#586">[ date ]</a>
+              <a href="thread.html#586">[ thread ]</a>
+              <a href="subject.html#586">[ subject ]</a>
+              <a href="author.html#586">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

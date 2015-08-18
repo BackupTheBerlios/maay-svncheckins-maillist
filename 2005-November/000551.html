@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r579 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r579%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511181650.jAIGoUkO000652%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000550.html">
+   <LINK REL="Next"  HREF="000552.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r579 - in trunk/maay: . data</H1>
+    <B>dnf at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r579%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511181650.jAIGoUkO000652%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r579 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 17:50:30 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000550.html">[Maay-svncheckins] r578 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000552.html">[Maay-svncheckins] r580 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#551">[ date ]</a>
+              <a href="thread.html#551">[ thread ]</a>
+              <a href="subject.html#551">[ subject ]</a>
+              <a href="author.html#551">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-18 17:50:29 +0100 (Fri, 18 Nov 2005)
+New Revision: 579
+
+Modified:
+   trunk/maay/data/maay.css
+   trunk/maay/data/searchform.html
+   trunk/maay/webapplication.py
+Log:
+Fix indexation page.
+Fix some searchForm problems (Aurelian remarks)
+
+
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-18 16:41:25 UTC (rev 578)
++++ trunk/maay/data/maay.css	2005-11-18 16:50:29 UTC (rev 579)
+@@ -32,8 +32,13 @@
+ }
+ 
+ /** search page *******/
++div.homemessage {
++  font-size: 120%;
++  color: orange;
++}
++
+ div.shortDocStat {
+-  font-size: 60%;
++  font-size: 80%;
+ }
+ 
+ 
+
+Modified: trunk/maay/data/searchform.html
+===================================================================
+--- trunk/maay/data/searchform.html	2005-11-18 16:41:25 UTC (rev 578)
++++ trunk/maay/data/searchform.html	2005-11-18 16:50:29 UTC (rev 579)
+@@ -8,22 +8,21 @@
+ &lt;!--       &lt;/nevow:attr&gt; --&gt;
+ &lt;!--       &lt;nevow:slot name=&quot;actionlabel&quot; /&gt; --&gt;
+ &lt;!--     &lt;/a&gt; --&gt;
+-    &lt;table class=&quot;searchHome&quot;&gt;
+-      &lt;tr&gt;
+-        &lt;td&gt;&lt;img src=&quot;images/maay.png&quot; /&gt;&lt;/td&gt;
+-      &lt;/tr&gt;
+-      &lt;tr&gt;
+-        &lt;td&gt;
+-          &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+-            &lt;input type=&quot;text&quot; name=&quot;words&quot; value=&quot;&quot; /&gt;
+-              &lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;
+-          &lt;/form&gt;
+-          &lt;font color=&quot;orange&quot; size=&quot;+1&quot;&gt;Search and share your documents.&lt;/font&gt;&lt;br /&gt;&lt;br /&gt;
+-          &lt;div class=&quot;shortDocStat&quot; nevow:render=&quot;shortstat&quot;&gt;
+-            Searching &lt;nevow:slot name=&quot;localDocumentCount&quot; /&gt; documents. Sharing &lt;nevow:slot name=&quot;publicDocumentCount&quot; /&gt; documents.
+-          &lt;/div&gt;
+-        &lt;/td&gt;
+-      &lt;/tr&gt;
+-    &lt;/table&gt;
++    &lt;center&gt;
++    &lt;img src=&quot;images/maay.png&quot; /&gt;
++    &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
++      &lt;table&gt;
++        &lt;tr&gt;
++          &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;words&quot; value=&quot;&quot; /&gt;&lt;/td&gt;
++          &lt;td&gt;&lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;&lt;/td&gt;
++        &lt;/tr&gt;
++      &lt;/table&gt;
++    &lt;/form&gt;
++    &lt;br /&gt;
++    &lt;div class=&quot;homemessage&quot;&gt;Search and share your documents.&lt;/div&gt;&lt;br /&gt;
++    &lt;div class=&quot;shortDocStat&quot; nevow:render=&quot;shortstat&quot;&gt;
++    Searching &lt;nevow:slot name=&quot;localDocumentCount&quot; /&gt; documents. Sharing &lt;nevow:slot name=&quot;publicDocumentCount&quot; /&gt; documents.
++    &lt;/div&gt;
++    &lt;/center&gt;
+   &lt;/nevow:invisible&gt;
+   
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-18 16:41:25 UTC (rev 578)
++++ trunk/maay/webapplication.py	2005-11-18 16:50:29 UTC (rev 579)
+@@ -159,6 +159,10 @@
+     def render_message(self, context, data):
+         return self.msg
+ 
++    def render_alert(self, context, data):
++        context.fillSlots(&quot;message&quot;, self.alertmessage)
++        return context.tag
++
+     def data_privatefolders(self, context, data):
+         if not self.indexerConfig.private_dir:
+             return [&quot;No private folder.&quot;]
+@@ -206,6 +210,8 @@
+         self.p2pquerier = p2pquerier
+         self.download_dir = indexer.indexerConfig.download_dir
+ 
++    # TODO: since getDocumentCount might be quite costly to compute for the
++    # DBMS, cache the value and update it every 10 mn
+     def render_shortstat(self, context, data):
+         docCounts = self.querier.getDocumentCount()
+         context.fillSlots('localDocumentCount', docCounts[Document.PRIVATE_STATE] + docCounts[Document.PUBLISHED_STATE]) 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000550.html">[Maay-svncheckins] r578 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000552.html">[Maay-svncheckins] r580 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#551">[ date ]</a>
+              <a href="thread.html#551">[ thread ]</a>
+              <a href="subject.html#551">[ subject ]</a>
+              <a href="author.html#551">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

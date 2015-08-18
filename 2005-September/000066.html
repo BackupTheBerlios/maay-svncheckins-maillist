@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r93 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r93%20-%20trunk/maay&In-Reply-To=%3C200509291040.j8TAeS8I017562%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000065.html">
+   <LINK REL="Next"  HREF="000067.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r93 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r93%20-%20trunk/maay&In-Reply-To=%3C200509291040.j8TAeS8I017562%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r93 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Sep 29 12:40:28 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000065.html">[Maay-svncheckins] r92 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000067.html">[Maay-svncheckins] r94 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#66">[ date ]</a>
+              <a href="thread.html#66">[ thread ]</a>
+              <a href="subject.html#66">[ subject ]</a>
+              <a href="author.html#66">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-29 12:40:27 +0200 (Thu, 29 Sep 2005)
+New Revision: 93
+
+Modified:
+   trunk/maay/indexer.py
+Log:
+handle more mime types
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-09-28 16:27:43 UTC (rev 92)
++++ trunk/maay/indexer.py	2005-09-29 10:40:27 UTC (rev 93)
+@@ -20,6 +20,32 @@
+ from maay.dbentity import Document, FileInfo
+ from maay.querier import MaayAuthenticationError
+ 
++# grabbed from nevow
++mimetypes.types_map.update(
++    {
++            '.conf':  'text/plain',
++            '.diff':  'text/plain',
++            '.exe':   'application/x-executable',
++            '.flac':  'audio/x-flac',
++            '.java':  'text/plain',
++            '.ogg':   'application/ogg',
++            '.oz':    'text/x-oz',
++            '.swf':   'application/x-shockwave-flash',
++            '.tgz':   'application/x-gtar',
++            '.wml':   'text/vnd.wap.wml',
++            '.xul':   'application/vnd.mozilla.xul+xml',
++            '.py':    'text/plain',
++            '.patch': 'text/plain',
++            '.c' : 'text/plain',
++            '.h': 'text/plain',
++            '.C': 'text/plain',
++            '.cpp': 'text/plain',
++            '.cc': 'text/plain',
++            '.c++': 'text/plain',
++        }
++    )
++
++
+ def makeDocumentId(filename):
+     &quot;&quot;&quot;return the SHA hash value from of the contents of the file&quot;&quot;&quot;
+     stream = file(filename, 'rb')
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000065.html">[Maay-svncheckins] r92 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000067.html">[Maay-svncheckins] r94 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#66">[ date ]</a>
+              <a href="thread.html#66">[ thread ]</a>
+              <a href="subject.html#66">[ subject ]</a>
+              <a href="author.html#66">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r350 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r350%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511081823.jA8INfVo018173%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000325.html">
+   <LINK REL="Next"  HREF="000327.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r350 - in trunk/maay: . data</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r350%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511081823.jA8INfVo018173%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r350 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 19:23:41 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000325.html">[Maay-svncheckins] r349 - trunk/maay/data
+</A></li>
+        <LI>Next message: <A HREF="000327.html">[Maay-svncheckins] r351 - trunk/debian
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#326">[ date ]</a>
+              <a href="thread.html#326">[ thread ]</a>
+              <a href="subject.html#326">[ subject ]</a>
+              <a href="author.html#326">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-08 19:23:37 +0100 (Tue, 08 Nov 2005)
+New Revision: 350
+
+Modified:
+   trunk/maay/data/maay.css
+   trunk/maay/data/resultpage.html
+   trunk/maay/webapplication.py
+Log:
+Add range (e.g. 1-15) in results.
+
+
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-08 18:04:59 UTC (rev 349)
++++ trunk/maay/data/maay.css	2005-11-08 18:23:37 UTC (rev 350)
+@@ -40,7 +40,7 @@
+ }
+ 
+ span.resultUrl {
+-  font-size: 90%;
++  font-size: 80%;
+   font-family: &quot;New Century Schoolbook&quot;, serif;
+   color: green;
+   text-decoration: none;
+@@ -48,7 +48,7 @@
+ 
+ div.prevnext {
+   width: 100%;
+-  font-size: 10px;
++  font-size: 80%;
+ }
+ 
+ div.prevnext a {
+
+Modified: trunk/maay/data/resultpage.html
+===================================================================
+--- trunk/maay/data/resultpage.html	2005-11-08 18:04:59 UTC (rev 349)
++++ trunk/maay/data/resultpage.html	2005-11-08 18:23:37 UTC (rev 350)
+@@ -13,7 +13,7 @@
+       &lt;/table&gt;
+     &lt;/form&gt;      
+   &lt;/div&gt;
+-  &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results for &quot;&lt;nevow:slot name=&quot;words&quot; /&gt;&quot;&lt;/div&gt;
++  &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
+   &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+     &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+       &lt;td&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-08 18:04:59 UTC (rev 349)
++++ trunk/maay/webapplication.py	2005-11-08 18:23:37 UTC (rev 350)
+@@ -149,9 +149,9 @@
+             query = Query.fromRawQuery(rawQuery, offset)
+             localResults = self.querier.findDocuments(query)
+             self._askForPeerResults(query, context)
+-            return ResultsPage(self.maayId, localResults, query)
++            return ResultsPage(self.maayId, localResults, query, offset)
+         else:
+-            return ResultsPage(self.maayId, results, query)
++            return ResultsPage(self.maayId, results, query, offset)
+ 
+     # XXX make sure that the requested document is really in the database
+     # XXX don't forget to update the download statistics of the document
+@@ -186,16 +186,19 @@
+     addSlash = False
+     
+     
+-    def __init__(self, maayId, results, query):
++    def __init__(self, maayId, results, query, offset):
+         MaayPage.__init__(self, maayId)
+         self.results = results
+         self.query = query.words # unicode(query)
++        self.offset = offset
+ 
+     def data_results(self, context, data):
+         return self.results
+ 
+     def render_title(self, context, data):
+         context.fillSlots('words', self.query)
++        context.fillSlots('start_result', min(len(self.results), self.offset + 1))
++        context.fillSlots('end_result', self.offset + len(self.results))
+         return context.tag
+ 
+     def render_searchfield(self, context, data):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000325.html">[Maay-svncheckins] r349 - trunk/maay/data
+</A></li>
+	<LI>Next message: <A HREF="000327.html">[Maay-svncheckins] r351 - trunk/debian
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#326">[ date ]</a>
+              <a href="thread.html#326">[ thread ]</a>
+              <a href="subject.html#326">[ subject ]</a>
+              <a href="author.html#326">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

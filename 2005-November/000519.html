@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r548 - trunk/doc
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r548%20-%20trunk/doc&In-Reply-To=%3C200511171621.jAHGLu4K014601%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000518.html">
+   <LINK REL="Next"  HREF="000520.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r548 - trunk/doc</H1>
+    <B>afayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r548%20-%20trunk/doc&In-Reply-To=%3C200511171621.jAHGLu4K014601%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r548 - trunk/doc">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Nov 17 17:21:56 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000518.html">[Maay-svncheckins] r547 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000520.html">[Maay-svncheckins] r549 - trunk/maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#519">[ date ]</a>
+              <a href="thread.html#519">[ thread ]</a>
+              <a href="subject.html#519">[ subject ]</a>
+              <a href="author.html#519">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-17 17:21:45 +0100 (Thu, 17 Nov 2005)
+New Revision: 548
+
+Added:
+   trunk/doc/CR_20051117.rest
+Log:
+added minutes of today's meeting
+
+
+Added: trunk/doc/CR_20051117.rest
+===================================================================
+--- trunk/doc/CR_20051117.rest	2005-11-17 15:03:36 UTC (rev 547)
++++ trunk/doc/CR_20051117.rest	2005-11-17 16:21:45 UTC (rev 548)
+@@ -0,0 +1,102 @@
++==========================================
++Compte rendu de la r&#233;union du 17 Nov. 2005
++==========================================
++
++Participants
++~~~~~~~~~~~~
++
++Joaquin Keller (FTRD)
++Fr&#233;d&#233;ric Dang Ngoc (FTRD)
++Alexandre Fayolle (Logilab)
++
++But de la r&#233;union
++~~~~~~~~~~~~~~~~~
++
++Bilan sur l'installation de la version 0.2.1 et perspectives pour la suite. 
++
++&#201;ch&#233;ances
++~~~~~~~~~~
++
++D&#233;monstration publique le 30 Nov. 
++
++D&#233;ploiment &#224; large &#233;chelle chez FT &#224; compter du 21 Nov. d'une version
++0.2.2 de Maay. 
++
++Points abord&#233;s
++~~~~~~~~~~~~~~
++
++Retour sur les premi&#232;res installations
++--------------------------------------
++
++Il y a quelques points &#224; modifier dans l'aspect cosm&#233;tique de
++l'interface Web. 
++
++L'installeur doit :
++
++ * ajouter un ic&#244;ne uninstall dans le menu D&#233;marrer ;
++
++ * cr&#233;er un lien vers <A HREF="http://localhost:7777">http://localhost:7777</A> dans le menu d&#233;marrer et
++   sur le bureau ;
++
++ * afficher la page principale de Maay dans le navigateur apr&#232;s
++   l'installation.
++
++Les modifications de l'interface Web seront r&#233;alis&#233;es par FTRD et
++celles concernant l'installeur Windows par Logilab. Elles donneront
++lieu &#224; la publication de Maay-0.2.2.
++
++Anomalies d&#233;tect&#233;es par Logilab
++-------------------------------
++
++Fayolle signale deux anomalies d&#233;tect&#233;es par Logilab apr&#232;s la
++publication de Maay-0.2.1 :
++
++ * les documents sont tri&#233;s du plus vieux au plus r&#233;cent et non pas le
++   contraire (corrig&#233; dans SVN)
++
++ * l'utilisation de Maay &#224; travers Internet Explorer peut causer des
++   blocages temporaires du navigateur qui ne se produisent pas avec
++   Firefox.
++
++Cette deuxi&#232;me anomalie est probl&#233;matique car IE est utilis&#233; sur de
++nombreux postes &#224; FTRD. Un correctif a &#233;t&#233; fourni par Logilab, et il
++est en cours de validation. 
++
++Ces deux anomalies seront corrig&#233;es dans la version 0.2.2 de Maay.
++
++D&#233;veloppements futurs
++---------------------
++
++Entre la publication de Maay-0.2.2 et la d&#233;monstration du 30 Nov. une
++version 0.3 devrait &#234;tre publi&#233;e qui servira de base &#224; la
++d&#233;monstration. Cette version devrait offrir de nouvelles possibilit&#233;
++en mati&#232;re de classement des documents renvoy&#233;s :
++
++ * les documents pourront &#234;tre tri&#233;s par relevance
++
++ * l'utilisateur pourra choisir un crit&#232;re de tri depuis l'interface
++   web (date ou relevance) et un sens de tri (croissant ou
++   d&#233;croissant)
++
++ * dans le cas ou un m&#234;me document est renvoy&#233; par plusieurs noeuds
++   distants, un seul r&#233;sultat est affich&#233; sur la page, avec la liste
++   tous les noeuds, et le crit&#232;re de tri est calcul&#233; comme suit: date
++   la plus r&#233;cente (ou la plus ancienne pour un tri d&#233;croissant) ou
++   somme des relevances. 
++
++Conclusion de la r&#233;union
++~~~~~~~~~~~~~~~~~~~~~~~~
++
++La version 0.2.2 de Maay devrait &#234;tre publi&#233;e le 18 Nov. en fin de
++journ&#233;e ou le 21 Nov. au matin au plus tard, afin que FTRD puisse la
++valider avant de proc&#233;der &#224; l'annonce de la disponibilit&#233; du produit
++en interne. 
++
++Le travail sur Maay-0.3.0 commencera en d&#233;but de semaine prochaine. 
++
++ -- Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;  Thu, 17 Nov 2005 17:19:44 +0100
++
++
++
++
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000518.html">[Maay-svncheckins] r547 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000520.html">[Maay-svncheckins] r549 - trunk/maay/sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#519">[ date ]</a>
+              <a href="thread.html#519">[ thread ]</a>
+              <a href="subject.html#519">[ subject ]</a>
+              <a href="author.html#519">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

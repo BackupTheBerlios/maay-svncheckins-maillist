@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r493 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r493%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511151019.jAFAJT0P015100%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000463.html">
+   <LINK REL="Next"  HREF="000465.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r493 - in trunk/maay: . data</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r493%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511151019.jAFAJT0P015100%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r493 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 11:19:29 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000463.html">[Maay-svncheckins] r492 - trunk/maay/win32
+</A></li>
+        <LI>Next message: <A HREF="000465.html">[Maay-svncheckins] r494 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#464">[ date ]</a>
+              <a href="thread.html#464">[ thread ]</a>
+              <a href="subject.html#464">[ subject ]</a>
+              <a href="author.html#464">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-15 11:19:27 +0100 (Tue, 15 Nov 2005)
+New Revision: 493
+
+Modified:
+   trunk/maay/data/liveresults.html
+   trunk/maay/webapplication.py
+Log:
+- fixed the bug that displayed every local results until
+  we didn't have a P2P answer
+- improved a bit previous / next links management
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-15 10:18:35 UTC (rev 492)
++++ trunk/maay/data/liveresults.html	2005-11-15 10:19:27 UTC (rev 493)
+@@ -59,9 +59,7 @@
+    &lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;&lt;span nevow:render=&quot;distantcount&quot; /&gt; distant results&lt;/a&gt;&lt;br/&gt;
+    &lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; results&lt;/a&gt;&lt;br/&gt;
+    &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; (&lt;nevow:slot name=&quot;count&quot; /&gt;) for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
+-    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+-    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+-    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
++   &lt;div class=&quot;prevnext&quot;&gt;&lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;&lt;/div&gt;
+     &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+       &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+         &lt;td&gt;
+@@ -73,10 +71,8 @@
+         &lt;/td&gt;
+       &lt;/tr&gt;
+     &lt;/table&gt;
+-    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+-    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+-    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+-    &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
++    &lt;div class=&quot;prevnext&quot;&gt;&lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;&lt;/div&gt;
++    &lt;nevow:invisible nevow:macro=&quot;footer&quot; /&gt;
+   &lt;/div&gt;
+  &lt;/body&gt;
+ &lt;/html&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-15 10:18:35 UTC (rev 492)
++++ trunk/maay/webapplication.py	2005-11-15 10:19:27 UTC (rev 493)
+@@ -277,13 +277,52 @@
+         return context.tag
+ 
+ class ResultsPageMixIn:
+-            
++
+     def data_results(self, context, data):
+         return self.results
+     
+     def macro_footer(self, context):
+         return loaders.xmlfile(get_path_of('footer.html'))
+ 
++    def macro_prevnext(self, context):
++        return loaders.stan(
++          tags.invisible()[
++            tags.invisible(render=tags.directive(&quot;onFirstSlice&quot;))[
++              tags.invisible(pattern=&quot;Previous&quot;)[
++                tags.a(href=tags.invisible(render=self.prevset_url))['Previous'],
++                tags.xml(&quot; &nbsp; &quot;),
++                ],
++              ],
++            tags.invisible(render=tags.directive(&quot;onLastSlice&quot;))[
++              tags.a(pattern=&quot;Next&quot;, href=tags.invisible(render=self.nextset_url))['Next']
++            ],
++          ],
++        )
++
++    def render_onLastSlice(self, context, data):
++        &quot;&quot;&quot;returns a specific pattern to tell if we're on last slice or not&quot;&quot;&quot;
++        q = inevow.IQ(context)
++        nextPattern = q.onePattern('Next')
++        localCount, distantCount = self.querier.countResults(self.queryId)
++        if self.onlyDistant:
++            resultsCount = distantCount
++        elif self.onlyLocal:
++            resultsCount = localCount
++        else:
++            resultsCount = localCount + distantCount
++        offset = self.query.offset
++        if (offset + 15) &gt; resultsCount:
++            return context.tag().clear()
++        return nextPattern or context.tag().clear()
++
++    def render_onFirstSlice(self, context, data):
++        &quot;&quot;&quot;returns a specific pattern to tell if we're on first slice or not&quot;&quot;&quot;
++        q = inevow.IQ(context)
++        falsePattern = q.onePattern('Previous')
++        if (self.query.offset &lt;= 0):
++            return context.tag().clear()
++        return falsePattern or context.tag().clear()
++    
+     def render_title(self, context, data):
+         localCount, distantCount = self.querier.countResults(self.queryId)
+         if self.onlyDistant:
+@@ -295,7 +334,7 @@
+         offset = self.query.offset
+         context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         context.fillSlots('start_result', offset + 1)
+-        context.fillSlots('end_result', min(resultsCount, offset+15))#self.offset + len(self.results))
++        context.fillSlots('end_result', min(resultsCount, offset+15))
+         context.fillSlots('count', resultsCount)
+         return context.tag
+ 
+@@ -315,18 +354,15 @@
+         context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         return context.tag
+ 
+-    def render_prevset_url(self, context, data):
+-        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
+-        offset = int(context.arg('offset', 0))
++    def nextset_url(self, context, data):
++        return 'javascript: browseResults(%s);' % (self.query.offset + 15,)
++
++    def prevset_url(self, context, data):
++        offset = self.query.offset
+         if offset:
+             offset -= 15
+-        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
++        return 'javascript: browseResults(%s);' % (offset,)
+ 
+-    def render_nextset_url(self, context, data):
+-        words = WORDS_RGX.findall(normalizeText(unicode(context.arg('words'), 'utf-8')))
+-        offset = int(context.arg('offset', 0)) + 15
+-        return 'search?words=%s&amp;offset=%s' % ('+'.join(words), offset)
+-
+     def render_row(self, context, data):
+         document = data
+         words = self.query.words #WORDS (was .split())
+@@ -351,12 +387,6 @@
+         context.fillSlots('publication_date', date.strftime('%d %b %Y'))
+         return context.tag
+     
+-class StaticResultsPage(MaayPage, ResultsPageMixIn):
+-    bodyFactory = loaders.xmlfile(get_path_of('resultpage.html'))
+-
+-    def __init__(self, results):
+-        self.results = results
+-
+ from nevow import athena, inevow
+ from twisted.python import log
+ 
+@@ -381,7 +411,6 @@
+         self.onlyDistant = False
+         # push local results once for all
+         if len(inevow.IRemainingSegments(context)) &lt; 2:
+-            print &quot;-=&quot; * 40
+             results = querier.findDocuments(self.query)
+             webappConfig = INodeConfiguration(context)
+             p2pQuery = P2pQuery(webappConfig.get_node_id(),
+@@ -389,14 +418,15 @@
+                                 self.query)
+             self.queryId = p2pQuery.qid
+             self.p2pQuery = p2pQuery
+-            self.results = results
+-            # self.results = self.querier.getQueryResults(self.queryId, offset=0)
+-            # self.querier.pushDocuments(self.queryId, self.results, provider=None)
+-        
++            self.querier.pushDocuments(self.queryId, results, provider=None)
++            self.results = self.querier.getQueryResults(self.queryId, offset=0)
++            
+     def onNewResults(self, provider, results):
+         results = [Document(**params) for params in results]
+         self.querier.pushDocuments(self.queryId, results, provider)
+-        results = self.querier.getQueryResults(self.queryId, offset=self.query.offset, onlyLocal=self.onlyLocal, onlyDistant=self.onlyDistant) # XXX limit ?
++        results = self.querier.getQueryResults(self.queryId, offset=self.query.offset,
++                                               onlyLocal=self.onlyLocal,
++                                               onlyDistant=self.onlyDistant)
+         page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId,
+                                    self.onlyLocal, self.onlyDistant).renderSynchronously()
+         page = unicode(page, 'utf-8')
+@@ -407,12 +437,14 @@
+         #TODO: very soon, the line below will also be the p2pquerier's job
+         self.p2pquerier.sendQuery(self.p2pQuery)
+         self.p2pquerier.addAnswerCallback(self.p2pQuery.qid, self.onNewResults)
+-        self.querier.pushDocuments(self.queryId, self.results, provider=None)
++        # self.querier.pushDocuments(self.queryId, self.results, provider=None)
+         return u''
+     
+     def remote_browseResults(self, context, offset):
+         self.query.offset = offset
+-        results = self.querier.getQueryResults(self.queryId, offset=offset, onlyLocal=self.onlyLocal, onlyDistant=self.onlyDistant) # XXX limit ?
++        results = self.querier.getQueryResults(self.queryId, offset=offset,
++                                               onlyLocal=self.onlyLocal,
++                                               onlyDistant=self.onlyDistant)
+         page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId,
+                                    self.onlyLocal, self.onlyDistant).renderSynchronously()
+         page = unicode(page, 'utf-8')
+@@ -421,16 +453,19 @@
+     def remote_setLocalFlag(self, context, flag):
+         self.onlyLocal = flag
+         self.onlyDistant = False
++        self.query.offset = 0
+         return self.remote_browseResults(context, self.query.offset)
+ 
+     def remote_setDistantFlag(self, context, flag):
+         self.onlyDistant = flag
+         self.onlyLocal = False
++        self.query.offset = 0
+         return self.remote_browseResults(context, self.query.offset)
+ 
+     def remote_unsetFlags(self, context):
+         self.onlyDistant = False
+         self.onlyLocal = False
++        self.query.offset = 0
+         return self.remote_browseResults(context, self.query.offset)
+     
+ 
+@@ -442,6 +477,7 @@
+     docFactory = loaders.xmlstr(&quot;&quot;&quot;
+   &lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; &gt;
+    &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;b&gt;&lt;nevow:slot name=&quot;start_result&quot; /&gt;&lt;/b&gt; - &lt;b&gt;&lt;nevow:slot name=&quot;end_result&quot; /&gt;&lt;/b&gt; of &lt;b&gt;&lt;nevow:slot name=&quot;count&quot; /&gt;&lt;/b&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
++    &lt;div class=&quot;prevnext&quot;&gt;&lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;&lt;/div&gt;
+    &lt;table&gt;
+      &lt;tr&gt;
+        &lt;td&gt;&lt;div class=&quot;localPublicResult&quot;&gt;&lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;&lt;span nevow:render=&quot;localcount&quot; /&gt; local&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
+@@ -451,9 +487,6 @@
+        &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; all&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+-   &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+-    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+-    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+     &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+       &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+         &lt;td&gt;
+@@ -475,9 +508,7 @@
+         &lt;/td&gt;
+       &lt;/tr&gt;
+     &lt;/table&gt;
+-    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+-    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+-    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
++    &lt;div class=&quot;prevnext&quot;&gt;&lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;&lt;/div&gt;
+     &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
+   &lt;/div&gt;
+     &quot;&quot;&quot;)
+@@ -499,7 +530,6 @@
+     
+     def render_row(self, context, data):
+         document = data
+-        print data
+         ResultsPageMixIn.render_row(self, context, data)
+         if document.host == 'localhost':
+             baseurl = '/download?docid=%s' % (document.document_id,)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000463.html">[Maay-svncheckins] r492 - trunk/maay/win32
+</A></li>
+	<LI>Next message: <A HREF="000465.html">[Maay-svncheckins] r494 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#464">[ date ]</a>
+              <a href="thread.html#464">[ thread ]</a>
+              <a href="subject.html#464">[ subject ]</a>
+              <a href="author.html#464">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

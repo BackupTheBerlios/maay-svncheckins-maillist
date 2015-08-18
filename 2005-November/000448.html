@@ -1,0 +1,483 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r477 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r477%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511142333.jAENX6ZP030019%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000447.html">
+   <LINK REL="Next"  HREF="000449.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r477 - in trunk/maay: . data</H1>
+    <B>dnf at berlios.de</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r477%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511142333.jAENX6ZP030019%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r477 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 00:33:06 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000447.html">[Maay-svncheckins] r476 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000449.html">[Maay-svncheckins] r478 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#448">[ date ]</a>
+              <a href="thread.html#448">[ thread ]</a>
+              <a href="subject.html#448">[ subject ]</a>
+              <a href="author.html#448">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-15 00:32:04 +0100 (Tue, 15 Nov 2005)
+New Revision: 477
+
+Modified:
+   trunk/maay/data/footer.html
+   trunk/maay/data/indexationpage.html
+   trunk/maay/data/maay.css
+   trunk/maay/p2pquerier.py
+   trunk/maay/webapplication.py
+Log:
+- update indexation page (display private and public directories)
+- p2pquerier.py : catch exception raised by os.getlogin() (return anonymous if fails)
+- some web esthetic modifications
+
+
+
+Modified: trunk/maay/data/footer.html
+===================================================================
+--- trunk/maay/data/footer.html	2005-11-14 22:16:43 UTC (rev 476)
++++ trunk/maay/data/footer.html	2005-11-14 23:32:04 UTC (rev 477)
+@@ -4,7 +4,9 @@
+   &lt;hr/&gt;
+   &lt;table width=&quot;100%&quot;&gt;
+     &lt;tr&gt;
+-      &lt;td valign=&quot;top&quot;&gt;&lt;small&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; &lt;/small&gt;&lt;/td&gt;
++      &lt;td valign=&quot;top&quot;&gt;&lt;a href=&quot;/&quot; class=&quot;footlink&quot;&gt;[Main&nbsp;page]&lt;/a&gt;&lt;/td&gt;
++      &lt;td valign=&quot;top&quot; width=&quot;100%&quot;&gt;&lt;a href=&quot;/indexation&quot; class=&quot;footlink&quot;&gt;[Indexation&nbsp;Page]&nbsp;&lt;/a&gt;&lt;/td&gt;
++      &lt;td valign=&quot;top&quot;&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot; class=&quot;footlink&quot;&gt;[Maay&nbsp;Home&nbsp;page]&lt;/a&gt;&lt;/td&gt;
+       &lt;td align=&quot;right&quot;&gt;&lt;img src=&quot;/images/logoFT.png&quot; /&gt;&lt;/td&gt;
+     &lt;/tr&gt;
+   &lt;/table&gt;
+
+Modified: trunk/maay/data/indexationpage.html
+===================================================================
+--- trunk/maay/data/indexationpage.html	2005-11-14 22:16:43 UTC (rev 476)
++++ trunk/maay/data/indexationpage.html	2005-11-14 23:32:04 UTC (rev 477)
+@@ -1,8 +1,36 @@
+ &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+ &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+ &lt;nevow:invisible xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+-&lt;h1&gt;Indexation Page&lt;/h1&gt;
+-  &lt;div class=&quot;message&quot;&gt;&quot;&lt;span nevow:render=&quot;message&quot; /&gt;&quot;&lt;/div&gt;&lt;br /&gt;&lt;br /&gt;
+-&lt;a href=&quot;/indexation?start=1&quot;&gt;Index now&lt;/a&gt;&lt;br /&gt;&lt;br /&gt;
+-&lt;a href=&quot;/&quot;&gt;return to search page&lt;/a&gt;
++&lt;table&gt;
++  &lt;tr&gt;
++    &lt;td&gt;&lt;a href=&quot;/&quot;&gt;&lt;img border=&quot;0&quot; src=&quot;images/smallmaay.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
++    &lt;td&gt;&lt;h1&gt;Indexation Page&lt;/h1&gt;&lt;/td&gt;
++  &lt;/tr&gt;
++&lt;/table&gt;
++  &lt;br /&gt;
++  &lt;div class=&quot;message&quot;&gt;&lt;b&gt;Status: &lt;/b&gt;&lt;span nevow:render=&quot;message&quot; /&gt;&lt;/div&gt;
++  &lt;hr /&gt;
++  &lt;h2&gt;Private Directories&lt;/h2&gt;
++  &lt;h3&gt;Indexed&lt;/h3&gt;
++    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;indexedprivatedirectories&quot;&gt;
++      &lt;div class=&quot;indexedDirectoryName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
++    &lt;/div&gt;
++  &lt;h3&gt;Skipped&lt;/h3&gt;
++    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;skippedprivatedirectories&quot;&gt;
++      &lt;div class=&quot;skippedDirectoryName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
++    &lt;/div&gt;
++  &lt;h2&gt;Public Directories&lt;/h2&gt;
++  &lt;h3&gt;Indexed&lt;/h3&gt;
++    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;indexedprivatedirectories&quot;&gt;
++      &lt;div class=&quot;indexedDirectoryName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
++    &lt;/div&gt;
++    &lt;h3&gt;Skipped&lt;/h3&gt;
++    &lt;div nevow:render=&quot;sequence&quot; nevow:data=&quot;skippedprivatedirectories&quot;&gt;
++      &lt;div class=&quot;skippedDirectoryName&quot; nevow:pattern=&quot;item&quot; nevow:render=&quot;directory&quot;&gt;&lt;nevow:slot name=&quot;name&quot; /&gt;&lt;/div&gt;
++    &lt;/div&gt;
++  &lt;hr /&gt;
++  &lt;form action=&quot;/indexation&quot; method=&quot;PUT&quot;&gt;
++    &lt;input type=&quot;hidden&quot; name=&quot;start&quot; value=&quot;1&quot; /&gt;
++    &lt;input type=&quot;submit&quot; value=&quot;Index now&quot; /&gt; 
++  &lt;/form&gt;
+ &lt;/nevow:invisible&gt;
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-14 22:16:43 UTC (rev 476)
++++ trunk/maay/data/maay.css	2005-11-14 23:32:04 UTC (rev 477)
+@@ -1,9 +1,17 @@
+ body,td,div,.p,a{font-family:arial,sans-serif }
+ 
+-h1 { font-family: arial,helvetica; font-size: 12pt; color: #000000; font-weight:bold }
++h1 { font-family: arial,helvetica; font-size: 14pt; color: #000000; font-weight:bold }
+ h2 {  font-family: Arial, Helvetica, sans-serif; font-size: 12pt; font-style:italic ; font-weight: bold ; color: #444444}
+ h3 {  font-family: Arial, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; color: #888888}
+ 
++
++/** footer ********/
++a.footlink {
++  /* display: block; */
++  font-size: 70%;
++  color: #444444;
++}
++
+ /** login page ********/
+ table.loginTable {
+   width: 100%;
+@@ -39,8 +47,8 @@
+   display: block;
+ }
+ 
+-.distantDocTitle {
+-  /* display: block; */
++a.distantDocTitle {
++  display: block;
+   background-color: yellow;
+ }
+ 
+@@ -87,6 +95,22 @@
+   text-align: right;
+ }
+ 
++
++/** indexation page *******/
++div.indexedDirectoryName {
++  font-size: 60%;
++  color: #448844; 
++  margin-left: 10px;
++}
++
++div.skippedDirectoryName {
++  font-size: 60%;
++  color: #884444; 
++  margin-left: 10px;
++}
++
++
++
+ /** icon *******/
+ div.text_html {
+   /* display: block; */
+@@ -132,3 +156,4 @@
+   height: 16px;
+   background: url(images/msword_icon.png);
+ }
++
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-14 22:16:43 UTC (rev 476)
++++ trunk/maay/p2pquerier.py	2005-11-14 23:32:04 UTC (rev 477)
+@@ -294,7 +294,17 @@
+             doc.text = untagText(removeSpace(abstract))
+ 
+         # provider is a triple (login, IP, xmlrpc-port)
+-        provider = (os.getlogin(),
++        # FIXME: method os.getlogin() raises an exception (under Linux).
++        # &gt;&gt;&gt; os.getlogin()
++        # Traceback (most recent call last):
++        #   File &quot;&lt;stdin&gt;&quot;, line 1, in ?
++        #   OSError: [Errno 2] No such file or directory
++        try:
++            login = os.getlogin()
++        except OSError:
++            login = &quot;anonymous&quot;
++
++        provider = (login,
+                     socket.gethostbyname(socket.gethostname()),
+                     P2pQuerier._ourRPCPort)
+             
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-14 22:16:43 UTC (rev 476)
++++ trunk/maay/webapplication.py	2005-11-14 23:32:04 UTC (rev 477)
+@@ -34,7 +34,7 @@
+ from logilab.common.textutils import normalize_text
+ 
+ from maay.querier import WEB_AVATARID
+-from maay.configuration import get_path_of
++from maay.configuration import get_path_of, IndexerConfiguration
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+@@ -45,6 +45,15 @@
+     &quot;&quot;&quot;provide an interface in order to be able to remember webappconfig&quot;&quot;&quot;
+ 
+ 
++class Maay404(rend.FourOhFour):
++    &quot;&quot;&quot;Maay specific resource for 404 errors&quot;&quot;&quot;
++    loader = loaders.xmlfile(get_path_of('notfound.html'))
++
++    def renderHTTP_notFound(self, context):
++        &quot;&quot;&quot;Render a not found message to the given request.
++        &quot;&quot;&quot;
++        return self.loader.load(context)[0]
++
+ class MaayPage(rend.Page):
+     docFactory = loaders.xmlfile(get_path_of('skeleton.html'))
+     child_maaycss = static.File(get_path_of('maay.css'))
+@@ -60,26 +69,6 @@
+     def macro_footer(self, context):
+         return loaders.xmlfile(get_path_of('footer.html'))
+ 
+-class Maay404(MaayPage, rend.FourOhFour):
+-    &quot;&quot;&quot;Maay specific resource for 404 errors&quot;&quot;&quot;
+-    # loader = loaders.xmlfile(get_path_of('notfound.html'))
+-    bodyFactory = loaders.xmlfile(get_path_of('notfound.html'))
+-    
+-    def __init__(self, msg=&quot;Sorry, I could not find the requested resource.&quot;):
+-        MaayPage.__init__(self)
+-        self.msg = msg
+-
+-    def render_errormsg(self, context, data):
+-        print &quot;Rendering error msg&quot;, self.msg
+-        return self.msg
+-    
+-    def renderHTTP_notFound(self, context):
+-        &quot;&quot;&quot;Render a not found message to the given request.
+-        &quot;&quot;&quot;
+-        # XXX little trick (extends MaayPage, etc.)
+-        return self.renderString(context)
+-        # return self.loader.load(context)[0]
+-
+ class PeersList(MaayPage):
+     &quot;&quot;&quot;display list of registered peers&quot;&quot;&quot;
+     bodyFactory = loaders.xmlfile(get_path_of('peers.html'))
+@@ -205,11 +194,10 @@
+         print &quot;SearchForm distantfile&quot;
+         proxy = Proxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port))
+         d = proxy.callRemote('downloadFile', docid, words)
+-        d.addCallback(self.gotDataBack, filename)
+-        d.addErrback(self.onDownloadFileError, filename)
++        d.addCallback(self.foo, filename)
+         return d
+ 
+-    def gotDataBack(self, rpcFriendlyData, filename):
++    def foo(self, rpcFriendlyData, filename):
+         fileData = rpcFriendlyData.data
+         print &quot; ... downloaded !&quot;
+         tmpdir = DownloadedDocs.makeTmpDir()
+@@ -219,10 +207,6 @@
+         f.close()
+         return DistantFilePage(tmpdir, filepath)
+ 
+-    def onDownloadFileError(self, error, filename):
+-        msg = &quot;Error while downloading file: %s&quot; % (filename,)
+-        return Maay404(msg)
+-    
+ class DistantFilePage(static.File):
+     def __init__(self, tmpdir, filepath):
+         static.File.__init__(self, filepath)
+@@ -242,10 +226,38 @@
+     def __init__(self, msg = &quot;No message&quot;):
+         MaayPage.__init__(self)
+         self._msg = msg
++        self.indexerConfig = IndexerConfiguration()
++        self.indexerConfig.load()
+ 
+     def render_message(self, context, data):
+         return self._msg
+ 
++    def data_indexedprivatedirectories(self, context, data):
++        if not self.indexerConfig.private_index_dir:
++            return [&quot;No indexed private directory.&quot;]
++        return self.indexerConfig.private_index_dir
++
++    def data_skippedprivatedirectories(self, context, data):
++        if not self.indexerConfig.private_skip_dir:
++            return [&quot;No skipped private directory.&quot;]
++        return self.indexerConfig.private_skip_dir
++
++    def data_indexedpublicdirectories(self, context, data):
++        if not self.indexerConfig.private_skip_dir:
++            return [&quot;No indexed public directory.&quot;]
++        return self.indexerConfig.public_index_dir
++
++    def data_skippedpublicdirectories(self, context, data):
++        if not self.indexerConfig.public_skip_dir:
++            return [&quot;No skipped public directory.&quot;]
++        return self.indexerConfig.public_skip_dir
++
++
++    def render_directory(self, context, name):
++        print &quot;directory = %s&quot; % name
++        context.fillSlots(&quot;name&quot;, name)
++        return context.tag
++
+ class ResultsPageMixIn:
+             
+     def data_results(self, context, data):
+@@ -256,12 +268,7 @@
+ 
+     def render_title(self, context, data):
+         localCount, distantCount = self.querier.countResults(self.queryId)
+-        if self.onlyDistant:
+-            resultsCount = distantCount
+-        elif self.onlyLocal:
+-            resultsCount = localCount
+-        else:
+-            resultsCount = localCount + distantCount
++        resultsCount = localCount + distantCount
+         offset = self.query.offset
+         context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         context.fillSlots('start_result', offset + 1)
+@@ -269,18 +276,6 @@
+         context.fillSlots('count', resultsCount)
+         return context.tag
+ 
+-    def render_localcount(self, context, data):
+-        localCount, _ = self.querier.countResults(self.queryId)
+-        return localCount
+-
+-    def render_distantcount(self, context, data):
+-        _, distantCount = self.querier.countResults(self.queryId)
+-        return distantCount
+-
+-    def render_totalcount(self, context, data):
+-        localCount, distantCount = self.querier.countResults(self.queryId)
+-        return localCount + distantCount
+-
+     def render_searchfield(self, context, data):
+         context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         return context.tag
+@@ -347,28 +342,21 @@
+         self.p2pquerier = p2pquerier
+         self.query = Query.fromContext(context)
+         self.offset = self.query.offset
+-        self.onlyLocal = False
+-        self.onlyDistant = False
++        self.results = querier.findDocuments(self.query)
++        webappConfig = INodeConfiguration(context)
++        p2pQuery = P2pQuery(webappConfig.get_node_id(),
++                            webappConfig.rpcserver_port,
++                            self.query)
++        self.queryId = p2pQuery.qid
++        self.p2pQuery = p2pQuery
+         # push local results once for all
+-        if len(inevow.IRemainingSegments(context)) &lt; 2:
+-            print &quot;-=&quot; * 40
+-            results = querier.findDocuments(self.query)
+-            webappConfig = INodeConfiguration(context)
+-            p2pQuery = P2pQuery(webappConfig.get_node_id(),
+-                                webappConfig.rpcserver_port,
+-                                self.query)
+-            self.queryId = p2pQuery.qid
+-            self.p2pQuery = p2pQuery
+-            self.results = results
+-            # self.results = self.querier.getQueryResults(self.queryId, offset=0)
+-            # self.querier.pushDocuments(self.queryId, self.results, provider=None)
++        self.querier.pushDocuments(self.queryId, self.results, provider=None)
+         
+     def onNewResults(self, provider, results):
+         results = [Document(**params) for params in results]
+         self.querier.pushDocuments(self.queryId, results, provider)
+-        results = self.querier.getQueryResults(self.queryId, offset=self.query.offset, onlyLocal=self.onlyLocal, onlyDistant=self.onlyDistant) # XXX limit ?
+-        page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId,
+-                                   self.onlyLocal, self.onlyDistant).renderSynchronously()
++        results = self.querier.getQueryResults(self.queryId, offset=self.query.offset) # XXX limit ?
++        page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId).renderSynchronously()
+         page = unicode(page, 'utf-8')
+         self.callRemote('updateResults', page)
+ 
+@@ -379,31 +367,14 @@
+         self.p2pquerier.addAnswerCallback(self.p2pQuery.qid, self.onNewResults)
+         self.querier.pushDocuments(self.queryId, self.results, provider=None)
+         return u''
+-    
++
+     def remote_browseResults(self, context, offset):
+         self.query.offset = offset
+-        results = self.querier.getQueryResults(self.queryId, offset=offset, onlyLocal=self.onlyLocal, onlyDistant=self.onlyDistant) # XXX limit ?
+-        page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId,
+-                                   self.onlyLocal, self.onlyDistant).renderSynchronously()
++        results = self.querier.getQueryResults(self.queryId, offset=offset) # XXX limit ?
++        page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId).renderSynchronously()
+         page = unicode(page, 'utf-8')
+         return page
+ 
+-    def remote_setLocalFlag(self, context, flag):
+-        self.onlyLocal = flag
+-        self.onlyDistant = False
+-        return self.remote_browseResults(context, self.query.offset)
+-
+-    def remote_setDistantFlag(self, context, flag):
+-        self.onlyDistant = flag
+-        self.onlyLocal = False
+-        return self.remote_browseResults(context, self.query.offset)
+-
+-    def remote_unsetFlags(self, context):
+-        self.onlyDistant = False
+-        self.onlyLocal = False
+-        return self.remote_browseResults(context, self.query.offset)
+-    
+-
+ class PleaseCloseYourEyes(rend.Page, ResultsPageMixIn):
+     &quot;&quot;&quot;This resource and the way it is called is kind of ugly.
+     It will be refactored later. The idea is to have something working
+@@ -411,10 +382,7 @@
+     &quot;&quot;&quot;
+     docFactory = loaders.xmlstr(&quot;&quot;&quot;
+   &lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; &gt;
+-   &lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;&lt;span nevow:render=&quot;localcount&quot; /&gt; local results&lt;/a&gt;&lt;br/&gt;
+-   &lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;&lt;span nevow:render=&quot;distantcount&quot; /&gt; distant results&lt;/a&gt;&lt;br/&gt;
+-   &lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; results&lt;/a&gt;&lt;br/&gt;
+-   &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; (&lt;nevow:slot name=&quot;count&quot; /&gt;) for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
++   &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; of &lt;nevow:slot name=&quot;count&quot; /&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
+    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+     nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+     name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+@@ -445,14 +413,11 @@
+   &lt;/div&gt;
+     &quot;&quot;&quot;)
+     
+-    def __init__(self, results, querier, query, queryId,
+-                 onlyLocal=False, onlyDistant=False):
++    def __init__(self, results, querier, query, queryId):
+         self.results = results
+         self.querier = querier
+         self.query = query
+         self.queryId = queryId
+-        self.onlyLocal = onlyLocal
+-        self.onlyDistant = onlyDistant
+ 
+     def render_peer(self, context, data):
+         &quot;&quot;&quot;:type data: Result&quot;&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000447.html">[Maay-svncheckins] r476 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000449.html">[Maay-svncheckins] r478 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#448">[ date ]</a>
+              <a href="thread.html#448">[ thread ]</a>
+              <a href="subject.html#448">[ subject ]</a>
+              <a href="author.html#448">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

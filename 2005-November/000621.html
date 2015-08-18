@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r649 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r649%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511241525.jAOFPDoC021827%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000620.html">
+   <LINK REL="Next"  HREF="000622.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r649 - in trunk/maay: . data</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r649%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511241525.jAOFPDoC021827%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r649 - in trunk/maay: . data">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov 24 16:25:13 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000620.html">[Maay-svncheckins] r648 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000622.html">[Maay-svncheckins] r650 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#621">[ date ]</a>
+              <a href="thread.html#621">[ thread ]</a>
+              <a href="subject.html#621">[ subject ]</a>
+              <a href="author.html#621">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-24 16:25:12 +0100 (Thu, 24 Nov 2005)
+New Revision: 649
+
+Modified:
+   trunk/maay/data/livefragment.html
+   trunk/maay/data/liveresults.html
+   trunk/maay/webapplication.py
+Log:
+Highlight the current sort criterium
+
+
+Modified: trunk/maay/data/livefragment.html
+===================================================================
+--- trunk/maay/data/livefragment.html	2005-11-24 15:23:06 UTC (rev 648)
++++ trunk/maay/data/livefragment.html	2005-11-24 15:25:12 UTC (rev 649)
+@@ -11,14 +11,12 @@
+         &lt;td&gt; &lt;div class=&quot;distantResult&quot;&gt;&lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;remote result&lt;/a&gt;(&lt;span nevow:render=&quot;distantcount&quot; /&gt;)&lt;/div&gt;&lt;/td&gt;
+         &lt;td&gt;-&lt;/td&gt;
+         &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;all results &lt;/a&gt;(&lt;span nevow:render=&quot;totalcount&quot; /&gt;)&lt;/td&gt;
+-        &lt;div class=&quot;sortBar&quot;&gt;
+-          &lt;td&gt; - &lt;b&gt; Sorted by: &lt;/b&gt;&lt;/td&gt;
+-          &lt;td&gt;&lt;a href=&quot;javascript: sortBy('relevance');&quot;&gt;&lt;div class=&quot;relevance&quot;&gt;&lt;span nevow:render=&quot;sort_rel&quot; /&gt;&lt;/div&gt;&lt;/a&gt;&lt;/td&gt;
+-          &lt;td&gt; - &lt;/td&gt;
+-          &lt;td&gt;&lt;a href=&quot;javascript: sortBy('popularity');&quot;&gt;&lt;div class=&quot;popularity&quot;&gt;&lt;span nevow:render=&quot;sort_pop&quot; /&gt;&lt;/div&gt;&lt;/a&gt;&lt;/td&gt;
+-          &lt;td&gt; - &lt;/td&gt;
+-          &lt;td&gt;&lt;a href=&quot;javascript: sortBy('publication_time');&quot;&gt;&lt;div class=&quot;publication&quot;&gt;&lt;span nevow:render=&quot;sort_pub&quot; /&gt;&lt;/div&gt;&lt;/a&gt;&lt;/td&gt;
+-        &lt;/div&gt;
++        &lt;td&gt; - &lt;b&gt; Sorted by: &lt;/b&gt;&lt;/td&gt;
++        &lt;td&gt;&lt;div nevow:render=&quot;relevanceDiv&quot;/&gt;&lt;/td&gt;
++        &lt;td&gt; - &lt;/td&gt;
++        &lt;td&gt;&lt;div nevow:render=&quot;popularityDiv&quot;/&gt;&lt;/td&gt;
++        &lt;td&gt; - &lt;/td&gt;
++        &lt;td&gt;&lt;div nevow:render=&quot;publicationDiv&quot;/&gt;&lt;/td&gt;
+       &lt;/tr&gt;
+     &lt;/table&gt;
+   &lt;center&gt;
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-24 15:23:06 UTC (rev 648)
++++ trunk/maay/data/liveresults.html	2005-11-24 15:25:12 UTC (rev 649)
+@@ -8,10 +8,16 @@
+     &lt;nevow:invisible nevow:render=&quot;liveglue&quot; /&gt;
+ 
+     &lt;script type='text/javascript' language='javascript'&gt;
++
++var selectedCriterium = 'publication_time';
++
+ function updateResults(source) {
+  div = document.getElementById('resultsDiv');
+  div.innerHTML = source;
+  abortNeeded = true;
++
++// new_elt = document.getElementById(selectedCriterium);
++// new_elt.setAttribute('class', 'selectedCriterium');
+ }
+ 
+ function startConnection() {
+@@ -43,6 +49,7 @@
+ function sortBy(sortCriteria) {
+  var d = server.callRemote('sortBy', sortCriteria);
+  d.addCallback(updateResults);
++ selectedCriterium = sortCriteria;
+ }
+     &lt;/script&gt;
+ 
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-24 15:23:06 UTC (rev 648)
++++ trunk/maay/webapplication.py	2005-11-24 15:25:12 UTC (rev 649)
+@@ -482,21 +482,6 @@
+         _, distantCount = self.querier.countResults(self.qid)
+         return distantCount
+ 
+-    def render_sort_rel(self, context, data):
+-        if self.query.order == 'relevance':
+-            return '[relevance]'
+-        return ' relevance '
+-    
+-    def render_sort_pop(self, context, data):
+-        if self.query.order == 'popularity':
+-            return '[popularity]'
+-        return ' popularity '
+-        
+-    def render_sort_pub(self, context, data):
+-        if self.query.order == 'publication_time':
+-            return '[publication time]'
+-        return ' publication time '
+-
+     def render_totalcount(self, context, data):
+         localCount, distantCount = self.querier.countResults(self.qid)
+         return localCount + distantCount
+@@ -532,7 +517,34 @@
+         if data.port == 0:
+             return ''
+         return '%s (%s) - ' % (data.login, data.host)
+-    
++
++    def render_relevanceDiv(self, context, data):
++        if self.query.order == 'relevance':
++            return tags.xml('&lt;div class=&quot;selectedCriterium&quot;&gt;'
++                            'relevance&lt;/div&gt;')
++        else:
++            return tags.xml(&quot;&quot;&quot;&lt;div class=&quot;unselectedCriterium&quot;&gt;&lt;a href=&quot;javascript: sortBy('relevance');&quot;&gt;&quot;&quot;&quot;
++                            'relevance&lt;/div&gt;')
++
++    def render_popularityDiv(self, context, data):
++        if self.query.order == 'popularity':
++            return tags.xml('&lt;div class=&quot;selectedCriterium&quot;&gt;'
++                            'popularity&lt;/div&gt;')
++        else:
++            return tags.xml(&quot;&quot;&quot;&lt;div class=&quot;unselectedCriterium&quot;&gt;&lt;a href=&quot;javascript: sortBy('popularity');&quot;&gt;&quot;&quot;&quot;
++                            'popularity&lt;/div&gt;')
++
++    def render_publicationDiv(self, context, data):
++        if self.query.order == 'publication_time':
++            return tags.xml('&lt;div class=&quot;selectedCriterium&quot;&gt;'
++                            'publication time&lt;/div&gt;')
++        else:
++            return tags.xml(&quot;&quot;&quot;&lt;div class=&quot;unselectedCriterium&quot;&gt;&lt;a href=&quot;javascript: sortBy('publication_time');&quot;&gt;&quot;&quot;&quot;
++                            'publication time&lt;/div&gt;')
++
++#    def render_
++
++
+     def render_row(self, context, data):
+         document = data
+         words = self.query.words #WORDS (was .split())
+@@ -618,7 +630,7 @@
+         
+     def onNewResults(self, provider, results):
+         results = [ScoredDocument(**params) for params in results]
+-        self.querier.pushDocuments(self.qid, results, provider)
++        self.querier.pushDocuments(self.qid, results, NODE_ID, provider)
+         results = self.querier.getQueryResults(self.query,
+                                                onlyLocal=self.onlyLocal,
+                                                onlyDistant=self.onlyDistant)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000620.html">[Maay-svncheckins] r648 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000622.html">[Maay-svncheckins] r650 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#621">[ date ]</a>
+              <a href="thread.html#621">[ thread ]</a>
+              <a href="subject.html#621">[ subject ]</a>
+              <a href="author.html#621">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

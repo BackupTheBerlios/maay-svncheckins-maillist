@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r223 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r223%20-%20trunk/maay&In-Reply-To=%3C200510250930.j9P9Umew027860%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000193.html">
+   <LINK REL="Next"  HREF="000195.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r223 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r223%20-%20trunk/maay&In-Reply-To=%3C200510250930.j9P9Umew027860%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r223 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Oct 25 11:30:48 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000193.html">[Maay-svncheckins] r222 - trunk/maay/test/data
+</A></li>
+        <LI>Next message: <A HREF="000195.html">[Maay-svncheckins] r224 - in trunk/maay: . data data/images
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#194">[ date ]</a>
+              <a href="thread.html#194">[ thread ]</a>
+              <a href="subject.html#194">[ subject ]</a>
+              <a href="author.html#194">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-25 11:30:45 +0200 (Tue, 25 Oct 2005)
+New Revision: 223
+
+Modified:
+   trunk/maay/server.py
+Log:
+Two typos and two prints.
+
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-25 09:29:27 UTC (rev 222)
++++ trunk/maay/server.py	2005-10-25 09:30:45 UTC (rev 223)
+@@ -120,7 +120,7 @@
+     bodyFactory = loaders.stan(
+         tags.html[
+             tags.head[tags.title[&quot;Maay Login Page&quot;,],
+-                      tags.link(rel='stylesheet', type='text/css', href='maaycss'),
++                      tags.link(rel='stylesheet', type='text/css', href='maay.css'),
+                       tags.link(rel='shortcut icon', href='images/maay.ico'),
+                       ],
+             
+@@ -277,6 +277,7 @@
+     def createUserSession(self, avatarId, querier):
+         &quot;&quot;&quot;associate a querier to an avatarId.
+         Use avatarId=None for the internal private database connection&quot;&quot;&quot;
++        print &quot;Maay Realm : creating session for&quot;, avatarId
+         self._sessions[avatarId] = querier
+ 
+ 
+@@ -297,7 +298,7 @@
+                     print &quot;Building search form with&quot;, avatarId
+                     resc = SearchForm(avatarId, querier)
+                 return inevow.IResource, resc, resc.logout
+-            # if we wera asked for a querier
++            # if we wer asked for a querier
+             elif iface is IQuerier:
+                 querier = self._getQuerier(avatarId)
+                 if querier is None:
+@@ -308,9 +309,10 @@
+     def _getQuerier(self, avatarId):
+         try:
+             querier = self._sessions[avatarId]
+-            print &quot;Hit cache !&quot;
++            print &quot;Querier for&quot;, avatarId, &quot;was in the cache. Good.&quot;
+         except KeyError:
+-            print &quot;Ouch ! What am I supposed to do ?!!&quot;
++            print &quot;No querier in cache far&quot;, avatarId, \
++                  &quot;. What are we supposed to do ?&quot;
+             querier = None
+         return querier
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000193.html">[Maay-svncheckins] r222 - trunk/maay/test/data
+</A></li>
+	<LI>Next message: <A HREF="000195.html">[Maay-svncheckins] r224 - in trunk/maay: . data data/images
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#194">[ date ]</a>
+              <a href="thread.html#194">[ thread ]</a>
+              <a href="subject.html#194">[ subject ]</a>
+              <a href="author.html#194">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r118 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r118%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510041137.j94BbZKc010464%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000089.html">
+   <LINK REL="Next"  HREF="000093.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r118 - in trunk/maay: . test</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r118%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510041137.j94BbZKc010464%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r118 - in trunk/maay: . test">adimasci at berlios.de
+       </A><BR>
+    <I>Tue Oct  4 13:37:35 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000089.html">[Maay-svncheckins] r117 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000093.html">[Maay-svncheckins] Re: Maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#90">[ date ]</a>
+              <a href="thread.html#90">[ thread ]</a>
+              <a href="subject.html#90">[ subject ]</a>
+              <a href="author.html#90">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-04 13:37:28 +0200 (Tue, 04 Oct 2005)
+New Revision: 118
+
+Modified:
+   trunk/maay/test/test_dbentity.py
+   trunk/maay/test/test_fileiteration.py
+   trunk/maay/texttool.py
+Log:
+small test-related fixes
+
+
+Modified: trunk/maay/test/test_dbentity.py
+===================================================================
+--- trunk/maay/test/test_dbentity.py	2005-10-04 11:37:27 UTC (rev 117)
++++ trunk/maay/test/test_dbentity.py	2005-10-04 11:37:28 UTC (rev 118)
+@@ -13,7 +13,7 @@
+         for p in params[:-1]:
+             self.assertEquals(type(p), unicode)
+         self.assertEquals(len(params), params[-1] + 1)
+-        expected = &quot;SELECT D.document_id, D.title, D.size, D.text, D.url, D.mime_type FROM documents D, document_scores DS WHERE DS.db_document_id=D.db_document_id AND DS.word IN (%s, %s, %s, %s) GROUP BY DS.db_document_id HAVING count(DS.db_document_id) = %s&quot;
++        expected = &quot;SELECT D.db_document_id, D.document_id, D.title, D.size, D.text, D.url, D.mime_type FROM documents D, document_scores DS WHERE DS.db_document_id=D.db_document_id AND DS.word IN (%s, %s, %s, %s) GROUP BY DS.db_document_id HAVING count(DS.db_document_id) = %s&quot;
+         self.assertEquals(query, expected)
+         q = query%tuple(params) # sanity check for argument count
+         
+
+Modified: trunk/maay/test/test_fileiteration.py
+===================================================================
+--- trunk/maay/test/test_fileiteration.py	2005-10-04 11:37:27 UTC (rev 117)
++++ trunk/maay/test/test_fileiteration.py	2005-10-04 11:37:28 UTC (rev 118)
+@@ -6,7 +6,7 @@
+ import os
+ from os.path import join, abspath, dirname, exists
+ 
+-from maay.indexer import FileIterator as BaseFileIterator
++from maay.indexer import FileIterator
+ 
+ HERE = dirname(__file__)
+ DATADIR = join(HERE, 'data')
+@@ -17,18 +17,6 @@
+     fp = file(filename, 'w')
+     fp.close()
+ 
+-
+-class FileIterator(BaseFileIterator):
+-    &quot;&quot;&quot;just transforms relative paths to absolute paths&quot;&quot;&quot;
+-    def __init__(self, indexed, skipped=None):
+-        indexed = [abspath(path) for path in indexed]
+-        if skipped:
+-            skipped = [abspath(path) for path in skipped]
+-        else:
+-            skipped = []
+-        BaseFileIterator.__init__(self, indexed, skipped)
+-            
+-
+ class FileIterationTC(unittest.TestCase):
+     def setUp(self):
+         self.pathList = [
+@@ -84,12 +72,16 @@
+                     ]
+         self.assertEquals(list(it), expected)
+ 
++    def testRelativePathConversion(self):
++        &quot;&quot;&quot;FileIterator should automatically convert relative paths&quot;&quot;&quot;
++        paths = [(['data/a'], ['data/b']),
++                 (['/data/a'], ['/data/b', 'data/c'])]
++        for indexed, skipped in paths:
++            onRelatives = list(FileIterator(indexed, skipped))
++            absIndexed = [abspath(path) for path in indexed]
++            absSkipped = [abspath(path) for path in skipped]
++            onAbspaths = list(FileIterator(absIndexed, absSkipped))
++            self.assertEquals(onRelatives, onAbspaths)
+ 
+-    def testFailOnRelativePath(self):
+-        &quot;&quot;&quot;make sure FileIterator forbids relative paths&quot;&quot;&quot;
+-        self.assertRaises(AssertionError, BaseFileIterator, ['data/a'], ['data/b'])
+-        self.assertRaises(AssertionError, BaseFileIterator, ['/data/a'], ['/data/b', 'data/c'])
+-        
+-
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-04 11:37:27 UTC (rev 117)
++++ trunk/maay/texttool.py	2005-10-04 11:37:28 UTC (rev 118)
+@@ -22,11 +22,11 @@
+ 
+ CHARSET_RGX = re.compile(r'charset=[\s&quot;]*([^\s&quot;]+)', re.I | re.S | re.U)
+ XML_ENCODING_RGX = re.compile(r'^&lt;\?xml version=[^\s]*\s*encoding=([^\s]*)\s*\?&gt;', re.I | re.S | re.U)
+-
+-class ParsingError(Exception):
+-    &quot;&quot;&quot;raised when an error occures during the indexation of a file&quot;&quot;&quot;
+-    pass
+ 
++class ParsingError(Exception):
++    &quot;&quot;&quot;raised when an error occurs during the indexation of a file&quot;&quot;&quot;
++    pass
++
+ def normalizeHtmlEncoding(htmlEncoding):
+     # XXX FIXME: this function probably already exists somewhere ...
+     if htmlEncoding in ('iso8859-1', 'iso-latin1', 'iso-latin-1', 'latin-1',
+@@ -106,10 +106,10 @@
+         TODO: port original code from htmltotext
+         :param encoding: if None, then need to be guessed
+         &quot;&quot;&quot;
+-        encoding = encoding or guessEncoding(filename)
++        encoding = encoding or guessEncoding(filename)
+         try:
+-            stream = open(filename, 'rb', encoding, errors='ignore')
+-        except LookupError:
++            stream = open(filename, 'rb', encoding, errors='ignore')
++        except LookupError:
+             raise ParsingError('Unsupported document encoding %s' % encoding)
+         try:
+             return self.parseString(stream.read())
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000089.html">[Maay-svncheckins] r117 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000093.html">[Maay-svncheckins] Re: Maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#90">[ date ]</a>
+              <a href="thread.html#90">[ thread ]</a>
+              <a href="subject.html#90">[ subject ]</a>
+              <a href="author.html#90">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

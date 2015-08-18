@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r344 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r344%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511081753.jA8Hr7Jk004898%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000319.html">
+   <LINK REL="Next"  HREF="000321.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r344 - in trunk/maay: . data</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r344%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511081753.jA8Hr7Jk004898%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r344 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 18:53:07 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000319.html">[Maay-svncheckins] r343 - trunk/maay/data/images
+</A></li>
+        <LI>Next message: <A HREF="000321.html">[Maay-svncheckins] r345 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#320">[ date ]</a>
+              <a href="thread.html#320">[ thread ]</a>
+              <a href="subject.html#320">[ subject ]</a>
+              <a href="author.html#320">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-08 18:52:57 +0100 (Tue, 08 Nov 2005)
+New Revision: 344
+
+Added:
+   trunk/maay/data/indexationpage.html
+Modified:
+   trunk/maay/data/skeleton.html
+   trunk/maay/indexer.py
+   trunk/maay/webapplication.py
+Log:
+Add feature to start indexer from web pages. (one task removed from the TODO list ;-)
+Some esthetic modifications on the result page.
+
+
+
+Added: trunk/maay/data/indexationpage.html
+===================================================================
+--- trunk/maay/data/indexationpage.html	2005-11-08 17:49:05 UTC (rev 343)
++++ trunk/maay/data/indexationpage.html	2005-11-08 17:52:57 UTC (rev 344)
+@@ -0,0 +1,8 @@
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
++&quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;nevow:invisible xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
++&lt;h1&gt;Indexation Page&lt;/h1&gt;
++  &lt;div class=&quot;message&quot; nevow:render=&quot;message&quot;&gt;&quot;&lt;nevow:slot name=&quot;msg&quot; /&gt;&quot;&lt;/div&gt;&lt;br /&gt;&lt;br /&gt;
++&lt;a href=&quot;/indexation?start=1&quot;&gt;Index now&lt;/a&gt;&lt;br /&gt;&lt;br /&gt;
++&lt;a href=&quot;/&quot;&gt;return to search page&lt;/a&gt;
++&lt;/nevow:invisible&gt;
+
+Modified: trunk/maay/data/skeleton.html
+===================================================================
+--- trunk/maay/data/skeleton.html	2005-11-08 17:49:05 UTC (rev 343)
++++ trunk/maay/data/skeleton.html	2005-11-08 17:52:57 UTC (rev 344)
+@@ -10,10 +10,11 @@
+   &lt;body&gt;
+     &lt;nevow:invisible nevow:macro=&quot;body&quot; /&gt;
+       &lt;hr /&gt;
+-        &lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; 
+-        &lt;a href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;
+-          &lt;img src=&quot;<A HREF="http://developer.berlios.de/images/berliOS_logo.png">http://developer.berlios.de/images/berliOS_logo.png</A>&quot;
+-            width=&quot;124&quot; height=&quot;32&quot; border=&quot;0&quot; alt=&quot;BerliOS Logo&quot; /&gt;
+-        &lt;/a&gt;
++        &lt;table width=&quot;100%&quot;&gt;
++        &lt;tr&gt;
++          &lt;td valign=&quot;top&quot;&gt;&lt;small&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; &lt;/small&gt;&lt;/td&gt;
++          &lt;td align=&quot;right&quot;&gt;&lt;img src=&quot;/images/logoFT.png&quot; /&gt;&lt;/td&gt;
++        &lt;/tr&gt;
++      &lt;/table&gt;
+   &lt;/body&gt;  
+ &lt;/html&gt;
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-08 17:49:05 UTC (rev 343)
++++ trunk/maay/indexer.py	2005-11-08 17:52:57 UTC (rev 344)
+@@ -32,13 +32,14 @@
+ import mimetypes
+ import socket
+ 
++import maay.indexer
+ from maay import converter
+ from maay.configuration import Configuration
+ from maay.dbentity import FutureDocument, Document, FileInfo
+ from maay.querier import MaayAuthenticationError
+ from maay.texttool import removeControlChar
++from thread import start_new_thread
+ 
+-
+ def makeDocumentId(filename):
+     &quot;&quot;&quot;return the SHA hash value from of the contents of the file&quot;&quot;&quot;
+     stream = file(filename, 'rb')
+@@ -313,6 +314,21 @@
+               (indexerConfig.host, indexerConfig.port)
+         sys.exit(1)
+ 
++running = False
++
++def _run_thread():
++    maay.indexer.running = True
++    try:
++        run()
++    finally:    
++        maay.indexer.running = False
++
++def start_as_thread():
++    if maay.indexer.running:
++        print &quot;Indexer already running&quot;
++        return
++    start_new_thread(_run_thread, ())
++
+ if __name__ == '__main__':
+     run()
+ 
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-08 17:49:05 UTC (rev 343)
++++ trunk/maay/webapplication.py	2005-11-08 17:52:57 UTC (rev 344)
+@@ -34,6 +34,7 @@
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
+ from maay.p2pquerier import P2pQuerier, P2pQuery
++import maay.indexer
+ 
+ class IServerConfiguration(Interface):
+     &quot;&quot;&quot;provide an interface in order to be able to remember webappconfig&quot;&quot;&quot;
+@@ -103,6 +104,22 @@
+     def child_peers(self, context):
+         return PeersList(self.maayId, self.querier)
+ 
++    def child_indexation(self, context):
++        start = int(context.arg('start', 0))
++        if start == 0:
++            if maay.indexer.running:
++                msg = &quot;Indexer running&quot;
++            else:
++                msg = &quot;Indexer not running&quot;
++        else:
++            if maay.indexer.running:    
++                msg = &quot;Indexer already running&quot;
++            else:
++                msg = &quot;Indexer started&quot;
++                maay.indexer.start_as_thread()
++
++        return IndexationPage(msg)
++
+     def _askForPeerResults(self, query, context):
+         &quot;&quot;&quot;Launches a P2P cascade of queries
+            The result of this shall be used ~ 5 and 15 secs. later
+@@ -138,6 +155,20 @@
+             return Maay404()
+ 
+ 
++class IndexationPage(MaayPage):
++    # just for the demo. Should be moved to a adminpanel interface later.
++    &quot;&quot;&quot;index page&quot;&quot;&quot;
++    bodyFactory = loaders.xmlfile(get_path_of('indexationpage.html'))
++    addSlash = False
++    
++    def __init__(self, msg = &quot;No message&quot;):
++        MaayPage.__init__(self)
++        self.__msg = msg
++
++    def render_message(self, context, data):
++        context.fillSlots('msg', self.__msg)
++        return context.tag
++
+ class ResultsPage(MaayPage):
+     &quot;&quot;&quot;default results page&quot;&quot;&quot;
+     bodyFactory = loaders.xmlfile(get_path_of('resultpage.html'))
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000319.html">[Maay-svncheckins] r343 - trunk/maay/data/images
+</A></li>
+	<LI>Next message: <A HREF="000321.html">[Maay-svncheckins] r345 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#320">[ date ]</a>
+              <a href="thread.html#320">[ thread ]</a>
+              <a href="subject.html#320">[ subject ]</a>
+              <a href="author.html#320">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

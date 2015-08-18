@@ -1,0 +1,622 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r158 - in trunk: . maay maay/bin maay/configuration maay/data maay/sql maay/test maay/test/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r158%20-%20in%20trunk%3A%20.%20maay%20maay/bin%20maay/configuration%20maay/data%20maay/sql%20maay/test%20maay/test/data&In-Reply-To=%3C200510061623.j96GNEv0015989%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000130.html">
+   <LINK REL="Next"  HREF="000132.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r158 - in trunk: . maay maay/bin maay/configuration maay/data maay/sql maay/test maay/test/data</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r158%20-%20in%20trunk%3A%20.%20maay%20maay/bin%20maay/configuration%20maay/data%20maay/sql%20maay/test%20maay/test/data&In-Reply-To=%3C200510061623.j96GNEv0015989%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r158 - in trunk: . maay maay/bin maay/configuration maay/data maay/sql maay/test maay/test/data">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Oct  6 18:23:14 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000130.html">[Maay-svncheckins] r157 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000132.html">[Maay-svncheckins] r159 - in trunk: . maay maay/bin maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#131">[ date ]</a>
+              <a href="thread.html#131">[ thread ]</a>
+              <a href="subject.html#131">[ subject ]</a>
+              <a href="author.html#131">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-06 18:23:13 +0200 (Thu, 06 Oct 2005)
+New Revision: 158
+
+Modified:
+   trunk/ChangeLog
+   trunk/ReleaseNotes
+   trunk/maay/__init__.py
+   trunk/maay/bin/maay-indexer
+   trunk/maay/bin/maay-server
+   trunk/maay/cleandb.py
+   trunk/maay/configuration.py
+   trunk/maay/configuration/indexer.ini
+   trunk/maay/configuration/webapp.ini
+   trunk/maay/converter.py
+   trunk/maay/createdb.py
+   trunk/maay/data/maay.css
+   trunk/maay/data/notfound.html
+   trunk/maay/data/resultpage.html
+   trunk/maay/data/searchform.html
+   trunk/maay/dbentity.py
+   trunk/maay/dbstats.py
+   trunk/maay/graphical_indexer.py
+   trunk/maay/indexer.py
+   trunk/maay/querier.py
+   trunk/maay/registration.py
+   trunk/maay/registration.tac
+   trunk/maay/registrationclient.py
+   trunk/maay/rpc.py
+   trunk/maay/server.py
+   trunk/maay/sql/mysql.sql
+   trunk/maay/sql/postgres.sql
+   trunk/maay/test/data/encoded.html
+   trunk/maay/test/data/guess_encoding.txt
+   trunk/maay/test/data/latin1.txt
+   trunk/maay/test/data/latin1.xml
+   trunk/maay/test/data/node22.html
+   trunk/maay/test/data/utf16.txt
+   trunk/maay/test/data/utf32.txt
+   trunk/maay/test/data/utf8.txt
+   trunk/maay/test/data/utf8.xml
+   trunk/maay/test/data/utf8noencoding.xml
+   trunk/maay/test/data/webapp1.ini
+   trunk/maay/test/data/webapp2.ini
+   trunk/maay/test/runtests.py
+   trunk/maay/test/test_codecs.py
+   trunk/maay/test/test_configuration.py
+   trunk/maay/test/test_converter.py
+   trunk/maay/test/test_dbentity.py
+   trunk/maay/test/test_fileiteration.py
+   trunk/maay/test/test_indexer.py
+   trunk/maay/test/test_querier.py
+   trunk/maay/test/test_rpc.py
+   trunk/maay/test/test_server.py
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+set various properties to ease cross platform development
+
+
+Property changes on: trunk/ChangeLog
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/ReleaseNotes
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/__init__.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/bin/maay-indexer
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/bin/maay-server
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/cleandb.py
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+
+Modified: trunk/maay/configuration/indexer.ini
+===================================================================
+--- trunk/maay/configuration/indexer.ini	2005-10-06 15:17:50 UTC (rev 157)
++++ trunk/maay/configuration/indexer.ini	2005-10-06 16:23:13 UTC (rev 158)
+@@ -1,8 +1,8 @@
+-[INDEXER]
+-host=localhost
+-port=6789
+-user=maay
+-password=maay
+-index-dir=c:\
+-skip-dir=c:\windows
++[INDEXER]
++host=localhost
++port=6789
++user=maay
++password=maay
++index-dir=c:\
++skip-dir=c:\windows
+ verbose=yes
+\ No newline at end of file
+
+
+Property changes on: trunk/maay/configuration/indexer.ini
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+Modified: trunk/maay/configuration/webapp.ini
+===================================================================
+--- trunk/maay/configuration/webapp.ini	2005-10-06 15:17:50 UTC (rev 157)
++++ trunk/maay/configuration/webapp.ini	2005-10-06 16:23:13 UTC (rev 158)
+@@ -1,5 +1,5 @@
+-[SERVER]
+-db-name=maay
+-db-host=localhost
+-user=maay
+-password=maay
++[SERVER]
++db-name=maay
++db-host=localhost
++user=maay
++password=maay
+
+
+Property changes on: trunk/maay/configuration/webapp.ini
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-10-06 15:17:50 UTC (rev 157)
++++ trunk/maay/configuration.py	2005-10-06 16:23:13 UTC (rev 158)
+@@ -35,7 +35,7 @@
+     if os.environ.get('PATH'):
+         path.append(os.environ.get('PATH'))
+     for directory in (u'pdftohtml', os.path.join(u'mysql', u'bin')):
+-        path.append(os.path.join(maay_dir, directory))
++        path.append(os.path.join(maay_dir, directory))
+     path.append(u'c:\antiword')
+     os.environ['PATH'] =  os.pathsep.join(path)
+ 
+
+
+Property changes on: trunk/maay/configuration.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Modified: trunk/maay/converter.py
+===================================================================
+--- trunk/maay/converter.py	2005-10-06 15:17:50 UTC (rev 157)
++++ trunk/maay/converter.py	2005-10-06 16:23:13 UTC (rev 158)
+@@ -103,7 +103,7 @@
+         uncompressed = file(uncompressedFile, 'wb')
+         uncompressed.write(compressed.read())
+         compressed.close()
+-        uncompressed.close()
++        uncompressed.close()
+ 
+             
+         outputFile = os.path.join(outputDir, 'outfile')
+
+
+Property changes on: trunk/maay/converter.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/createdb.py
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/data/maay.css
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/data/notfound.html
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/data/resultpage.html
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/data/searchform.html
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/dbentity.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/dbstats.py
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+
+
+Property changes on: trunk/maay/graphical_indexer.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-06 15:17:50 UTC (rev 157)
++++ trunk/maay/indexer.py	2005-10-06 16:23:13 UTC (rev 158)
+@@ -162,16 +162,16 @@
+     def __init__(self, indexed, skipped=None):
+         self.indexed = [os.path.abspath(os.path.expanduser(p)) for p in indexed]
+         skipped = skipped or []
+-        self.skipped = [os.path.abspath(os.path.expanduser(p)) for p in skipped]
++        self.skipped = [os.path.abspath(os.path.expanduser(p)) for p in skipped]
+         self.skipped = [self.normalizeCase(p) for p in self.skipped]
+-        
+-    if sys.platform == 'win32':
+-        def normalizeCase(self, path):
+-            return path.lower()
+-    else:    
+-        def normalizeCase(self, path):
+-            return path
+         
++    if sys.platform == 'win32':
++        def normalizeCase(self, path):
++            return path.lower()
++    else:    
++        def normalizeCase(self, path):
++            return path
++        
+     def __iter__(self):
+         for path in self.indexed:
+             # test path not in self.skipped (dummy config files)
+
+
+Property changes on: trunk/maay/indexer.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/querier.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/registration.py
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/registration.tac
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/registrationclient.py
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+
+
+Property changes on: trunk/maay/rpc.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/server.py
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/sql/mysql.sql
+___________________________________________________________________
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/sql/postgres.sql
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/encoded.html
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/guess_encoding.txt
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+
+
+Property changes on: trunk/maay/test/data/latin1.txt
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/latin1.xml
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/node22.html
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/utf16.txt
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+Property changes on: trunk/maay/test/data/utf32.txt
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+Property changes on: trunk/maay/test/data/utf8.txt
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+Property changes on: trunk/maay/test/data/utf8.xml
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/utf8noencoding.xml
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/webapp1.ini
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/data/webapp2.ini
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/runtests.py
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/test_codecs.py
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+Name: svn:keyword
+   + Id
+
+
+Property changes on: trunk/maay/test/test_configuration.py
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/test_converter.py
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/test_dbentity.py
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+Name: svn:keyword
+   + Id
+
+
+Property changes on: trunk/maay/test/test_fileiteration.py
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/test_indexer.py
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+Name: svn:keyword
+   + Id
+
+
+Property changes on: trunk/maay/test/test_querier.py
+___________________________________________________________________
+Name: svn:keywords
+   - &quot;Id&quot;
+   + Id
+Name: svn:keyword
+   + Id
+
+
+Property changes on: trunk/maay/test/test_rpc.py
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/test_server.py
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/test/test_texttool.py
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+Property changes on: trunk/maay/texttool.py
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000130.html">[Maay-svncheckins] r157 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000132.html">[Maay-svncheckins] r159 - in trunk: . maay maay/bin maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#131">[ date ]</a>
+              <a href="thread.html#131">[ thread ]</a>
+              <a href="subject.html#131">[ subject ]</a>
+              <a href="author.html#131">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

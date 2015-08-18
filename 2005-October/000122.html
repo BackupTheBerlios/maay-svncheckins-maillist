@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r149 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r149%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510061011.j96ABAFl015658%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000121.html">
+   <LINK REL="Next"  HREF="000123.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r149 - in trunk/maay: . test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r149%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510061011.j96ABAFl015658%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r149 - in trunk/maay: . test">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Oct  6 12:11:10 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000121.html">[Maay-svncheckins] r148 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000123.html">[Maay-svncheckins] r150 - in trunk/maay: . data sql test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#122">[ date ]</a>
+              <a href="thread.html#122">[ thread ]</a>
+              <a href="subject.html#122">[ subject ]</a>
+              <a href="author.html#122">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-06 12:11:10 +0200 (Thu, 06 Oct 2005)
+New Revision: 149
+
+Modified:
+   trunk/maay/indexer.py
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+fixed xmlrpm ProtocolError caused by illegal chars in XML payload
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-06 09:23:36 UTC (rev 148)
++++ trunk/maay/indexer.py	2005-10-06 10:11:10 UTC (rev 149)
+@@ -19,6 +19,7 @@
+ from maay.configuration import Configuration
+ from maay.dbentity import Document, FileInfo
+ from maay.querier import MaayAuthenticationError
++from maay.texttool import removeControlChar
+ 
+ # grabbed from nevow
+ mimetypes.types_map.update(
+@@ -141,6 +142,8 @@
+         if self.verbose:
+             print &quot;Requesting indexation of %s&quot; % filename
+         try:
++            title = removeControlChar(title)
++            text = removeControlChar(text)
+             self.serverProxy.indexDocument(self.cnxId, filename, title, text,
+                                            fileSize, lastModTime, content_hash,
+                                            mime_type, state, file_state)
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-10-06 09:23:36 UTC (rev 148)
++++ trunk/maay/test/test_texttool.py	2005-10-06 10:11:10 UTC (rev 149)
+@@ -4,7 +4,7 @@
+ import unittest
+ from os.path import join, dirname
+ 
+-from maay.texttool import MaayHTMLParser, guessEncoding, open, untagText, normalizeText
++from maay.texttool import MaayHTMLParser, guessEncoding, open, untagText, normalizeText, removeControlChar
+ 
+ RAW_TEXT = u&quot;foo &#233;t&#233; bar baz top bim bam boum&quot;
+ 
+@@ -121,6 +121,13 @@
+         self.assertEquals(u&quot;a paris, l'ete sera chaud&quot;, norm)
+         self.assertEquals(unicode, type(norm))
+         
++    def testRemoveControlChar(self):
++        text = u''.join([chr(i) for i in range(32)])
++        text += u'\uFFEF\uFFFE\uFFFF'
++        text += u'\uDA00toto\U00011234'
++        norm = removeControlChar(text)
++        self.assertEquals(u&quot;\t\n\r\uFFEFtoto\U00011234&quot;, norm)
++        self.assertEquals(unicode, type(norm))
+ 
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-06 09:23:36 UTC (rev 148)
++++ trunk/maay/texttool.py	2005-10-06 10:11:10 UTC (rev 149)
+@@ -174,6 +174,7 @@
+ _table = {}
+ for i in xrange(32):
+     _table[i] = ord(' ')
++del i
+ 
+ 
+ 
+@@ -238,7 +239,23 @@
+     &quot;&quot;&quot;
+     rgx = re.compile('&lt;.*?&gt;')
+     return rgx.sub('', text)
++
++_table2 = {}
++for i in range(0x20) + range(0xD800,0xE000) + [0xFFFE, 0xFFFF]:
++    _table2[i] = None
++for i in (0x9, 0xA, 0xD):
++    del _table2[i]
++del i
++
+     
++def removeControlChar(text, table= _table2):
++    &quot;&quot;&quot;remove control characters which are not allowed in XML 1.0&quot;&quot;&quot;
++    # This is required to prevent internal errors in the xmlrpc server
++    assert type(text) is unicode, &quot;got %s instead of unicode !&quot; % type(text)
++    return text.translate(table)
++del _table2
++    
++
+ def makeAbstract(text, words):
+     &quot;&quot;&quot;return the original text with HTML emphasis tags
+     around &lt;words&gt; occurences
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000121.html">[Maay-svncheckins] r148 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000123.html">[Maay-svncheckins] r150 - in trunk/maay: . data sql test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#122">[ date ]</a>
+              <a href="thread.html#122">[ thread ]</a>
+              <a href="subject.html#122">[ subject ]</a>
+              <a href="author.html#122">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r578 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r578%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511181641.jAIGfPUh032667%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000549.html">
+   <LINK REL="Next"  HREF="000551.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r578 - in trunk/maay: . data</H1>
+    <B>dnf at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r578%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511181641.jAIGfPUh032667%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r578 - in trunk/maay: . data">dnf at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 17:41:25 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000549.html">[Maay-svncheckins] r577 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000551.html">[Maay-svncheckins] r579 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#550">[ date ]</a>
+              <a href="thread.html#550">[ thread ]</a>
+              <a href="subject.html#550">[ subject ]</a>
+              <a href="author.html#550">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-18 17:41:25 +0100 (Fri, 18 Nov 2005)
+New Revision: 578
+
+Modified:
+   trunk/maay/data/indexationpage.html
+   trunk/maay/webapplication.py
+Log:
+Checking of added directory in indexation page (check if the directory exists).
+
+
+
+Modified: trunk/maay/data/indexationpage.html
+===================================================================
+--- trunk/maay/data/indexationpage.html	2005-11-18 16:35:32 UTC (rev 577)
++++ trunk/maay/data/indexationpage.html	2005-11-18 16:41:25 UTC (rev 578)
+@@ -57,6 +57,11 @@
+     &lt;input type=&quot;hidden&quot; name=&quot;start&quot; value=&quot;1&quot; /&gt;
+     &lt;input type=&quot;submit&quot; value=&quot;Index now&quot; /&gt; 
+   &lt;/form&gt;
+-  &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
++  &lt;script language=&quot;javascript&quot; nevow:render=&quot;alert&quot;&gt;
++    msg = '&lt;nevow:slot name=&quot;message&quot; /&gt;'
++    if (msg)
++        alert(msg)
++  &lt;/script&gt;
++  &lt;nevow:invisible nevow:macro=&quot;footer&quot; /&gt;
+ &lt;/body&gt;
+ &lt;/html&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-18 16:35:32 UTC (rev 577)
++++ trunk/maay/webapplication.py	2005-11-18 16:41:25 UTC (rev 578)
+@@ -217,14 +217,29 @@
+         # XXX: logout message should be forwarded to presence server
+         return None
+ 
++    # FIXME: maybe not a good place to define this function ?
++    def __is_valid_directory(self, directory):
++        try:
++            mode = os.stat(directory)[stat.ST_MODE]
++            if not stat.S_ISDIR(mode):
++                return False
++        except:
++            return False
++        return True
++
+     def child_indexation(self, context, _factory=IndexationPageFactory(IndexationPage)):
++        alertMsg = &quot;&quot;
+         # TODO: check if the added folders are valid
+ 
+         # Actions (add/remove) on private folders
++
+         addPrivateFolder = context.arg('addPrivateFolder', 0)
+         if addPrivateFolder:
++            if self.__is_valid_directory(addPrivateFolder):
+                 indexer.indexerConfig.private_dir.append(addPrivateFolder)
+                 indexer.indexerConfig.save()
++            else:
++                alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addPrivateFolder
+  
+         removePrivateFolder = context.arg('removePrivateFolder', 0)
+         if removePrivateFolder:
+@@ -237,8 +252,11 @@
+         # Actions (add/remove) on public folders
+         addPublicFolder = context.arg('addPublicFolder', 0)
+         if addPublicFolder:
++            if self.__is_valid_directory(addPublicFolder):
+                 indexer.indexerConfig.public_dir.append(addPublicFolder)
+                 indexer.indexerConfig.save()
++            else:
++                alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addPublicFolder
+  
+         removePublicFolder = context.arg('removePublicFolder', 0)
+         if removePublicFolder:
+@@ -251,8 +269,11 @@
+         # Actions (add/remove) on skipped folders
+         addSkippedFolder = context.arg('addSkippedFolder', 0)
+         if addSkippedFolder:
++            if self.__is_valid_directory(addSkippedFolder):
+                 indexer.indexerConfig.skip_dir.append(addSkippedFolder)
+                 indexer.indexerConfig.save()
++            else:
++                alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addSkippedFolder
+  
+         removeSkippedFolder = context.arg('removeSkippedFolder', 0)
+         if removeSkippedFolder:
+@@ -276,6 +297,7 @@
+                 msg = &quot;Indexer started&quot;
+                 indexer.start_as_thread(_factory)
+         indexationPage.msg = msg
++        indexationPage.alertmessage = alertMsg
+         return indexationPage
+ 
+     def child_search(self, context):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000549.html">[Maay-svncheckins] r577 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000551.html">[Maay-svncheckins] r579 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#550">[ date ]</a>
+              <a href="thread.html#550">[ thread ]</a>
+              <a href="subject.html#550">[ subject ]</a>
+              <a href="author.html#550">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r607 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r607%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511221722.jAMHMZCL021683%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000578.html">
+   <LINK REL="Next"  HREF="000580.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r607 - in trunk/maay: . data</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r607%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511221722.jAMHMZCL021683%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r607 - in trunk/maay: . data">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov 22 18:22:35 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000578.html">[Maay-svncheckins] r606 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000580.html">[Maay-svncheckins] r608 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#579">[ date ]</a>
+              <a href="thread.html#579">[ thread ]</a>
+              <a href="subject.html#579">[ subject ]</a>
+              <a href="author.html#579">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-22 18:22:34 +0100 (Tue, 22 Nov 2005)
+New Revision: 607
+
+Modified:
+   trunk/maay/data/livefragment.html
+   trunk/maay/webapplication.py
+Log:
+Inform webapp of new document attributes (relevance, popularity)
+
+
+Modified: trunk/maay/data/livefragment.html
+===================================================================
+--- trunk/maay/data/livefragment.html	2005-11-22 17:18:47 UTC (rev 606)
++++ trunk/maay/data/livefragment.html	2005-11-22 17:22:34 UTC (rev 607)
+@@ -32,7 +32,8 @@
+ 	    &lt;/tr&gt;
+ 	  &lt;/table&gt;
+ 	  &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
+-	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;span nevow:render=&quot;peer&quot; /&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
++	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;span nevow:render=&quot;peer&quot; /&gt;
++                &lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;nevow:slot name=&quot;relevance&quot; /&gt; - &lt;nevow:slot name=&quot;popularity&quot; /&gt;&lt;/span&gt;
+ 	&lt;/div&gt;
+       &lt;/td&gt;
+     &lt;/tr&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-22 17:18:47 UTC (rev 606)
++++ trunk/maay/webapplication.py	2005-11-22 17:22:34 UTC (rev 607)
+@@ -328,6 +328,7 @@
+             if osp.isfile(docurl):
+                 return static.File(docurl)
+             else:
++                #TODO: automatically reindex
+                 return Maay404(&quot;File %s does not exist any more. Please re-index.&quot; %
+                                docurl)
+         else:
+@@ -495,6 +496,13 @@
+         baseurl += '&amp;words=%s' % '+'.join(self.query.words)
+         baseurl += '&amp;qid=%s' % (self.queryId,)
+         context.fillSlots('url', baseurl)
++        try:
++            document.score_relevance
++        except:
++            document.score_relevance = 'no relevance is provided'
++            document.score_popularity = 'no popularity is provided'
++        context.fillSlots('relevance', document.score_relevance)
++        context.fillSlots('popularity', document.score_popularity)
+         return context.tag
+     
+ 
+@@ -611,7 +619,7 @@
+ class ResultsPageFactory(athena.LivePageFactory):
+     def getLivePage(self, context):
+         livepageId = inevow.IRequest(context).getHeader('Livepage-Id')
+-        print &quot;*** livepage id =&quot;, livepageId
++        #print &quot;*** livepage id =&quot;, livepageId
+         if livepageId is not None:
+             return self.clients.get(livepageId)
+         else:
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000578.html">[Maay-svncheckins] r606 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000580.html">[Maay-svncheckins] r608 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#579">[ date ]</a>
+              <a href="thread.html#579">[ thread ]</a>
+              <a href="subject.html#579">[ subject ]</a>
+              <a href="author.html#579">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r623 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r623%20-%20trunk/maay&In-Reply-To=%3C200511231149.jANBnFk9021817%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000594.html">
+   <LINK REL="Next"  HREF="000596.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r623 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r623%20-%20trunk/maay&In-Reply-To=%3C200511231149.jANBnFk9021817%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r623 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 12:49:15 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000594.html">[Maay-svncheckins] r622 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000596.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#595">[ date ]</a>
+              <a href="thread.html#595">[ thread ]</a>
+              <a href="subject.html#595">[ subject ]</a>
+              <a href="author.html#595">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-23 12:49:14 +0100 (Wed, 23 Nov 2005)
+New Revision: 623
+
+Added:
+   trunk/maay/localinfo.py
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/p2pquerier.py
+Log:
+Put common stuff into localinfo
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-23 11:41:17 UTC (rev 622)
++++ trunk/maay/dbentity.py	2005-11-23 11:49:14 UTC (rev 623)
+@@ -27,27 +27,8 @@
+ from sets import Set
+ import time
+ 
+-######FIXME : put this common stuff in a separated file
+-import socket, os
+-def getUserLogin():
+-    &quot;&quot;&quot;uses os.getlogin() when available, and if not provides a simple
+-    (and *unreliable*) replacement.
+-    &quot;&quot;&quot;
+-    try:
+-        return os.getlogin()
+-    except (OSError, AttributeError):
+-        # OSError can occur on some Linux platforms.
+-        # AttributeError occurs on any non-UNIX platform
+-        # try to make a rough guess ...
+-        for var in ('USERNAME', 'USER', 'LOGNAME'):
+-            guessed = os.environ.get(var)
+-            if guessed:
+-                return guessed
+-        # could not guess username, use host name
+-        return socket.gethostname()
+-HOST_LOGIN = getUserLogin()
++from maay.localinfo import NODE_LOGIN
+ 
+-
+ from maay.texttool import normalizeText, WORD_MIN_LEN, WORD_MAX_LEN,\
+      WORDS_RGX
+ from maay.p2pquerier import NODE_ID
+@@ -392,7 +373,7 @@
+             stateDict['host'] = 'localhost'
+             stateDict['port'] = 0
+             stateDict['node_id'] = NODE_ID # local node id
+-            stateDict['login'] = HOST_LOGIN
++            stateDict['login'] = NODE_LOGIN
+         stateDict['query_id'] = queryId
+         stateDict['record_ts'] = time.time()
+         return Result(**stateDict)
+
+Added: trunk/maay/localinfo.py
+===================================================================
+--- trunk/maay/localinfo.py	2005-11-23 11:41:17 UTC (rev 622)
++++ trunk/maay/localinfo.py	2005-11-23 11:49:14 UTC (rev 623)
+@@ -0,0 +1,42 @@
++#     Maay : a network of peers for document search
++#
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This library is free software; you can redistribute it and/or
++#     modify it under the terms of the GNU General Public
++#     License as published by the Free Software Foundation; either
++#     version 2.1 of the License, or (at your option) any later version.
++#
++#     This library is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++#     Lesser General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public
++#     License along with this library; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++
++
++import socket, os
++
++def getUserLogin():
++    &quot;&quot;&quot;uses os.getlogin() when available, and if not provides a simple
++    (and *unreliable*) replacement.
++    &quot;&quot;&quot;
++    try:
++        return os.getlogin()
++    except (OSError, AttributeError):
++        # OSError can occur on some Linux platforms.
++        # AttributeError occurs on any non-UNIX platform
++        # try to make a rough guess ...
++        for var in ('USERNAME', 'USER', 'LOGNAME'):
++            guessed = os.environ.get(var)
++            if guessed:
++                return guessed
++        # could not guess username, use host name
++        return socket.gethostname()
++
++
++
++NODE_LOGIN = getUserLogin()
++NODE_HOST = socket.gethostbyname(socket.gethostname())
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-23 11:41:17 UTC (rev 622)
++++ trunk/maay/p2pquerier.py	2005-11-23 11:49:14 UTC (rev 623)
+@@ -35,11 +35,11 @@
+ from maay.texttool import makeAbstract, removeSpace, untagText
+ from maay.configuration import NodeConfiguration
+ from maay.query import Query
++from maay.localinfo import NODE_LOGIN, NODE_HOST
+ 
+ nodeConfig=NodeConfiguration()
+ nodeConfig.load() #FIXME : load from file would be better
+ 
+-NODE_HOST = socket.gethostbyname(socket.gethostname())
+ NODE_PORT = nodeConfig.rpcserver_port
+ NODE_ID = nodeConfig.get_node_id()
+ 
+@@ -52,26 +52,6 @@
+     hasher.update('%s' % time.time())
+     return hasher.hexdigest()
+ 
+-def getUserLogin():
+-    &quot;&quot;&quot;uses os.getlogin() when available, and if not provides a simple
+-    (and *unreliable*) replacement.
+-    &quot;&quot;&quot;
+-    try:
+-        return os.getlogin()
+-    except (OSError, AttributeError):
+-        # OSError can occur on some Linux platforms.
+-        # AttributeError occurs on any non-UNIX platform
+-        # try to make a rough guess ...
+-        for var in ('USERNAME', 'USER', 'LOGNAME'):
+-            guessed = os.environ.get(var)
+-            if guessed:
+-                return guessed
+-        # could not guess username, use host name
+-        return socket.gethostname()
+-
+-NODE_LOGIN = getUserLogin()
+-
+-
+ class QueryVersionMismatch(Exception):
+     &quot;&quot;&quot;we beginning a versionning nightmare trip on queries
+        maybe I'll be shot for this, but who knows&quot;&quot;&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000594.html">[Maay-svncheckins] r622 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000596.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#595">[ date ]</a>
+              <a href="thread.html#595">[ thread ]</a>
+              <a href="subject.html#595">[ subject ]</a>
+              <a href="author.html#595">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

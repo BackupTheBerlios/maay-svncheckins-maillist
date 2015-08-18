@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r228 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r228%20-%20trunk/maay&In-Reply-To=%3C200510261056.j9QAu0nE005352%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000198.html">
+   <LINK REL="Next"  HREF="000200.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r228 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r228%20-%20trunk/maay&In-Reply-To=%3C200510261056.j9QAu0nE005352%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r228 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Oct 26 12:56:00 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000198.html">[Maay-svncheckins] r227 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000200.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#199">[ date ]</a>
+              <a href="thread.html#199">[ thread ]</a>
+              <a href="subject.html#199">[ subject ]</a>
+              <a href="author.html#199">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-26 12:55:47 +0200 (Wed, 26 Oct 2005)
+New Revision: 228
+
+Modified:
+   trunk/maay/querier.py
+   trunk/maay/rpc.py
+   trunk/maay/server.py
+Log:
+- fix for the leak leading to mysql threads exhaustion (pb. was DBAuthChecker not recycling queriers)
+- fixes to the maay portal (in the future it may prove useful to unfix it :)
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-26 10:51:08 UTC (rev 227)
++++ trunk/maay/querier.py	2005-10-26 10:55:47 UTC (rev 228)
+@@ -405,7 +405,7 @@
+         node.last_seen_time = int(time.time())
+         node.commit(cursor, update=True)
+         cursor.close()
+-        self._cnx.commit()        
++        self._cnx.commit()
+         
+     def _createDocument(self, cursor, content_hash, title, text, fileSize,
+                         lastModifiedOn, filename, mime_type, state):
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-10-26 10:51:08 UTC (rev 227)
++++ trunk/maay/rpc.py	2005-10-26 10:55:47 UTC (rev 228)
+@@ -44,8 +44,8 @@
+         self._sessions = {}
+         self.portal = portal
+         self.nodeId = portal.config.get_node_id() # hmmm ...
+-        self._sessions[ANONYMOUS_AVATARID] = portal.anonymousQuerier
+-        self._p2pQuerier = P2pQuerier(nodeId, portal.anonymousQuerier)
++        self._sessions[ANONYMOUS_AVATARID] = portal.webQuerier
++        self._p2pQuerier = P2pQuerier(nodeId, portal.webQuerier)
+         
+     def _attachUser(self, (interface, querier, logout), username, password):
+         if interface is not IQuerier or querier is None:
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-26 10:51:08 UTC (rev 227)
++++ trunk/maay/server.py	2005-10-26 10:55:47 UTC (rev 228)
+@@ -56,7 +56,7 @@
+ 
+ from logilab.common.textutils import normalize_text
+ 
+-from maay.querier import MaayQuerier, IQuerier, AnonymousQuerier, \
++from maay.querier import MaayQuerier, IQuerier, \
+      MaayAuthenticationError, ANONYMOUS_AVATARID
+ from maay.rpc import MaayRPCServer
+ from maay.configuration import get_path_of, Configuration
+@@ -281,7 +281,8 @@
+     def createUserSession(self, avatarId, querier):
+         &quot;&quot;&quot;associate a querier to an avatarId.
+         Use avatarId=None for the internal private database connection&quot;&quot;&quot;
+-        print &quot;Maay Realm : creating session for&quot;, avatarId
++        print &quot;Maay Realm : creating session for avatar&quot;, avatarId,
++        print &quot;with a&quot;, type(querier), &quot;querier.&quot;
+         self._sessions[avatarId] = querier
+ 
+ 
+@@ -313,7 +314,8 @@
+     def _getQuerier(self, avatarId):
+         try:
+             querier = self._sessions[avatarId]
+-            print &quot;Querier of type&quot;, type(querier), &quot;for&quot;, avatarId, &quot;was in the cache. Good.&quot;
++            print &quot;Querier of type&quot;, type(querier), &quot;for avatar&quot;,
++            print avatarId, &quot;was in the cache. Good.&quot;
+         except KeyError:
+             print &quot;No querier in cache for&quot;, str(avatarId)+ \
+                   &quot;. What are we supposed to do ?&quot;
+@@ -332,49 +334,45 @@
+         self.anonymousChecker = MaayAnonymousChecker()
+         self.registerChecker(self.anonymousChecker, IAnonymous)
+         self.config = webappConfig
+-        # Create default anonymous querier, based on local configuration
++        # Create default web querier, based on local configuration
+         try:
+             print &quot;Credentials : &quot;
+             print &quot;  - host&quot;, webappConfig.db_host
+             print &quot;  - db&quot;, webappConfig.db_name
+             print &quot;  - user&quot;, webappConfig.user
+             print &quot;  - pass&quot;, webappConfig.password
+-            anonymousQuerier = MaayQuerier(host=webappConfig.db_host,
+-                                           database=webappConfig.db_name,
+-                                           user=webappConfig.user,
+-                                           password=webappConfig.password)
+-            #anonymousQuerier = AnonymousQuerier(host=webappConfig.db_host,
+-            #                                    database=webappConfig.db_name,
+-            #                                    user=webappConfig.user,
+-            #                                    password=webappConfig.password)
++            webQuerier = MaayQuerier(host=webappConfig.db_host,
++                                     database=webappConfig.db_name,
++                                     user=webappConfig.user,
++                                     password=webappConfig.password)
+         except Exception, exc:
+-            # unable to create an anonymous querier
++            # unable to create a web querier
+             print &quot;***&quot;
+-            print &quot;*** Could not create anonymous querier&quot;
++            print &quot;*** Could not create web querier&quot;
+             print &quot;*** Got exception&quot;, exc
+-            print &quot;*** This will disable the P2P functionalities&quot;
+-            print &quot;*** and force the user to login for local search&quot;
++            print &quot;*** This may hurt in unexpected ways&quot;
+             print &quot;***&quot;
+-            anonymousQuerier = None
++            webQuerier = None
+         else:
+-            realm.createUserSession(ANONYMOUS_AVATARID, anonymousQuerier)
+-            anonymousQuerier.registerNode(self.config.get_node_id(),
+-                                          ip=socket.gethostbyname(socket.gethostname()),
+-                                          port=webappConfig.rpcserver_port,
+-                                          bandwidth=webappConfig.bandwidth)
+-        self.anonymousQuerier = anonymousQuerier
++            realm.createUserSession(ANONYMOUS_AVATARID, webQuerier)
++            webQuerier.registerNode(self.config.get_node_id(),
++                                    ip=socket.gethostbyname(socket.gethostname()),
++                                    port=webappConfig.rpcserver_port,
++                                    bandwidth=webappConfig.bandwidth)
++        self.webQuerier = webQuerier
+ 
+-    def getAnonymousQuerier(self):
+-        return getattr(self, '_anonymousQuerier', None)
++    def getWebQuerier(self):
++        return getattr(self, '_webQuerier', None)
+ 
+-    def setAnonymousQuerier(self, value):
++    def setWebQuerier(self, value):
+         &quot;&quot;&quot;used to set 'anonymousAllowed' flag in anonymous checker&quot;&quot;&quot;
++        #XXX: now, check this seriously
+         if value is not None:
+             self.anonymousChecker.anonymousAllowed = True
+-        self._anonymousQuerier = value
++        self._webQuerier = value
+ 
+-    anonymousQuerier = property(getAnonymousQuerier, setAnonymousQuerier,
+-                                doc=&quot;anonymous querier&quot;)
++    webQuerier = property(getWebQuerier, setWebQuerier,
++                          doc=&quot;web querier&quot;)
+ 
+ 
+ class MaayAnonymousChecker(AllowAnonymousAccess):
+@@ -398,19 +396,23 @@
+     credentialInterfaces = (IUsernamePassword,)
+     
+     def __init__(self, realm, dbhost, dbname):
++        print &quot;DBAuthChecker inits in realm&quot;, realm, &quot;dbhost&quot;, dbhost,
++        print &quot;and dbname&quot;, str(dbname)+&quot;.&quot;
+         self.realm = realm
+         self.dbhost = dbhost
+         self.dbname = dbname
++        self.querier = None # reusing the same querier has some benefits :)
+     
+     def requestAvatarId(self, creds):
+-        print &quot;Checking credentials for DB access&quot;
++        print &quot;DBAuthChecker : checking credentials for DB access&quot;
+         try:
+-            querier = MaayQuerier(host=self.dbhost, database=self.dbname,
+-                                  user=creds.username, password=creds.password)
++            if not self.querier:
++                self.querier = MaayQuerier(host=self.dbhost, database=self.dbname,
++                                        user=creds.username, password=creds.password)
+         except MaayAuthenticationError:
+             print &quot;DBAuthChecker : Authentication Error&quot;
+             return failure.Failure(error.UnauthorizedLogin())
+-        self.realm.createUserSession(creds.username, querier)
++        self.realm.createUserSession(creds.username, self.querier)
+         return defer.succeed(creds.username)
+ 
+ 
+@@ -569,7 +571,7 @@
+     website.remember(webappConfig, IWebappConfiguration)
+     registrationclient.login(reactor,
+                              webappConfig.registration_host, webappConfig.registration_port,
+-                             maayPortal.anonymousQuerier,
++                             maayPortal.webQuerier,
+                              webappConfig.get_node_id(),
+                              socket.gethostbyname(socket.gethostname()),
+                              webappConfig.rpcserver_port,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000198.html">[Maay-svncheckins] r227 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000200.html">[Maay-svncheckins] r229 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#199">[ date ]</a>
+              <a href="thread.html#199">[ thread ]</a>
+              <a href="subject.html#199">[ subject ]</a>
+              <a href="author.html#199">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

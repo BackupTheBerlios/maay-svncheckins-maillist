@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r625 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r625%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511231437.jANEbYa0008473%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000643.html">
+   <LINK REL="Next"  HREF="000598.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r625 - in trunk/maay: . data</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r625%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511231437.jANEbYa0008473%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r625 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 15:37:34 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000643.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000598.html">[Maay-svncheckins] r626 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#597">[ date ]</a>
+              <a href="thread.html#597">[ thread ]</a>
+              <a href="subject.html#597">[ subject ]</a>
+              <a href="author.html#597">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-23 15:37:31 +0100 (Wed, 23 Nov 2005)
+New Revision: 625
+
+Modified:
+   trunk/maay/data/livefragment.html
+   trunk/maay/data/liveresults.html
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+   trunk/maay/webapplication.py
+Log:
+added ability to sort results by &quot;publication time&quot; / &quot;popularity&quot; / &quot;relevance&quot;
+
+
+Modified: trunk/maay/data/livefragment.html
+===================================================================
+--- trunk/maay/data/livefragment.html	2005-11-23 12:15:23 UTC (rev 624)
++++ trunk/maay/data/livefragment.html	2005-11-23 14:37:31 UTC (rev 625)
+@@ -13,6 +13,9 @@
+       &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;all results &lt;/a&gt;(&lt;span nevow:render=&quot;totalcount&quot; /&gt;)&lt;/td&gt;
+     &lt;/tr&gt;
+   &lt;/table&gt;
++  &lt;div class=&quot;sortBar&quot;&gt;
++    Sort by: &lt;a href=&quot;javascript: sortBy('relevance');&quot;&gt;relevance&lt;/a&gt; - &lt;a href=&quot;javascript: sortBy('popularity');&quot;&gt;popularity&lt;/a&gt; - &lt;a href=&quot;javascript: sortBy('publication_time');&quot;&gt;publication date&lt;/a&gt;
++  &lt;/div&gt;
+   &lt;center&gt;
+   &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
+   &lt;/center&gt;
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-23 12:15:23 UTC (rev 624)
++++ trunk/maay/data/liveresults.html	2005-11-23 14:37:31 UTC (rev 625)
+@@ -39,6 +39,11 @@
+  var d = server.callRemote('unsetFlags');
+  d.addCallback(updateResults);
+ }
++
++function sortBy(sortCriteria) {
++ var d = server.callRemote('sortBy', sortCriteria);
++ d.addCallback(updateResults);
++}
+     &lt;/script&gt;
+ 
+   &lt;/head&gt;
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-23 12:15:23 UTC (rev 624)
++++ trunk/maay/dbentity.py	2005-11-23 14:37:31 UTC (rev 625)
+@@ -241,7 +241,7 @@
+ 
+     def boundAttributes(self):
+         &quot;&quot;&quot;returns the list of attributes for which a value is specified&quot;&quot;&quot;
+-        return [attr for attr in self.extended_attrs]
++        return [attr for attr in self.extended_attrs if hasattr(self, attr)]
+ 
+     
+     def readable_size(self):
+@@ -379,27 +379,26 @@
+         return Result(**stateDict)
+     fromDocument = staticmethod(fromDocument)
+ 
+-    def _selectQuery(cls, limit, offset, onlyLocal=False, onlyDistant=False, whereColumns=()):
+-        if whereColumns:
+-            wheres = ['%s=%%(%s)s' % (attr, attr) for attr in whereColumns]
+-            where =  ' WHERE ' + ' AND '.join(wheres)
+-        else:
+-            where = ''
++    def _selectQuery(cls, query, onlyLocal=False, onlyDistant=False):
++        wheres = ['query_id=%(query_id)s']
+         if onlyDistant:
+-            where += &quot; AND host != 'localhost' &quot;
++            wheres.append(&quot;host != 'localhost'&quot;)
+         elif onlyLocal:
+-            where += &quot; AND host = 'localhost' &quot;
+-        query = 'SELECT %s FROM %s%s GROUP BY document_id ' \
+-                'HAVING record_ts=MIN(record_ts) ' \
+-                'ORDER BY publication_time DESC LIMIT %s OFFSET %s' % (
+-            ', '.join(cls.attributes),
+-            cls.tableName,
+-            where, limit, offset)
+-        return query
++            wheres.append(&quot;host = 'localhost'&quot;)
++        sqlQuery = 'SELECT %s FROM %s WHERE %s GROUP BY document_id ' \
++            'HAVING record_ts=MIN(record_ts) ' \
++            'ORDER BY %s %s ' \
++            'LIMIT %s OFFSET %s' % (', '.join(cls.attributes),
++                                    cls.tableName,
++                                    ' AND '.join(wheres),
++                                    query.order, query.direction,
++                                    query.limit, query.offset,
++                                    )
++        return sqlQuery, {'query_id' : query.queryId}
+     _selectQuery = classmethod(_selectQuery)
+ 
+-    def selectWhere(cls, cursor, limit, offset, onlyLocal=False, onlyDistant=False, **args):
+-        query = cls._selectQuery(limit, offset, onlyLocal, onlyDistant, args.keys())
++    def selectWhere(cls, cursor, query, onlyLocal=False, onlyDistant=False):
++        query, args = cls._selectQuery(query, onlyLocal, onlyDistant)
+         cursor.execute(query, args)
+         results = cursor.fetchall()
+         return [cls(**dict(zip(cls.attributes, row))) for row in results]
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-23 12:15:23 UTC (rev 624)
++++ trunk/maay/querier.py	2005-11-23 14:37:31 UTC (rev 625)
+@@ -344,14 +344,12 @@
+         cursor.close()
+         return localCount, distantCount
+     
+-    def getQueryResults(self, queryId, limit=15, offset=0,
+-                        onlyLocal=False, onlyDistant=False):
++    def getQueryResults(self, query, onlyLocal=False, onlyDistant=False):
+         &quot;&quot;&quot;builds and returns Result' instances by searching in
+         the temporary table built for &lt;queryId&gt;
+         &quot;&quot;&quot;
+         cursor = self._cnx.cursor()
+-        results = Result.selectWhere(cursor, limit, offset,
+-                                     onlyLocal, onlyDistant, query_id=queryId)
++        results = Result.selectWhere(cursor, query, onlyLocal, onlyDistant)
+         cursor.close()
+         return results
+ 
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-23 12:15:23 UTC (rev 624)
++++ trunk/maay/webapplication.py	2005-11-23 14:37:31 UTC (rev 625)
+@@ -571,12 +571,14 @@
+             p2pQuery = P2pQuery(sender=webappConfig.get_node_id(),
+                                 query=self.query)
+             self.queryId = p2pQuery.qid
++            # XXX: attach queryId to query object. Will be handled cleanly
++            #      in a next release
++            self.query.queryId = self.queryId
+             self.p2pQuery = p2pQuery
+             # purge old results
+             self.querier.purgeOldResults()
+             self.querier.pushDocuments(self.queryId, results, provider=None)
+-            self.results = self.querier.getQueryResults(self.queryId, offset=0)
+-            # self.results = self.querier.getQueryResults(self.query)
++            self.results = self.querier.getQueryResults(self.query)
+             
+     # XXX (refactoring): provide a common base class for LivePages
+     # Maay / py2exe / win32 related trick : we provide our own javascript
+@@ -589,8 +591,7 @@
+     def onNewResults(self, provider, results):
+         results = [Document(**params) for params in results]
+         self.querier.pushDocuments(self.queryId, results, provider)
+-        # results = self.querier.getQueryResults(self.query,
+-        results = self.querier.getQueryResults(self.queryId, offset=self.query.offset,
++        results = self.querier.getQueryResults(self.query,
+                                                onlyLocal=self.onlyLocal,
+                                                onlyDistant=self.onlyDistant)
+         page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId,
+@@ -609,7 +610,7 @@
+     
+     def remote_browseResults(self, context, offset):
+         self.query.offset = offset
+-        results = self.querier.getQueryResults(self.queryId, offset=offset,
++        results = self.querier.getQueryResults(self.query,
+                                                onlyLocal=self.onlyLocal,
+                                                onlyDistant=self.onlyDistant)
+         page = PleaseCloseYourEyes(results, self.querier, self.query, self.queryId,
+@@ -635,7 +636,12 @@
+         self.query.offset = 0
+         return self.remote_browseResults(context, self.query.offset)
+     
++    def remote_sortBy(self, context, sortCriteria):
++        self.query.order = sortCriteria
++        # reset counter to 0
++        return self.remote_browseResults(context, 0)
+ 
++    
+ class PleaseCloseYourEyes(rend.Page, ResultsPageMixIn):
+     &quot;&quot;&quot;This resource and the way it is called is kind of ugly.
+     It will be refactored later. The idea is to have something working
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000643.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000598.html">[Maay-svncheckins] r626 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#597">[ date ]</a>
+              <a href="thread.html#597">[ thread ]</a>
+              <a href="subject.html#597">[ subject ]</a>
+              <a href="author.html#597">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

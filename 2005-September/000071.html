@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r98 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r98%20-%20trunk/maay&In-Reply-To=%3C200509291431.j8TEVDBZ014357%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000070.html">
+   <LINK REL="Next"  HREF="000072.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r98 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r98%20-%20trunk/maay&In-Reply-To=%3C200509291431.j8TEVDBZ014357%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r98 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Sep 29 16:31:13 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000070.html">[Maay-svncheckins] r97 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000072.html">[Maay-svncheckins] r99 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#71">[ date ]</a>
+              <a href="thread.html#71">[ thread ]</a>
+              <a href="subject.html#71">[ subject ]</a>
+              <a href="author.html#71">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-29 16:31:13 +0200 (Thu, 29 Sep 2005)
+New Revision: 98
+
+Modified:
+   trunk/maay/dbentity.py
+Log:
+call commit correctly
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-09-29 13:32:27 UTC (rev 97)
++++ trunk/maay/dbentity.py	2005-09-29 14:31:13 UTC (rev 98)
+@@ -57,7 +57,7 @@
+             return entities
+         else:
+             entity = cls(**args)
+-            entity.commit(update=False)
++            entity.commit(cursor, update=False)
+             return cls.selectOrInsertWhere(cursor, **args)
+     selectOrInsertWhere = classmethod(selectOrInsertWhere)
+     
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000070.html">[Maay-svncheckins] r97 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000072.html">[Maay-svncheckins] r99 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#71">[ date ]</a>
+              <a href="thread.html#71">[ thread ]</a>
+              <a href="subject.html#71">[ subject ]</a>
+              <a href="author.html#71">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

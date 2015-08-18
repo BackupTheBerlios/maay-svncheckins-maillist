@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r542 - trunk/maay/data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r542%20-%20trunk/maay/data&In-Reply-To=%3C200511171110.jAHBALtc015648%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000512.html">
+   <LINK REL="Next"  HREF="000514.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r542 - trunk/maay/data</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r542%20-%20trunk/maay/data&In-Reply-To=%3C200511171110.jAHBALtc015648%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r542 - trunk/maay/data">adimasci at berlios.de
+       </A><BR>
+    <I>Thu Nov 17 12:10:21 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000512.html">[Maay-svncheckins] r541 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000514.html">[Maay-svncheckins] r543 - in trunk/maay: . sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#513">[ date ]</a>
+              <a href="thread.html#513">[ thread ]</a>
+              <a href="subject.html#513">[ subject ]</a>
+              <a href="author.html#513">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-17 12:10:19 +0100 (Thu, 17 Nov 2005)
+New Revision: 542
+
+Modified:
+   trunk/maay/data/athena.js
+Log:
+Looks like this patch (found on IRC logs) fixes the
+MSIE bug. (Need to do a bit more tests before claiming bug
+is fixed :-))
+
+Modified: trunk/maay/data/athena.js
+===================================================================
+--- trunk/maay/data/athena.js	2005-11-17 10:01:38 UTC (rev 541)
++++ trunk/maay/data/athena.js	2005-11-17 11:10:19 UTC (rev 542)
+@@ -178,10 +178,20 @@
+     }
+ }
+ 
++var last_request = null;
++var userAgent = navigator.userAgent.toLowerCase();
++
++if (userAgent.indexOf(&quot;msie&quot;) != -1) {
++    /* IE specific stuff */
++    /* Abort last request so we don't 'leak' connections */
++    window.attachEvent(&quot;onbeforeunload&quot;, function() { if (last_request != null) {last_request.abort();} } )
++}
++
+ function nevow_prepareRemoteAction(actionType, args) {
+ 
+     var url = nevow_constructActionURL(actionType, args);
+     var req = MochiKit.Async.getXMLHttpRequest();
++    last_request = req;
+ 
+     try {
+         req.open('GET', url, true);
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000512.html">[Maay-svncheckins] r541 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000514.html">[Maay-svncheckins] r543 - in trunk/maay: . sql
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#513">[ date ]</a>
+              <a href="thread.html#513">[ thread ]</a>
+              <a href="subject.html#513">[ subject ]</a>
+              <a href="author.html#513">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

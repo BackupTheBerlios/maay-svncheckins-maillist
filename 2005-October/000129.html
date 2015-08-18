@@ -1,0 +1,313 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r156 - in trunk: . maay maay/configuration maay/sql
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r156%20-%20in%20trunk%3A%20.%20maay%20maay/configuration%20maay/sql&In-Reply-To=%3C200510061448.j96EmHFq000032%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000128.html">
+   <LINK REL="Next"  HREF="000130.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r156 - in trunk: . maay maay/configuration maay/sql</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r156%20-%20in%20trunk%3A%20.%20maay%20maay/configuration%20maay/sql&In-Reply-To=%3C200510061448.j96EmHFq000032%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r156 - in trunk: . maay maay/configuration maay/sql">afayolle at berlios.de
+       </A><BR>
+    <I>Thu Oct  6 16:48:17 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000128.html">[Maay-svncheckins] r155 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000130.html">[Maay-svncheckins] r157 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#129">[ date ]</a>
+              <a href="thread.html#129">[ thread ]</a>
+              <a href="subject.html#129">[ subject ]</a>
+              <a href="author.html#129">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-06 16:48:16 +0200 (Thu, 06 Oct 2005)
+New Revision: 156
+
+Modified:
+   trunk/README.txt
+   trunk/ReleaseNotes
+   trunk/maay.iss
+   trunk/maay/configuration.py
+   trunk/maay/configuration/indexer.ini
+   trunk/maay/configuration/webapp.ini
+   trunk/maay/indexer.py
+   trunk/maay/sql/mysql.sql
+   trunk/setup.py
+Log:
+various update to release snapshot 2005-10-06
+Should actually work on windows, but Word document indexation is not functioning.
+
+Modified: trunk/README.txt
+===================================================================
+--- trunk/README.txt	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/README.txt	2005-10-06 14:48:16 UTC (rev 156)
+@@ -1,3 +1,10 @@
++Warning
++======
++
++This is alpha quality software. Before launching anything be sure to read 
++this document and the release notes for the program. On Windows systems, 
++the release notes are available through the start menu shortcut of Maay.
++
+ What is Maay?
+ =============
+ 
+@@ -18,7 +25,7 @@
+  * a web interface which can be used to issue queries (currently
+    queries are ontly dispatched on the current node, i.e. the P2P
+    functionnality is not available for now, though we are working on
+-   it. 
++   it). 
+ 
+ How do I install Maay from source?
+ ==================================
+@@ -74,7 +81,13 @@
+ How do I start using Maay?
+ ==========================
+ 
+-First, start the Maay service. On Windows, use the start menu to
++First, edit the configuration files. On Windows, they are in 
++C:\Program Files\Maay\webapp.ini and C:\Program Files\Maay\indexer.ini.
++On Unix systems, they are in /etc/maay, and you can copy them to 
++~/.maay/ if you want to have some personnalized settings. Pay attention 
++to the index-dir and skip-dir settings in indexer.ini.
++
++Then, start the Maay service. On Windows, use the start menu to
+ launch &quot;Maay Server&quot;. On unix systems, use /usr/bin/maay-server
+ 
+ You can now visit <A HREF="http://localhost:8080/">http://localhost:8080/</A> which will display the Maay
+@@ -100,4 +113,4 @@
+ <A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>
+ 
+ 
+- Alexandre Fayolle &lt;alexandre.fayolle&gt;, Mon,  3 Oct 2005 10:09:28 +0200
++ Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;, Thu,  6 Oct 2005 15:50:15 +0200
+
+Modified: trunk/ReleaseNotes
+===================================================================
+--- trunk/ReleaseNotes	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/ReleaseNotes	2005-10-06 14:48:16 UTC (rev 156)
+@@ -1,3 +1,14 @@
++Release Notes for snapshot 2005-10-06
++
++This release is a development snapshot, it is not as tested as an 
++official release, and is only provided as a convenience to our users. 
++Expect the application to crash.
++
++Refer to previous release notes below.
++
++-----------------------------------------------------------
++Release Notes for version 0.1.0
++
+ See README.txt for installation and quick start instructions. 
+ 
+ This release is alpha-level software. We support local indexation and
+
+Modified: trunk/maay/configuration/indexer.ini
+===================================================================
+--- trunk/maay/configuration/indexer.ini	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/maay/configuration/indexer.ini	2005-10-06 14:48:16 UTC (rev 156)
+@@ -1,8 +1,8 @@
+-[INDEXER]
+-host: localhost
+-port: 6789
+-user: maay
+-password: maay
+-index-dir:~/
+-#skip-dir:~/.firefox,~/.mozilla
+-verbose: yes
++[INDEXER]
++host=localhost
++port=6789
++user=maay
++password=maay
++index-dir=c:\
++skip-dir=c:\windows
++verbose=yes
+\ No newline at end of file
+
+Modified: trunk/maay/configuration/webapp.ini
+===================================================================
+--- trunk/maay/configuration/webapp.ini	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/maay/configuration/webapp.ini	2005-10-06 14:48:16 UTC (rev 156)
+@@ -1,5 +1,5 @@
+-[SERVER]
+-db-name: maay
+-db-host: localhost
+-user: maay
+-password: maay
++[SERVER]
++db-name=maay
++db-host=localhost
++user=maay
++password=maay
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/maay/configuration.py	2005-10-06 14:48:16 UTC (rev 156)
+@@ -34,8 +34,9 @@
+     path = []
+     if os.environ.get('PATH'):
+         path.append(os.environ.get('PATH'))
+-    for directory in (u'antiword', u'pdftohtml', os.path.join(u'mysql', u'bin')):
+-        path.append(os.path.join(maay_dir, directory))
++    for directory in (u'pdftohtml', os.path.join(u'mysql', u'bin')):
++        path.append(os.path.join(maay_dir, directory))
++    path.append(u'c:\antiword')
+     os.environ['PATH'] =  os.pathsep.join(path)
+ 
+         
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/maay/indexer.py	2005-10-06 14:48:16 UTC (rev 156)
+@@ -162,8 +162,16 @@
+     def __init__(self, indexed, skipped=None):
+         self.indexed = [os.path.abspath(os.path.expanduser(p)) for p in indexed]
+         skipped = skipped or []
+-        self.skipped = [os.path.abspath(os.path.expanduser(p)) for p in skipped]
+-
++        self.skipped = [os.path.abspath(os.path.expanduser(p)) for p in skipped]
++        self.skipped = [self.normalizeCase(p) for p in self.skipped]
++        
++    if sys.platform == 'win32':
++        def normalizeCase(self, path):
++            return path.lower()
++    else:    
++        def normalizeCase(self, path):
++            return path
++        
+     def __iter__(self):
+         for path in self.indexed:
+             # test path not in self.skipped (dummy config files)
+@@ -184,7 +192,7 @@
+     def _removeSkippedDirnames(self, dirpath, dirnames):
+         &quot;&quot;&quot;removed skipped directories from dirnames (inplace !)&quot;&quot;&quot;
+         for dirname in dirnames[:]:
+-            abspath = os.path.join(dirpath, dirname)
++            abspath = self.normalizeCase(os.path.join(dirpath, dirname))
+             if abspath in self.skipped:
+                 dirnames.remove(dirname)
+ 
+
+Modified: trunk/maay/sql/mysql.sql
+===================================================================
+--- trunk/maay/sql/mysql.sql	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/maay/sql/mysql.sql	2005-10-06 14:48:16 UTC (rev 156)
+@@ -1,7 +1,7 @@
+ -- ---------------------------------------------------------
+ -- maay database
+ -- ---------------------------------------------------------
+-
++DROP DATABASE maay;
+ CREATE DATABASE maay DEFAULT CHARACTER SET utf8;
+ 
+ use maay;
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/maay.iss	2005-10-06 14:48:16 UTC (rev 156)
+@@ -4,17 +4,19 @@
+ 
+ [Setup]
+ AppName=Maay
+-AppVerName=Maay version 0.1
++AppVerName=Maay snapshot 2005-10-06
+ DefaultDirName={pf}\Maay
+ DefaultGroupName=Maay
+ UninstallDisplayIcon={app}\maay_server.exe
+ Compression=bzip
+ SolidCompression=yes
+ LicenseFile=thirdparty\mysql\COPYING.txt
+-; Require 20 MB for the database files. We can tune this later.
++; Require 50 MB for the database files. We can tune this later.
+ ExtraDiskSpaceRequired=20000000
+ ; Win9x is not supported
+ MinVersion=0,4.0
++InfoBeforeFile=ReleaseNotes
++InfoAfterFile=README.txt
+ 
+ [Files]
+ Source: &quot;dist\*&quot;; DestDir: &quot;{app}&quot;
+@@ -25,13 +27,22 @@
+ Source: &quot;maay\data\images\*.ico&quot;; DestDir: &quot;{app}\data\images&quot;
+ Source: &quot;maay\sql\mysql.sql&quot;; DestDir: &quot;{app}&quot;
+ Source: &quot;thirdparty\mysql\*&quot;; DestDir: &quot;{app}\mysql&quot; ; Flags: recursesubdirs
+-Source: &quot;thirdparty\antiword\*&quot;; DestDir: &quot;{app}\antiword&quot; ; Flags: recursesubdirs
++Source: &quot;thirdparty\antiword\*&quot;; DestDir: &quot;c:\antiword&quot; ; Flags: recursesubdirs
+ Source: &quot;thirdparty\pdftohtml-0.36\*&quot;; DestDir: &quot;{app}\pdftohtml&quot; ; Flags: recursesubdirs
++Source: &quot;maay\configuration\*.ini&quot;; DestDir: &quot;{app}&quot;
++Source: &quot;README.txt&quot;; DestDir: &quot;{app}&quot;
++Source: &quot;ChangeLog&quot;; DestDir: &quot;{app}&quot;
++Source: &quot;ReleaseNotes&quot;; DestDir: &quot;{app}&quot;
+ 
+ [Icons]
++Name: &quot;{group}\README.txt&quot;; Filename: &quot;{app}\README.txt&quot;; Comment: &quot;Required reading before launching Maay&quot;
++Name: &quot;{group}\ReleaseNotes.txt&quot;; Filename: &quot;{app}\ReleaseNotes&quot;; Comment: &quot;Required reading before launching Maay&quot;
+ Name: &quot;{group}\Maay Server&quot;; Filename: &quot;{app}\maay_server.exe&quot;; WorkingDir: &quot;{app}&quot;; Comment: &quot;The Maay server component&quot;
+ Name: &quot;{group}\Maay Indexer&quot;; Filename: &quot;{app}\maay_indexer.exe&quot;; WorkingDir: &quot;{app}&quot;; Comment: &quot;The Maay indexer component&quot;
++Name: &quot;{group}\webapp.ini&quot;; Filename: &quot;{app}\webapp.ini&quot;; Comment: &quot;Maay server configuration&quot;
++Name: &quot;{group}\indexer.ini&quot;; Filename: &quot;{app}\indexer.ini&quot;; Comment: &quot;Maay indexer configuration&quot;
+ 
++
+ [Run]
+ Filename: &quot;{app}\mysql\bin\mysqld-max-nt.exe&quot;; Parameters:&quot;--install MySQL --defaults-file=&quot;&quot;{app}\mysql\my-maay.ini&quot;&quot;&quot;; StatusMsg: &quot;Registering MySQL as a service&quot;; WorkingDir:&quot;{app}\mysql&quot;; Flags:runhidden
+ Filename: &quot;NET&quot;; Parameters:&quot;start MySQL&quot;; StatusMsg: &quot;Starting MySQL server&quot;; WorkingDir:&quot;{app}\mysql&quot;; Flags:runhidden
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-10-06 13:28:50 UTC (rev 155)
++++ trunk/setup.py	2005-10-06 14:48:16 UTC (rev 156)
+@@ -7,7 +7,7 @@
+ version = '0.1.0'
+ author = &quot;France Telecom R&amp;D and Logilab&quot;
+ author_email = &quot;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">maay-dev at lists.berlios.de</A>&quot;
+-copyright = &quot;Copyright (c)2005 France Telecom R&amp;D and Logilab&quot;
++copyright = &quot;Copyright (c)2004-2005 France Telecom R&amp;D&quot;
+ description = &quot;a network of peers for document search&quot;
+ name = &quot;Maay&quot;
+ url = &quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000128.html">[Maay-svncheckins] r155 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000130.html">[Maay-svncheckins] r157 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#129">[ date ]</a>
+              <a href="thread.html#129">[ thread ]</a>
+              <a href="subject.html#129">[ subject ]</a>
+              <a href="author.html#129">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r624 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r624%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C35cde7700511230631k3239f66dqae06873dffbb26bd%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000596.html">
+   <LINK REL="Next"  HREF="000597.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r624 - in trunk/maay: . data</H1>
+    <B>Fr&#233;d&#233;ric Dang Ngoc</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r624%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C35cde7700511230631k3239f66dqae06873dffbb26bd%40mail.gmail.com%3E"
+       TITLE="[Maay-svncheckins] r624 - in trunk/maay: . data">frederic.dangngoc at gmail.com
+       </A><BR>
+    <I>Wed Nov 23 15:31:59 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000596.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000597.html">[Maay-svncheckins] r625 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#643">[ date ]</a>
+              <a href="thread.html#643">[ thread ]</a>
+              <a href="subject.html#643">[ subject ]</a>
+              <a href="author.html#643">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> NOTE: Frederic, The versioning checks seems to work here. Could you
+</I>&gt;<i>       please have a look and check that I did not break anything in
+</I>&gt;<i>       your stuff. If you need to fix a few things, please do it the
+</I>&gt;<i>       way I started to do things (using nevow templating system)
+</I>&gt;<i>
+</I>
+Hi Adrien,
+
+I just tested the new version.
+the versioning check does not work for me :
+- <A HREF="http://127.0.0.1/version.js">http://127.0.0.1/version.js</A> does not work (   solution: add
+setattr(MaayPage, 'child_version.js',
+static.File(get_path_of('version.js')))   in webapplication.py )
+- &lt;center onLoad=&quot;checkNewRelease();&quot;&gt; does not work. I think that
+the attribute onLoad might only work on body tag.
+I do not exactly what is the best way to include it using the templating system.
+
+Fr&#233;d&#233;ric
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000596.html">[Maay-svncheckins] r624 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000597.html">[Maay-svncheckins] r625 - in trunk/maay: . data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#643">[ date ]</a>
+              <a href="thread.html#643">[ thread ]</a>
+              <a href="subject.html#643">[ subject ]</a>
+              <a href="author.html#643">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

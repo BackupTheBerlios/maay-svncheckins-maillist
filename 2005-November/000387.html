@@ -1,0 +1,329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r411 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r411%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511101523.jAAFNWA3011266%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000386.html">
+   <LINK REL="Next"  HREF="000388.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r411 - in trunk/maay: . data</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r411%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511101523.jAAFNWA3011266%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r411 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Thu Nov 10 16:23:32 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000386.html">[Maay-svncheckins] r410 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000388.html">[Maay-svncheckins] r412 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#387">[ date ]</a>
+              <a href="thread.html#387">[ thread ]</a>
+              <a href="subject.html#387">[ subject ]</a>
+              <a href="author.html#387">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-10 16:23:29 +0100 (Thu, 10 Nov 2005)
+New Revision: 411
+
+Modified:
+   trunk/maay/data/liveresults.html
+   trunk/maay/data/maay.css
+   trunk/maay/query.py
+   trunk/maay/webapplication.py
+Log:
+This is the first revision having auto update result pages more or 
+less working.
+
+**However**, there is still a lot of work to do :
+
+ - next/previous links don't work
+ - we need to merge resultsets properly
+ - we need comsectic changes to display differently results
+   from each peer
+ - refactoring needed
+
+
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-10 15:13:36 UTC (rev 410)
++++ trunk/maay/data/liveresults.html	2005-11-10 15:23:29 UTC (rev 411)
+@@ -6,14 +6,14 @@
+     &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;maaycss&quot;/&gt;
+     &lt;link rel=&quot;shortcut icon&quot; href=&quot;images/maay.ico&quot; /&gt;
+     &lt;nevow:invisible nevow:render=&quot;liveglue&quot; /&gt;
++
+     &lt;script type='text/javascript' language='javascript'&gt;
+ function updateResults(source) {
+-  alert(&quot;I'm alive .... alive !!!&quot;);
+   div = document.getElementById('resultsDiv');
+   div.innerHTML = source;
+ }
+ function startConnection() {
+-  var d = server.callRemote('foo');
++  var d = server.callRemote('connect');
+ }
+     &lt;/script&gt;
+ 
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-10 15:13:36 UTC (rev 410)
++++ trunk/maay/data/maay.css	2005-11-10 15:23:29 UTC (rev 411)
+@@ -39,6 +39,11 @@
+   display: block;
+ }
+ 
++a.distantDocTitle {
++  display: block;
++  background-color: yellow;
++}
++
+ span.resultUrl {
+   font-size: 80%;
+   font-family: &quot;New Century Schoolbook&quot;, serif;
+
+Modified: trunk/maay/query.py
+===================================================================
+--- trunk/maay/query.py	2005-11-10 15:13:36 UTC (rev 410)
++++ trunk/maay/query.py	2005-11-10 15:23:29 UTC (rev 411)
+@@ -49,6 +49,13 @@
+         return Query(u' '.join(words), offset, **restrictions)
+     fromRawQuery = staticmethod(fromRawQuery)
+ 
++    def fromContext(context):
++        &quot;&quot;&quot;:type context: nevow's context objects&quot;&quot;&quot;
++        rawQuery = unicode(context.arg('words'), 'utf-8')
++        offset = int(context.arg('offset', 0))
++        return Query.fromRawQuery(rawQuery, offset)
++    fromContext = staticmethod(fromContext)
++
+     def __repr__(self):
+         return 'Query Object (%s, %s, %s)' % (self.words, self.filetype,
+                                               self.filename)
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-10 15:13:36 UTC (rev 410)
++++ trunk/maay/webapplication.py	2005-11-10 15:23:29 UTC (rev 411)
+@@ -22,6 +22,7 @@
+ from datetime import datetime
+ import re
+ from xmlrpclib import ServerProxy
++from itertools import cycle
+ 
+ from zope.interface import Interface
+ from twisted.web import static
+@@ -34,6 +35,7 @@
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
+ from maay.p2pquerier import P2pQuerier, P2pQuery
++from maay.dbentity import Document
+ import maay.indexer
+ 
+ class INodeConfiguration(Interface):
+@@ -139,27 +141,7 @@
+ 
+ 
+     def child_search(self, context):
+-        # query = unicode(context.arg('words'))        
+-        offset = int(context.arg('offset', 0))
+-        words = context.arg('words')
+-        if not words:
+-            query = Query.fromRawQuery('')
+-            return FACTORY.getLivePage(context)
+-        rawQuery = unicode(context.arg('words'), 'utf-8')
+-        query = Query.fromRawQuery(rawQuery, offset)
+-        localResults = self.querier.findDocuments(query)
+-        # self._askForPeerResults(query, context)
+-        resultsPage = FACTORY.clientFactory(context, self.maayId, localResults, query, offset)
+-        #######################
+-        webappConfig = INodeConfiguration(context)
+-        p2pQuery = P2pQuery(webappConfig.get_node_id(),
+-                            webappConfig.rpcserver_port,
+-                            query)
+-        self.p2pquerier.sendQuery(p2pQuery)
+-        #######################
+-
+-        self.p2pquerier.addAnswerCallback(p2pQuery.qid, resultsPage.onNewResults)
+-        return resultsPage
++        return FACTORY.clientFactory(context, self.querier, self.p2pquerier)
+     
+     # XXX make sure that the requested document is really in the database
+     # XXX don't forget to update the download statistics of the document
+@@ -198,26 +180,43 @@
+     docFactory = loaders.xmlfile(get_path_of('liveresults.html'))
+     addSlash = False
+ 
+-    instances = []
++    def __init__(self, context, querier, p2pquerier):
++        athena.LivePage.__init__(self)
++        # XXX: nevow/livepage related trick (version 0.6.0) :
++        # This resource is instanciated several times when rendering the
++        # results page (each time the browser tries to load
++        # ROOT/search/athena.js, ROOT/search/MochiKit.js, etc.) because
++        # the Livepage-Id is not yet set in the request. In these particuliar
++        # cases, we don't want to start new queries, so we do an ugly check
++        # to test whether or not we're instanciating the *real* live page
++        # (or if we're just trying to download JS files)
++        # NOTE: At the time this comment is written, athena/LivePages are handled
++        #       differently in nevow SVN. It's now possible to insantiate directly
++        #       LivePage instances (which is great !), so we'll have to change
++        #       the implementation for next nevow release.
++        if len(inevow.IRemainingSegments(context)) &lt; 2:
++            self.query = Query.fromContext(context)
++            self.offset = self.query.offset
++            self.results = querier.findDocuments(self.query)
++            webappConfig = IServerConfiguration(context)
++            p2pQuery = P2pQuery(webappConfig.get_node_id(),
++                                webappConfig.rpcserver_port,
++                                self.query)
++            p2pquerier.sendQuery(p2pQuery)
++            p2pquerier.addAnswerCallback(p2pQuery.qid, self.onNewResults)
+     
+-    def __init__(self, maayId, results, query, offset):
+-        athena.LivePage.__init__(self)
+-        self.maayId = maayId
+-        self.results = results
+-        self.offset = offset
+-        self.query = query.words # unicode(query)
+ 
+     def data_results(self, context, data):
+         return self.results
+     
+     def render_title(self, context, data):
+-        context.fillSlots('words', self.query)
++        context.fillSlots('words', self.query.words)
+         context.fillSlots('start_result', min(len(self.results), self.offset + 1))
+         context.fillSlots('end_result', self.offset + len(self.results))
+         return context.tag
+ 
+     def render_searchfield(self, context, data):
+-        context.fillSlots('words', self.query)
++        context.fillSlots('words', self.query.words)
+         return context.tag
+ 
+     def render_prevset_url(self, context, data):
+@@ -234,7 +233,7 @@
+ 
+     def render_row(self, context, data):
+         document = data
+-        words = self.query.split()
++        words = self.query.words.split()
+         context.fillSlots('mime_type', re.sub(&quot;/&quot;, &quot;_&quot;, document.mime_type))
+         context.fillSlots('doctitle',
+                           tags.xml(boldifyText(document.title, words)))
+@@ -250,7 +249,7 @@
+         context.fillSlots('abstract', tags.xml(abstract))
+         context.fillSlots('docid', document.db_document_id)
+         context.fillSlots('docurl', tags.xml(boldifyText(document.url, words)))
+-        context.fillSlots('words', self.query)
++        context.fillSlots('words', self.query.words)
+         context.fillSlots('readable_size', document.readable_size())
+         date = datetime.fromtimestamp(document.publication_time)
+         context.fillSlots('publication_date', date.strftime('%d %b %Y'))
+@@ -259,14 +258,40 @@
+     def onNewResults(self, results):
+         # r = mergeResults(self.results, results)
+         # source = htmlize(r)
+-        print &quot;++++++++++++++++++ Got new resulsts&quot;, results
+-        self.callRemote('updateResults', u'&lt;div&gt;%r&lt;/div&gt;' % results)
++        self.results = [Document(**params) for params in results]
++        page = PleaseCloseYourEyes(self.results, self.query).renderSynchronously()
++        self.callRemote('updateResults', u'&lt;div&gt;%s&lt;/div&gt;' % page)
+ 
+-    def remote_foo(self, context):
+-        print &quot;************************************************** le client m'appelle !!&quot;
++    def remote_connect(self, context):
++        &quot;&quot;&quot;just here to start the connection between client and server (Ajax)&quot;&quot;&quot;
+         return 0
+ 
+ 
++class PleaseCloseYourEyes(ResultsPage):
++    &quot;&quot;&quot;This resource and the way it is called is kind of ugly.
++    It will be refactored later. The idea is to have something working
++    quickly.
++    &quot;&quot;&quot;
++
++    docFactory = loaders.xmlstr(&quot;&quot;&quot;
++  &lt;table xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
++    &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
++      &lt;td&gt;
++	&lt;div class=&quot;resultItem&quot;&gt;
++	  &lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot;/&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;&lt;td&gt;&lt;a class=&quot;distantDocTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/download?docid=&lt;nevow:slot name=&quot;docid&quot; /&gt;&amp;words=&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
++	  &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
++	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
++	&lt;/div&gt;
++      &lt;/td&gt;
++    &lt;/tr&gt;
++  &lt;/table&gt;
++    &quot;&quot;&quot;)
++    
++    def __init__(self, results, query):
++        self.results = results
++        self.query = query
++
++
+ class ResultsPageFactory(athena.LivePageFactory):
+     def getLivePage(self, context):
+         livepageId = inevow.IRequest(context).getHeader('Livepage-Id')
+@@ -276,16 +301,16 @@
+         else:
+             return None        
+ 
+-    def clientFactory(self, context, maayId, results, query, offset):
++    def clientFactory(self, context, querier, p2pquerier):
+         livepage = self.getLivePage(context)
+         if livepage is None:
+-            return self._manufactureClient(maayId, results, query, offset)
++            return self._manufactureClient(context, querier, p2pquerier)
+         else:
+             return livepage
+         
+-    def _manufactureClient(self, maayId, results, query, offset):
++    def _manufactureClient(self, context, querier, p2pquerier):
+         print &quot;Building livepage !&quot;
+-        cl = self._pageFactory(maayId, results, query, offset)
++        cl = self._pageFactory(context, querier, p2pquerier)
+         cl.factory = self
+         return cl
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000386.html">[Maay-svncheckins] r410 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000388.html">[Maay-svncheckins] r412 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#387">[ date ]</a>
+              <a href="thread.html#387">[ thread ]</a>
+              <a href="subject.html#387">[ subject ]</a>
+              <a href="author.html#387">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

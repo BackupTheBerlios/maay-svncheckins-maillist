@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r106 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r106%20-%20trunk&In-Reply-To=%3C200510030813.j938D4ZH009671%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000080.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r106 - trunk</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r106%20-%20trunk&In-Reply-To=%3C200510030813.j938D4ZH009671%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r106 - trunk">afayolle at berlios.de
+       </A><BR>
+    <I>Mon Oct  3 10:13:04 CEST 2005</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000080.html">[Maay-svncheckins] r107 - in trunk/maay: . bin
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#79">[ date ]</a>
+              <a href="thread.html#79">[ thread ]</a>
+              <a href="subject.html#79">[ subject ]</a>
+              <a href="author.html#79">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-03 10:13:03 +0200 (Mon, 03 Oct 2005)
+New Revision: 106
+
+Added:
+   trunk/README.txt
+Modified:
+   trunk/MANIFEST.in
+   trunk/setup.py
+Log:
+Fixed a couple of errors in setup.py and MANIFEST.in.
+Added a README document
+
+
+Modified: trunk/MANIFEST.in
+===================================================================
+--- trunk/MANIFEST.in	2005-09-30 15:51:52 UTC (rev 105)
++++ trunk/MANIFEST.in	2005-10-03 08:13:03 UTC (rev 106)
+@@ -1,3 +1,3 @@
+-recursive-include maay/test/*
+-recursive-include maay/data/*
+-recursive-include maay/sql/*.sql
++recursive-include maay/test/ *.py *.txt *.txt.bz2 *.txt.gz *.xml *.html *.ini
++recursive-include maay/data/ *.html *.css *.gif *.png *.jpg *.ico
++recursive-include maay/sql *.sql
+
+Added: trunk/README.txt
+===================================================================
+--- trunk/README.txt	2005-09-30 15:51:52 UTC (rev 105)
++++ trunk/README.txt	2005-10-03 08:13:03 UTC (rev 106)
+@@ -0,0 +1,103 @@
++What is Maay?
++=============
++
++Maay is a P2P indexation and search engine. You can use it to index
++files on your computer, and export them to other members of the Maay
++P2P network. You can also issue searches which will look for documents
++on your computer as well as on other nodes of the P2P network.
++
++What is in the current implementation?
++======================================
++
++The current Maay implementation features:
++
++ * an indexer, which can handle the following document formats: raw
++   text, HTML, Microsoft Word, Rich Text Format, Portable Document
++   Format. 
++
++ * a web interface which can be used to issue queries (currently
++   queries are ontly dispatched on the current node, i.e. the P2P
++   functionnality is not available for now, though we are working on
++   it. 
++
++How do I install Maay from source?
++==================================
++
++These instruction are intended for people using a unix-like
++OS. Windows users are strongly advised to use the prebuilt package
++(see below).
++
++A few Python libraries are required to make the whole think work. Most
++of them should be available in your OS distribution too :
++
++ * logilab common libraries (<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>)
++ * mysql-python (<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>)
++ * python-twisted (<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>)
++ * python-twisted-web (<A HREF="http://twistedmatrix.com/">http://twistedmatrix.com/</A>)
++ * python-nevow (<A HREF="http://nevow.com/">http://nevow.com/</A>)
++
++You will also need a few helper applications to perform the conversion
++of various binary formats to something that Maay can index. There is
++probably a prebuilt binary available for your OS distribution
++somewhere. You will need to download and install :
++
++ * pdftohtml (<A HREF="http://pdftohtml.sourceforge.net/">http://pdftohtml.sourceforge.net/</A>)
++ * antiword (<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>)
++ * unrtf (<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>)
++
++The indexation part uses a MySQL database, so 
++
++Once everything else is installed, you can point you web browser to
++<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> and download the latest
++source tarball. Unpack it, go to the newly created directory and run::
++
++ # python setup.py install
++
++It is now necessary to create the MySQL database instance that will
++store the indexation data::
++
++ # mysql -u root mysql
++ mysql&gt; \. sql/mysql.sql
++
++You're done !
++
++How do I install Maay from a package?
++=====================================
++
++For now, only a Windows installer is available. Download it from
++<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> and run it. This should
++install and setup everything properly. 
++
++A package for the Debian GNU/Linux distribution will soon be made
++available. 
++
++How do I start using Maay?
++==========================
++
++First, start the Maay service. On Windows, use the start menu to
++launch &quot;Maay Server&quot;. On unix systems, use /usr/bin/maay-server
++
++You can now visit <A HREF="http://localhost:8080/">http://localhost:8080/</A> which will display the Maay
++search page. Issuing a search will probably not yield any result since
++you have not indexed any files yet.
++
++Launch the indexer. On Windows, this is done through the start menu
++again by choosing &quot;Maay Indexer&quot;. On Unix systems, use
++/usr/bin/maay-indexer. The indexer will look for files on your hard
++disks and index them by sending indexation requests to the
++server. Once the indexation is done, queries issued through the web
++interface should give results. 
++
++Where can I get help?
++=====================
++
++For now the best place to ask for help is on the development mailing
++list of Maay. You can subscribe from
++
++<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">https://lists.berlios.de/mailman/listinfo/maay-svncheckins</A>
++
++You may also use the bug tracker on the Berlios project page at 
++<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>
++
++
++ Alexandre Fayolle &lt;alexandre.fayolle&gt;, Mon,  3 Oct 2005 10:09:28 +0200
+
+
+Property changes on: trunk/README.txt
+___________________________________________________________________
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-09-30 15:51:52 UTC (rev 105)
++++ trunk/setup.py	2005-10-03 08:13:03 UTC (rev 106)
+@@ -6,6 +6,7 @@
+ 
+ version = '0.1.0'
+ author = &quot;France Telecom R&amp;D and Logilab&quot;
++author_email = &quot;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">maay-svncheckins at lists.berlios.de</A>&quot;
+ copyright = &quot;Copyright (c)2005 France Telecom R&amp;D and Logilab&quot;
+ description = &quot;a network of peers for document search&quot;
+ name = &quot;Maay&quot;
+@@ -44,6 +45,7 @@
+ 		version = version,
+ 		description = description,
+ 		author = author,
++                author_email = author_email,
+ 		copyright = copyright,
+ 		url = url
+                 )
+@@ -53,9 +55,10 @@
+ 		name = name,
+ 		version = version,
+ 		author = author,
++                author_email = author_email,
+ 		copyright = copyright,
+ 		description = description,
+ 		url = url,
+ 		data_files = data_files,
+ 		packages = packages
+-                )
+\ No newline at end of file
++                )
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000080.html">[Maay-svncheckins] r107 - in trunk/maay: . bin
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#79">[ date ]</a>
+              <a href="thread.html#79">[ thread ]</a>
+              <a href="subject.html#79">[ subject ]</a>
+              <a href="author.html#79">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

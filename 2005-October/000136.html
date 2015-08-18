@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r163 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r163%20-%20trunk/maay&In-Reply-To=%3C200510070648.j976m1EK031379%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000135.html">
+   <LINK REL="Next"  HREF="000137.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r163 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r163%20-%20trunk/maay&In-Reply-To=%3C200510070648.j976m1EK031379%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r163 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Oct  7 08:48:01 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000135.html">[Maay-svncheckins] r162 - in trunk/maay: . sql
+</A></li>
+        <LI>Next message: <A HREF="000137.html">[Maay-svncheckins] r164 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#136">[ date ]</a>
+              <a href="thread.html#136">[ thread ]</a>
+              <a href="subject.html#136">[ subject ]</a>
+              <a href="author.html#136">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-07 08:47:57 +0200 (Fri, 07 Oct 2005)
+New Revision: 163
+
+Modified:
+   trunk/maay/querier.py
+   trunk/maay/registrationclient.py
+Log:
+- use LineReceiver Protocol for registration client
+- fixed typos
+
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-07 06:46:07 UTC (rev 162)
++++ trunk/maay/querier.py	2005-10-07 06:47:57 UTC (rev 163)
+@@ -76,7 +76,7 @@
+         Return document url if the document is downloadable and and
+         empty string otherwise&quot;&quot;&quot;
+         
+-    def registerNode(nodeId, ip, port, bandwidth):
++    def registerNode(nodeId, ip, port, bandwidth, lastSeenTime=None):
+         &quot;&quot;&quot;register a node in the database&quot;&quot;&quot;
+         
+     def close():
+@@ -244,13 +244,14 @@
+         self._cnx.commit()
+ 
+ 
+-    def registerNode(self, nodeId, ip, port, bandwidth):
++    def registerNode(self, nodeId, ip, port, bandwidth, lastSeenTime=None):
++        lastSeenTime = lastSeenTime or int(time.time())
+         cursor = self._cnx.cursor()
+         node = Node.selectOrInsertWhere(cursor, node_id=nodeId)[0]
+         node.ip = ip
+         node.port = port
+         node.bandwidth = bandwidth
+-        node.last_seen_time = int(time.time())
++        node.last_seen_time = lastSeenTime
+         node.commit(cursor, update=True)
+ 
+ 
+
+Modified: trunk/maay/registrationclient.py
+===================================================================
+--- trunk/maay/registrationclient.py	2005-10-07 06:46:07 UTC (rev 162)
++++ trunk/maay/registrationclient.py	2005-10-07 06:47:57 UTC (rev 163)
+@@ -14,10 +14,11 @@
+ #     along with this program; if not, write to the Free Software
+ #     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ 
+-from twisted.internet.protocol import Protocol, ClientCreator
++from twisted.internet.protocol import ClientCreator
++from twisted.protocols.basic import LineReceiver
+ from time import mktime
+ 
+-class RegistrationClient(Protocol):
++class RegistrationClient(LineReceiver):
+     def __init__(self, nodeRegistrationCallback):
+         self.__callback = nodeRegistrationCallback
+         
+@@ -29,7 +30,7 @@
+ 
+     def logout(self, nodeId):
+         self.transport.write('logout:%s\r\n' % nodeId)
+-        self.transport.looseConnection()
++        self.transport.loseConnection()
+ 
+     def who(self):
+         print &quot;querying registration server&quot;
+@@ -39,7 +40,7 @@
+         data = data.strip()
+         print &quot;registration server said&quot;, data
+         if data.startswith('EOT'):
+-            self.transport.looseConnection()
++            self.transport.loseConnection()
+             return
+         time, nodeId, nodeIP, nodePort, nodeBandwidth = data.split('\t')
+         lastSeenTime = parseTime(time)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000135.html">[Maay-svncheckins] r162 - in trunk/maay: . sql
+</A></li>
+	<LI>Next message: <A HREF="000137.html">[Maay-svncheckins] r164 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#136">[ date ]</a>
+              <a href="thread.html#136">[ thread ]</a>
+              <a href="subject.html#136">[ subject ]</a>
+              <a href="author.html#136">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

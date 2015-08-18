@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r190 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r190%20-%20trunk/maay&In-Reply-To=%3C200510171307.j9HD7Jfs002322%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000160.html">
+   <LINK REL="Next"  HREF="000162.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r190 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r190%20-%20trunk/maay&In-Reply-To=%3C200510171307.j9HD7Jfs002322%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r190 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Mon Oct 17 15:07:19 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000160.html">[Maay-svncheckins] r189 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000162.html">[Maay-svncheckins] r191 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#161">[ date ]</a>
+              <a href="thread.html#161">[ thread ]</a>
+              <a href="subject.html#161">[ subject ]</a>
+              <a href="author.html#161">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-17 15:07:19 +0200 (Mon, 17 Oct 2005)
+New Revision: 190
+
+Modified:
+   trunk/maay/indexer.py
+Log:
+Fix spurious edit from previous commit
+
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-17 13:02:38 UTC (rev 189)
++++ trunk/maay/indexer.py	2005-10-17 13:07:19 UTC (rev 190)
+@@ -122,7 +122,6 @@
+         existingFiles.union(self.runIndexer(isPrivate=False))
+         indexedFiles = Set(self.serverProxy.getIndexedFiles(self.cnxId))
+         oldFiles = indexedFiles - existingFiles
+-        oldfiles = []
+         for filename in oldFiles:
+             if self.verbose:
+                 print &quot;Requesting unindexation of %s&quot; % filename
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000160.html">[Maay-svncheckins] r189 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000162.html">[Maay-svncheckins] r191 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#161">[ date ]</a>
+              <a href="thread.html#161">[ thread ]</a>
+              <a href="subject.html#161">[ subject ]</a>
+              <a href="author.html#161">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r185 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r185%20-%20trunk/maay&In-Reply-To=%3C200510132014.j9DKEtQJ000211%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000156.html">
+   <LINK REL="Next"  HREF="000158.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r185 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r185%20-%20trunk/maay&In-Reply-To=%3C200510132014.j9DKEtQJ000211%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r185 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Thu Oct 13 22:14:55 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000156.html">[Maay-svncheckins] r184 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000158.html">[Maay-svncheckins] r186 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#157">[ date ]</a>
+              <a href="thread.html#157">[ thread ]</a>
+              <a href="subject.html#157">[ subject ]</a>
+              <a href="author.html#157">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-13 22:14:55 +0200 (Thu, 13 Oct 2005)
+New Revision: 185
+
+Modified:
+   trunk/maay/server.py
+Log:
+memorize current url before login to be able to return there
+in case of successful login
+
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-13 14:05:03 UTC (rev 184)
++++ trunk/maay/server.py	2005-10-13 20:14:55 UTC (rev 185)
+@@ -73,12 +73,20 @@
+         self.maayId = maayId
+ 
+     def render_loginurl(self, context, data):
++        url = URL.fromContext(context)
++        # store current URL into  'goThereAfter' to be able to return here
++        # after login
+         if self.maayId != ANONYMOUS_AVATARID:
++            goThereAfter = URL(url.scheme, url.netloc,
++                               ['logout'] + url.pathList())
+             context.fillSlots('actionlabel', 'Logout')
+-            context.fillSlots('loginurl', '/logout')
+         else:
++            goThereAfter = URL(url.scheme, url.netloc,
++                               ['login'] + url.pathList())
+             context.fillSlots('actionlabel', 'Login')            
+-            context.fillSlots('loginurl', '/login')
++        for param, value in url.queryList():
++            goThereAfter = goThereAfter.add(param, value)
++        context.fillSlots('loginurl', str(goThereAfter))
+         return context.tag
+ 
+     def child_login(self, context):
+@@ -95,7 +103,17 @@
+     &quot;&quot;&quot;a basic login form. This page is rendered until the user
+     is logged.
+     &quot;&quot;&quot;
+-    addSlash = True
++    # addSlash = True
++
++    def path(self, context, data):
++        here = URL.fromContext(context)
++        # transform /login/somePathAndQuery into /__login__/somePathAndQuery
++        # to benefit from nevow.guard redirection magic
++        pathList = ['__login__'] + here.pathList()[1:]
++        goThereAfter = URL(here.scheme, here.netloc,
++                           pathList, here.queryList())
++        return str(goThereAfter)
++
+     docFactory = loaders.stan(
+         tags.html[
+             tags.head[tags.title[&quot;Maay Login Page&quot;,],
+@@ -104,7 +122,8 @@
+                       ],
+             
+             tags.body[
+-                tags.form(action='/'+guard.LOGIN_AVATAR, method='post')[
++                # tags.form(action='/'+guard.LOGIN_AVATAR, render=path, method='post')[
++                tags.form(action=path, method='post')[
+                     tags.table(_class=&quot;loginTable&quot;)[
+                         tags.tr[
+                             tags.td[ &quot;Username:&quot; ],
+@@ -122,7 +141,9 @@
+             ]
+         )
+ 
+-
++    def childFactory(self, context, segments):
++        return LoginForm()
++    
+ class SearchForm(MaayPage):
+     &quot;&quot;&quot;default search form&quot;&quot;&quot;
+     docFactory = loaders.xmlfile(get_path_of('searchform.html'))
+@@ -478,6 +499,8 @@
+     XXX: TODO check if we could not use SessionWrapper.incorrectLoginError()
+     &quot;&quot;&quot;
+     def login(self, request, session, credentials, segments):
++        # d = SessionWrapper.login()
++        # d.addErrback(..)
+         mind = self.mindFactory(request, credentials)
+         session.mind = mind
+         d = self.portal.login(credentials, mind, self.credInterface)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000156.html">[Maay-svncheckins] r184 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000158.html">[Maay-svncheckins] r186 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#157">[ date ]</a>
+              <a href="thread.html#157">[ thread ]</a>
+              <a href="subject.html#157">[ subject ]</a>
+              <a href="author.html#157">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

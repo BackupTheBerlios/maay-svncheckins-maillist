@@ -1,0 +1,370 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r441 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r441%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511121451.jACEpBiK032120%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000411.html">
+   <LINK REL="Next"  HREF="000413.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r441 - in trunk/maay: . data</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r441%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511121451.jACEpBiK032120%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r441 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Sat Nov 12 15:51:11 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000411.html">[Maay-svncheckins] r440 - in trunk/maay: . sql test
+</A></li>
+        <LI>Next message: <A HREF="000413.html">[Maay-svncheckins] r442 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#412">[ date ]</a>
+              <a href="thread.html#412">[ thread ]</a>
+              <a href="subject.html#412">[ subject ]</a>
+              <a href="author.html#412">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-12 15:51:10 +0100 (Sat, 12 Nov 2005)
+New Revision: 441
+
+Added:
+   trunk/maay/data/footer.html
+Modified:
+   trunk/maay/data/liveresults.html
+   trunk/maay/data/skeleton.html
+   trunk/maay/querier.py
+   trunk/maay/webapplication.py
+Log:
+- try to use the temporary table to display the results
+- factorized a little bit HTML
+
+
+
+Added: trunk/maay/data/footer.html
+===================================================================
+--- trunk/maay/data/footer.html	2005-11-12 14:07:31 UTC (rev 440)
++++ trunk/maay/data/footer.html	2005-11-12 14:51:10 UTC (rev 441)
+@@ -0,0 +1,11 @@
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
++    &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;div&gt;
++  &lt;hr/&gt;
++  &lt;table width=&quot;100%&quot;&gt;
++    &lt;tr&gt;
++      &lt;td valign=&quot;top&quot;&gt;&lt;small&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; &lt;/small&gt;&lt;/td&gt;
++      &lt;td align=&quot;right&quot;&gt;&lt;img src=&quot;/images/logoFT.png&quot; /&gt;&lt;/td&gt;
++    &lt;/tr&gt;
++  &lt;/table&gt;
++&lt;/div&gt;
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-12 14:07:31 UTC (rev 440)
++++ trunk/maay/data/liveresults.html	2005-11-12 14:51:10 UTC (rev 441)
+@@ -9,6 +9,7 @@
+ 
+     &lt;script type='text/javascript' language='javascript'&gt;
+ function updateResults(source) {
++  alert('yo');
+   div = document.getElementById('resultsDiv');
+   div.innerHTML = source;
+ }
+@@ -18,9 +19,7 @@
+     &lt;/script&gt;
+ 
+   &lt;/head&gt;
+- 
+   &lt;body onload=&quot;startConnection()&quot;&gt;
+-  &lt;!-- &lt;a nevow:render=&quot;loginurl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;loginurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;actionlabel&quot; /&gt;&lt;/a&gt; --&gt;
+   &lt;div class=&quot;reSearch&quot;&gt;
+     &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+       &lt;table&gt;
+@@ -36,20 +35,22 @@
+   &lt;!--
+   &lt;div class=&quot;sort&quot;&gt;&lt;a href=&quot;&quot;&gt;Sort by date&lt;/a&gt; - &lt;a href=&quot;&quot;&gt;Sort by popularity&lt;/a&gt;&lt;/div&gt;
+   --&gt;
+-  &lt;div id=&quot;resultsDiv&quot;&gt;&lt;/div&gt;
+-  &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+-    &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+-      &lt;td&gt;
+-	&lt;div class=&quot;resultItem&quot;&gt;
+-	  &lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot; /&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;&lt;td&gt;&lt;a class=&quot;docTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/download?docid=&lt;nevow:slot name=&quot;docid&quot; /&gt;&amp;words=&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+-	  &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
+-	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
+-	&lt;/div&gt;
+-      &lt;/td&gt;
+-    &lt;/tr&gt;
+-  &lt;/table&gt;
+-  &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
+-  nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+-  name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+-  &lt;/body&gt;
++  &lt;div id=&quot;resultsDiv&quot;&gt;
++    &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
++      &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
++        &lt;td&gt;
++  	&lt;div class=&quot;resultItem&quot;&gt;
++  	  &lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot; /&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;&lt;td&gt;&lt;a class=&quot;docTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/download?docid=&lt;nevow:slot name=&quot;docid&quot; /&gt;&amp;words=&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
++  	  &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
++  	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
++  	&lt;/div&gt;
++        &lt;/td&gt;
++      &lt;/tr&gt;
++    &lt;/table&gt;
++    &lt;div class=&quot;prevnext&quot;&gt;&lt;a&gt;&lt;nevow:attr name=&quot;href&quot;
++    nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
++    name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
++    &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
++  &lt;/div&gt;
++ &lt;/body&gt;
+ &lt;/html&gt;
+
+Modified: trunk/maay/data/skeleton.html
+===================================================================
+--- trunk/maay/data/skeleton.html	2005-11-12 14:07:31 UTC (rev 440)
++++ trunk/maay/data/skeleton.html	2005-11-12 14:51:10 UTC (rev 441)
+@@ -9,12 +9,6 @@
+  
+   &lt;body&gt;
+     &lt;nevow:invisible nevow:macro=&quot;body&quot; /&gt;
+-      &lt;hr /&gt;
+-        &lt;table width=&quot;100%&quot;&gt;
+-        &lt;tr&gt;
+-          &lt;td valign=&quot;top&quot;&gt;&lt;small&gt;&lt;a href=&quot;<A HREF="http://maay.netofpeers.net/">http://maay.netofpeers.net/</A>&quot;&gt;Maay Home page&lt;/a&gt; &lt;/small&gt;&lt;/td&gt;
+-          &lt;td align=&quot;right&quot;&gt;&lt;img src=&quot;/images/logoFT.png&quot; /&gt;&lt;/td&gt;
+-        &lt;/tr&gt;
+-      &lt;/table&gt;
++    &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
+   &lt;/body&gt;  
+ &lt;/html&gt;
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-12 14:07:31 UTC (rev 440)
++++ trunk/maay/querier.py	2005-11-12 14:51:10 UTC (rev 441)
+@@ -23,6 +23,7 @@
+ __metaclass__ = type
+ 
+ import time
++import traceback
+ from math import sqrt, log
+ 
+ from zope.interface import Interface, implements
+@@ -30,7 +31,7 @@
+ from logilab.common.db import get_dbapi_compliant_module
+ 
+ from maay.dbentity import Document, FileInfo, \
+-     DocumentProvider, DocumentScore, Word, Node
++     DocumentProvider, DocumentScore, Word, Node, Result
+ from maay.texttool import normalizeText, WORDS_RGX, MAX_STORED_SIZE
+ 
+ class MaayAuthenticationError(Exception):
+@@ -107,12 +108,12 @@
+                 raise MaayAuthenticationError(&quot;Failed to authenticate user %r&quot;
+                                               % user)
+             except Exception, e:
+-                import traceback
+                 traceback.print_exc()
+                 raise MaayAuthenticationError(
+                     &quot;Failed to authenticate user %r [%s]&quot; % (user, e))
+         self._cnx = connection
+-
++        self.flushTemporaryTable()
++    
+     def _execute(self, query, args=None):
+         cursor = self._cnx.cursor()
+         results = []
+@@ -130,6 +131,9 @@
+             self._cnx.commit()
+         return results
+ 
++    def flushTemporaryTable(self):
++        self._execute('DELETE FROM results')
++        
+     def close(self):
+         self._cnx.close()
+         self._cnx = None
+@@ -287,7 +291,32 @@
+         nodes = Node.selectActive(cursor, nodeId, nbNodes) 
+         cursor.close()
+         return nodes
+-    
++
++    def getQueryResults(self, queryId, limit=15, offset=0):
++        &quot;&quot;&quot;builds and returns Result' instances by searching in
++        the temporary table built for &lt;queryId&gt;
++        &quot;&quot;&quot;
++        cursor = self._cnx.cursor()
++        results = Result.selectWhere(cursor, limit, offset, query_id=queryId)
++        cursor.close()
++        return results
++        
++    def pushDocuments(self, queryId, documents, provider=None):
++        &quot;&quot;&quot;push &lt;documents&gt; into the temporary table built for
++        &lt;queryId&gt;
++        &quot;&quot;&quot;
++        cursor = self._cnx.cursor()
++        try:
++            for document in documents:
++                res = Result.fromDocument(document, queryId, provider)
++                res.commit(cursor, update=False)
++            cursor.close()
++            self._cnx.commit()
++        except:
++            import traceback
++            traceback.print_exc()
++            self._cnx.rollback()
++        
+ class MaayQuerier(AnonymousQuerier):
+     &quot;&quot;&quot;High-Level interface to Maay SQL database.
+ 
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-12 14:07:31 UTC (rev 440)
++++ trunk/maay/webapplication.py	2005-11-12 14:51:10 UTC (rev 441)
+@@ -63,6 +63,8 @@
+     def macro_body(self, context):
+         return self.bodyFactory
+ 
++    def macro_footer(self, context):
++        return loaders.xmlfile(get_path_of('footer.html'))
+ 
+ class PeersList(MaayPage):
+     &quot;&quot;&quot;display list of registered peers&quot;&quot;&quot;
+@@ -192,6 +194,9 @@
+         #       differently in nevow SVN. It's now possible to insantiate directly
+         #       LivePage instances (which is great !), so we'll have to change
+         #       the implementation for next nevow release.
++        # NOTE2: another way to be sure that only the appopriate resource
++        #        starts the p2pquery (and registers callbacks) would be
++        #        to launch the query in the remote_conect() method
+         if len(inevow.IRemainingSegments(context)) &lt; 2:
+             self.query = Query.fromContext(context)
+             self.offset = self.query.offset
+@@ -203,11 +208,15 @@
+                                 self.query)
+             p2pquerier.sendQuery(p2pQuery)
+             p2pquerier.addAnswerCallback(p2pQuery.qid, self.onNewResults)
+-    
+-
++            self.queryId = p2pQuery.qid
++            self.querier = querier
++            
+     def data_results(self, context, data):
+         return self.results
+     
++    def macro_footer(self, context):
++        return loaders.xmlfile(get_path_of('footer.html'))
++
+     def render_title(self, context, data):
+         context.fillSlots('words', self.query.words)
+         context.fillSlots('start_result', min(len(self.results), self.offset + 1))
+@@ -255,15 +264,15 @@
+         return context.tag
+ 
+     def onNewResults(self, provider, results):
+-        #FIXME: do something with the provider info
+-        # r = mergeResults(self.results, results)
+-        # source = htmlize(r)
+-        self.results = [Document(**params) for params in results]
+-        page = PleaseCloseYourEyes(self.results, provider, self.query).renderSynchronously()
++        results = [Document(**params) for params in results]
++        self.querier.pushDocuments(self.queryId, results, provider)
++        results = self.querier.getQueryResults(self.queryId) # XXX offset, limit ?
++        page = PleaseCloseYourEyes(results, provider, self.query).renderSynchronously()
+         self.callRemote('updateResults', u'&lt;div&gt;%s&lt;/div&gt;' % page)
+ 
+     def remote_connect(self, context):
+         &quot;&quot;&quot;just here to start the connection between client and server (Ajax)&quot;&quot;&quot;
++        self.querier.pushDocuments(self.queryId, self.results, provider=None)
+         return 0
+ 
+ 
+@@ -273,26 +282,29 @@
+     quickly.
+     &quot;&quot;&quot;
+     docFactory = loaders.xmlstr(&quot;&quot;&quot;
+-  &lt;table xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+-    &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+-      &lt;td&gt;
+-	&lt;div class=&quot;resultItem&quot;&gt;
+-	  &lt;table&gt;
+-            &lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot;/&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;
+-                &lt;td&gt;
+-                 &lt;a class=&quot;distantDocTitle&quot;&gt;
+-                  &lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;distanturl&quot; /&gt;&lt;/nevow:attr&gt;
+-                  &lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;
+-                 &lt;/a&gt;
+-                &lt;/td&gt;
+-            &lt;/tr&gt;
+-          &lt;/table&gt;
+-          &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
+-	  &lt;span class=&quot;resultUrl&quot;&gt;(&lt;span nevow:render=&quot;peer&quot; /&gt;) - &lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
+-	&lt;/div&gt;
+-      &lt;/td&gt;
+-    &lt;/tr&gt;
+-  &lt;/table&gt;
++  &lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; &gt;
++    &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
++      &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
++        &lt;td&gt;
++          &lt;div class=&quot;resultItem&quot;&gt;
++            &lt;table&gt;
++              &lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot;/&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;
++                  &lt;td&gt;
++                   &lt;a class=&quot;distantDocTitle&quot;&gt;
++                    &lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;distanturl&quot; /&gt;&lt;/nevow:attr&gt;
++                    &lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;
++                   &lt;/a&gt;
++                  &lt;/td&gt;
++              &lt;/tr&gt;
++            &lt;/table&gt;
++            &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
++            &lt;span class=&quot;resultUrl&quot;&gt;(&lt;span nevow:render=&quot;peer&quot; /&gt;) - &lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
++          &lt;/div&gt;
++        &lt;/td&gt;
++      &lt;/tr&gt;
++    &lt;/table&gt;
++    &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
++  &lt;/div&gt;
+     &quot;&quot;&quot;)
+     
+     def __init__(self, results, provider, query):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000411.html">[Maay-svncheckins] r440 - in trunk/maay: . sql test
+</A></li>
+	<LI>Next message: <A HREF="000413.html">[Maay-svncheckins] r442 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#412">[ date ]</a>
+              <a href="thread.html#412">[ thread ]</a>
+              <a href="subject.html#412">[ subject ]</a>
+              <a href="author.html#412">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

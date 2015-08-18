@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r633 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r633%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511231721.jANHL7hV024001%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000604.html">
+   <LINK REL="Next"  HREF="000606.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r633 - in trunk/maay: . data</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r633%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511231721.jANHL7hV024001%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r633 - in trunk/maay: . data">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov 23 18:21:07 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000604.html">[Maay-svncheckins] r632 - in trunk/maay: . bin win32
+</A></li>
+        <LI>Next message: <A HREF="000606.html">[Maay-svncheckins] r634 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#605">[ date ]</a>
+              <a href="thread.html#605">[ thread ]</a>
+              <a href="subject.html#605">[ subject ]</a>
+              <a href="author.html#605">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-23 18:21:06 +0100 (Wed, 23 Nov 2005)
+New Revision: 633
+
+Modified:
+   trunk/maay/data/livefragment.html
+   trunk/maay/webapplication.py
+Log:
+Make apparent the chosen sort order
+
+
+Modified: trunk/maay/data/livefragment.html
+===================================================================
+--- trunk/maay/data/livefragment.html	2005-11-23 17:13:51 UTC (rev 632)
++++ trunk/maay/data/livefragment.html	2005-11-23 17:21:06 UTC (rev 633)
+@@ -3,19 +3,24 @@
+ 
+ &lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+   &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;b&gt;&lt;nevow:slot name=&quot;start_result&quot; /&gt;&lt;/b&gt; - &lt;b&gt;&lt;nevow:slot name=&quot;end_result&quot; /&gt;&lt;/b&gt; of &lt;b&gt;&lt;nevow:slot name=&quot;count&quot; /&gt;&lt;/b&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
+-  &lt;table&gt;
+-    &lt;tr&gt;
+-      &lt;td&gt;&lt;b&gt;Filter :&lt;/b&gt;&lt;/td&gt;
+-      &lt;td&gt;&lt;div class=&quot;localPublicResult&quot;&gt;&lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;local result&lt;/a&gt; (&lt;span nevow:render=&quot;localcount&quot; /&gt;)&lt;/div&gt;&lt;/td&gt;
+-      &lt;td&gt; - &lt;/td&gt;
+-      &lt;td&gt; &lt;div class=&quot;distantResult&quot;&gt;&lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;remote result&lt;/a&gt;(&lt;span nevow:render=&quot;distantcount&quot; /&gt;)&lt;/div&gt;&lt;/td&gt;
+-      &lt;td&gt;-&lt;/td&gt;
+-      &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;all results &lt;/a&gt;(&lt;span nevow:render=&quot;totalcount&quot; /&gt;)&lt;/td&gt;
+-    &lt;/tr&gt;
+-  &lt;/table&gt;
+-  &lt;div class=&quot;sortBar&quot;&gt;
+-    Sort by: &lt;a href=&quot;javascript: sortBy('relevance');&quot;&gt;relevance&lt;/a&gt; - &lt;a href=&quot;javascript: sortBy('popularity');&quot;&gt;popularity&lt;/a&gt; - &lt;a href=&quot;javascript: sortBy('publication_time');&quot;&gt;publication date&lt;/a&gt;
+-  &lt;/div&gt;
++    &lt;table&gt;
++      &lt;tr&gt;
++        &lt;td&gt;&lt;b&gt;Filter :&lt;/b&gt;&lt;/td&gt;
++        &lt;td&gt;&lt;div class=&quot;localPublicResult&quot;&gt;&lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;local result&lt;/a&gt; (&lt;span nevow:render=&quot;localcount&quot; /&gt;)&lt;/div&gt;&lt;/td&gt;
++        &lt;td&gt; - &lt;/td&gt;
++        &lt;td&gt; &lt;div class=&quot;distantResult&quot;&gt;&lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;remote result&lt;/a&gt;(&lt;span nevow:render=&quot;distantcount&quot; /&gt;)&lt;/div&gt;&lt;/td&gt;
++        &lt;td&gt;-&lt;/td&gt;
++        &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;all results &lt;/a&gt;(&lt;span nevow:render=&quot;totalcount&quot; /&gt;)&lt;/td&gt;
++        &lt;div class=&quot;sortBar&quot;&gt;
++          &lt;td&gt; - &lt;b&gt; Sorted by: &lt;/b&gt;&lt;/td&gt;
++          &lt;td&gt;&lt;a href=&quot;javascript: sortBy('relevance');&quot;&gt;&lt;div class=&quot;relevance&quot;&gt;&lt;span nevow:render=&quot;sort_rel&quot; /&gt;&lt;/div&gt;&lt;/a&gt;&lt;/td&gt;
++          &lt;td&gt; - &lt;/td&gt;
++          &lt;td&gt;&lt;a href=&quot;javascript: sortBy('popularity');&quot;&gt;&lt;div class=&quot;popularity&quot;&gt;&lt;span nevow:render=&quot;sort_pop&quot; /&gt;&lt;/div&gt;&lt;/a&gt;&lt;/td&gt;
++          &lt;td&gt; - &lt;/td&gt;
++          &lt;td&gt;&lt;a href=&quot;javascript: sortBy('publication_time');&quot;&gt;&lt;div class=&quot;publication&quot;&gt;&lt;span nevow:render=&quot;sort_pub&quot; /&gt;&lt;/div&gt;&lt;/a&gt;&lt;/td&gt;
++        &lt;/div&gt;
++      &lt;/tr&gt;
++    &lt;/table&gt;
+   &lt;center&gt;
+   &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
+   &lt;/center&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-23 17:13:51 UTC (rev 632)
++++ trunk/maay/webapplication.py	2005-11-23 17:21:06 UTC (rev 633)
+@@ -476,6 +476,21 @@
+         _, distantCount = self.querier.countResults(self.qid)
+         return distantCount
+ 
++    def render_sort_rel(self, context, data):
++        if self.query.order == 'relevance':
++            return '[relevance]'
++        return 'relevance'
++    
++    def render_sort_pop(self, context, data):
++        if self.query.order == 'popularity':
++            return '[popularity]'
++        return 'popularity'
++        
++    def render_sort_pub(self, context, data):
++        if self.query.order == 'publication_time':
++            return '[publication time]'
++        return 'publication time'
++
+     def render_totalcount(self, context, data):
+         localCount, distantCount = self.querier.countResults(self.qid)
+         return localCount + distantCount
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000604.html">[Maay-svncheckins] r632 - in trunk/maay: . bin win32
+</A></li>
+	<LI>Next message: <A HREF="000606.html">[Maay-svncheckins] r634 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#605">[ date ]</a>
+              <a href="thread.html#605">[ thread ]</a>
+              <a href="subject.html#605">[ subject ]</a>
+              <a href="author.html#605">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

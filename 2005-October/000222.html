@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r248 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r248%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510281207.j9SC7fHd028698%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000221.html">
+   <LINK REL="Next"  HREF="000223.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r248 - in trunk/maay: . test</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r248%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200510281207.j9SC7fHd028698%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r248 - in trunk/maay: . test">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Oct 28 14:07:41 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000221.html">[Maay-svncheckins] r247 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000223.html">[Maay-svncheckins] r249 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#222">[ date ]</a>
+              <a href="thread.html#222">[ thread ]</a>
+              <a href="subject.html#222">[ subject ]</a>
+              <a href="author.html#222">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-10-28 14:07:36 +0200 (Fri, 28 Oct 2005)
+New Revision: 248
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/indexer.py
+   trunk/maay/querier.py
+   trunk/maay/rpc.py
+   trunk/maay/test/test_querier.py
+Log:
+Big cosmetic rewrite : a new FutureDocument class is added. It is intended to hold the many parameters passed back and forth in indexDocuments and co and enhance, generally, readability. Feel free to complain :)
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-10-28 09:32:08 UTC (rev 247)
++++ trunk/maay/dbentity.py	2005-10-28 12:07:36 UTC (rev 248)
+@@ -123,7 +123,14 @@
+                                       for attr in self.boundAttributes()]))
+     def __repr__(self):
+         return str(self)
+-    
++
++
++class FutureDocument(DBEntity):
++    &quot;&quot;&quot;Represents a Document before it gets fed to the database&quot;&quot;&quot;
++    attributes = ('filename', 'title', 'text', 'fileSize', 'lastModificationTime',
++                  'content_hash', 'mime_type', 'state', 'file_state')
++    key = ('content_hash',)
++
+ class Document(DBEntity):
+     &quot;&quot;&quot;Represent a Document in the database
+     A Document is different from a file, because several files can store
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-10-28 09:32:08 UTC (rev 247)
++++ trunk/maay/indexer.py	2005-10-28 12:07:36 UTC (rev 248)
+@@ -34,7 +34,7 @@
+ 
+ from maay import converter
+ from maay.configuration import Configuration
+-from maay.dbentity import Document, FileInfo
++from maay.dbentity import FutureDocument, Document, FileInfo
+ from maay.querier import MaayAuthenticationError
+ from maay.texttool import removeControlChar
+ 
+@@ -142,9 +142,11 @@
+                 docId = makeDocumentId(filename)
+                 mime_type = mimetypes.guess_type(filename)[0]
+ 
+-                self.indexDocument(filename, title, text, fileSize,
+-                                   lastModificationTime,
+-                                   docId, mime_type, state)
++                self.indexDocument(FutureDocument(filename=filename, title=title, text=text,
++                                                  fileSize=fileSize,
++                                                  lastModificationTime=lastModificationTime,
++                                                  content_hash=docId, mime_type=mime_type,
++                                                  state=state))
+         return existingFiles
+         
+     def getLastIndexationTimeAndState(self, filename):
+@@ -154,26 +156,25 @@
+         lastTime, lastState = answer
+         return lastTime, lastState
+ 
+-    def indexDocument(self, filename, title, text, fileSize,
+-                      lastModTime, content_hash, mime_type, state,
+-                      file_state=FileInfo.CREATED_FILE_STATE):
++    def indexDocument(self, futureDoc):
++        futureDoc.file_state=FileInfo.CREATED_FILE_STATE
+         if self.verbose:
+-            print &quot;Requesting indexation of %s&quot; % filename,
++            print &quot;Requesting indexation of %s&quot; % futureDoc.filename,
+         try:
+-            title = removeControlChar(title) 
+-            text = removeControlChar(text)
++            futureDoc.title = removeControlChar(futureDoc.title) 
++            futureDoc.text = removeControlChar(futureDoc.text)
+             if self.verbose:
+-                print u'('+title.encode('utf-8')+u')'
+-            self.serverProxy.indexDocument(self.cnxId, filename, title, text,
+-                                           fileSize, lastModTime, content_hash,
+-                                           mime_type, state, file_state)
++                print u'('+futureDoc.title.encode('utf-8')+u')'
++            self.serverProxy.indexDocument(self.cnxId, futureDoc)
++
+         except (Fault, ProtocolError), exc:
+             if self.verbose:
+-                print &quot;An error occured on the server while indexing %s&quot; % filename.encode('iso-8859-1')
++                print &quot;An error occured on the server while indexing %s&quot; % \
++                      futureDoc.filename.encode('iso-8859-1')
+                 print exc
+                 print &quot;See server log for details&quot;
+             else:
+-                print &quot;Error indexing %s: %s&quot; % (filename.encode('iso-8859-1'), exc)
++                print &quot;Error indexing %s: %s&quot; % (futureDoc.filename.encode('iso-8859-1'), exc)
+         
+     
+      
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-28 09:32:08 UTC (rev 247)
++++ trunk/maay/querier.py	2005-10-28 12:07:36 UTC (rev 248)
+@@ -31,8 +31,8 @@
+ 
+ from logilab.common.db import get_dbapi_compliant_module
+ 
+-from maay.dbentity import Document, FileInfo, DocumentProvider, DocumentScore, \
+-     Word, Node
++from maay.dbentity import FutureDocument, Document, FileInfo, DocumentProvider, \
++     DocumentScore, Word, Node
+ from maay.texttool import normalizeText, WORDS_RGX, MAX_STORED_SIZE
+ 
+ class MaayAuthenticationError(Exception):
+@@ -56,8 +56,7 @@
+         &quot;&quot;&quot;returns a list of indexed file names as strings
+         &quot;&quot;&quot;
+ 
+-    def indexDocument(nodeId, filename, title, text, fileSize, lastModifiedOn,
+-                      content_hash, mime_type, state, file_state):
++    def indexDocument(nodeId, futureDoc):
+         &quot;&quot;&quot;Inserts or update information in table documents,
+         file_info, document_score and word&quot;&quot;&quot;
+ 
+@@ -331,45 +330,36 @@
+         print &quot;removed %d rows related to unreferenced documents&quot; % rows
+         return rows
+ 
+-    def indexDocument(self, nodeId, filename, title, text, fileSize, lastModifiedOn,
+-                      content_hash, mime_type, state, file_state):
++    def indexDocument(self, nodeId, futureDoc):
+         &quot;&quot;&quot;Inserts or update information in table documents,
+         file_info, document_score and word&quot;&quot;&quot;
+         # XXX Decide if we can compute the content_hash and mime_type
+         # ourselves or if the indexer should do it and pass the values as an argument
+         cursor = self._cnx.cursor()
+         # insert or update in table file_info
+-        fileinfo = FileInfo.selectWhere(cursor, file_name=filename)
++        fileinfo = FileInfo.selectWhere(cursor, file_name=futureDoc.filename)
+         # insert title into text to be able to find documents according
+         # to their title (e.g: searching 'foo' should find 'foo.pdf')
+-        text = '%s %s' % (title, text)
++        futureDoc.text = '%s %s' % (futureDoc.title, futureDoc.text)
+         if fileinfo:
+             fileinfo = fileinfo[0]
+-            fileinfo.file_time = lastModifiedOn
+-            fileinfo.state = state
+-            fileinfo.file_state = file_state
++            fileinfo.file_time = futureDoc.lastModificationTime
++            fileinfo.state = futureDoc.state
++            fileinfo.file_state = futureDoc.file_state
+             doc = Document.selectWhere(cursor,
+                                        db_document_id=fileinfo.db_document_id)
+-            if not doc or doc[0].document_id!=content_hash :
++            if not doc or doc[0].document_id!=futureDoc.content_hash :
+                 # no document was found or a document with another content
+                 # in both case, we create a new Document in database
+                 # (we don't want to modify the existing one, because it
+                 # can be shared by several files)
+-                doc = self._createDocument(cursor,
+-                                           content_hash,
+-                                           title,
+-                                           text,
+-                                           fileSize,
+-                                           lastModifiedOn,
+-                                           filename,
+-                                           mime_type,
+-                                           state)
++                doc = self._createDocument(cursor, futureDoc)
+                 fileinfo.db_document_id = doc.db_document_id
+             else:
+                 # document has not changed
+                 doc = doc[0]
+-                if doc.state != state:
+-                    doc.state = state
++                if doc.state != futureDoc.state:
++                    doc.state = futureDoc.state
+                     doc.commit(cursor, update=True)
+                 
+             fileinfo.commit(cursor, update=True)
+@@ -377,32 +367,24 @@
+         else:
+             # file unknown
+             # try to find a Document with same hash value
+-            doc = Document.selectWhere(cursor, document_id=content_hash)
++            doc = Document.selectWhere(cursor, document_id=futureDoc.content_hash)
+             if doc:
+                 doc = doc[0]
+-                doc.state = state
+-                doc.publication_time = max(doc.publication_time, lastModifiedOn)
++                doc.state = futureDoc.state
++                doc.publication_time = max(doc.publication_time, futureDoc.lastModificationTime)
+                 doc.commit(cursor, update=True)
+             else:
+-                doc = self._createDocument(cursor,
+-                                           content_hash,
+-                                           title,
+-                                           text,
+-                                           fileSize,
+-                                           lastModifiedOn,
+-                                           filename,
+-                                           mime_type,
+-                                           state)
+-                doc = Document.selectWhere(cursor, document_id=content_hash)[0]
++                doc = self._createDocument(cursor, futureDoc)
++                doc = Document.selectWhere(cursor, document_id=futureDoc.content_hash)[0]
+ 
+             fileinfo = FileInfo(db_document_id=doc.db_document_id,
+-                                 file_name=filename,
+-                                 file_time=lastModifiedOn,
+-                                 state=state,
+-                                 file_state=file_state)
++                                file_name=futureDoc.filename,
++                                file_time=futureDoc.lastModificationTime,
++                                state=futureDoc.state,
++                                file_state=futureDoc.file_state)
+             fileinfo.commit(cursor, update=False)
+ 
+-        self._updateScores(cursor, doc.db_document_id, text)
++        self._updateScores(cursor, doc.db_document_id, futureDoc.text)
+         provider = DocumentProvider.selectOrInsertWhere(cursor,
+                                           db_document_id=doc.db_document_id,
+                                           node_id=nodeId)[0]
+@@ -414,21 +396,21 @@
+         cursor.close()
+         self._cnx.commit()
+         
+-    def _createDocument(self, cursor, content_hash, title, text, fileSize,
+-                        lastModifiedOn, filename, mime_type, state):
+-        doc = Document(document_id=content_hash,
+-                       title=title,
+-                       text=text[:MAX_STORED_SIZE],
+-                       size=fileSize,
+-                       publication_time=lastModifiedOn,
++    def _createDocument(self, cursor, futureDoc):
++
++        doc = Document(document_id=futureDoc.content_hash,
++                       title=futureDoc.title,
++                       text=futureDoc.text[:MAX_STORED_SIZE],
++                       size=futureDoc.fileSize,
++                       publication_time=futureDoc.lastModificationTime,
+                        download_count=0.,
+-                       url=filename,
+-                       mime_type=mime_type,
++                       url=futureDoc.filename,
++                       mime_type=futureDoc.mime_type,
+                        matching=0.,
+                        indexed='1',
+-                       state=state)
++                       state=futureDoc.state)
+         doc.commit(cursor, update=False)
+-        doc = Document.selectWhere(cursor, document_id=content_hash)[0]
++        doc = Document.selectWhere(cursor, document_id=futureDoc.content_hash)[0]
+         return doc
+ 
+ def hoeffding_deviation(occurence, confidence=0.9):
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-10-28 09:32:08 UTC (rev 247)
++++ trunk/maay/rpc.py	2005-10-28 12:07:36 UTC (rev 248)
+@@ -25,7 +25,7 @@
+ ## from twisted.python.failure import Failure
+ 
+ from maay.querier import MaayQuerier, IQuerier, ANONYMOUS_AVATARID, WEB_AVATARID
+-from maay.dbentity import Document
++from maay.dbentity import FutureDocument, Document
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+ from maay.query import Query
+ 
+@@ -116,27 +116,27 @@
+             querier = self._sessions[cnxId]
+             return querier.removeUnreferencedDocuments()
+         return -1
+-                    
+-    def xmlrpc_indexDocument(self, cnxId, filename, title, text, fileSize,
+-                             lastModifiedOn, content_hash, mime_type, state,
+-                             file_state):
++
++    def xmlrpc_indexDocument(self, cnxId, futureDoc):
+         &quot;&quot;&quot;
+         :type title: xmlrpclib.Binary
+         :type text: xmlrpclib.Binary
+         &quot;&quot;&quot;
+-        filename = unicode(filename)
+-        title = unicode(title)
++        doc_dict = futureDoc
++        futureDoc = FutureDocument()
++        futureDoc.__dict__ = doc_dict
++        futureDoc.filename = unicode(futureDoc.filename)
++        futureDoc.title = unicode(futureDoc.title)
+         try:
+-            text = unicode(text)
++            futureDoc.text = unicode(futureDoc.text)
+         except UnicodeError, exc:
+             print exc
+             print `text`
+             return 1
+         if self.cnxIsValid(cnxId):
+             querier = self._sessions[cnxId]
+-            querier.indexDocument(self.nodeId, filename, title, text, fileSize,
+-                                  lastModifiedOn, content_hash, mime_type, state,
+-                                  file_state)
++            querier.indexDocument(self.nodeId, futureDoc)
++
+         return 0
+ 
+     def xmlrpc_distributedQuery(self, queryId, sender, ttl, words, mime_type):
+
+Modified: trunk/maay/test/test_querier.py
+===================================================================
+--- trunk/maay/test/test_querier.py	2005-10-28 09:32:08 UTC (rev 247)
++++ trunk/maay/test/test_querier.py	2005-10-28 12:07:36 UTC (rev 248)
+@@ -22,7 +22,7 @@
+ 
+ from logilab.common.testlib import MockConnection
+ from logilab.common.db import get_connection
+-from maay.querier import MaayQuerier, normalizeText, Document, FileInfo
++from maay.querier import MaayQuerier, normalizeText, FutureDocument, Document, FileInfo
+ 
+ 
+ 
+@@ -60,16 +60,16 @@
+         title = 'Le Tartuffe'
+         matchingDocs = Document.selectWhere(cursor, document_id=digest)
+         self.assertEquals(len(matchingDocs), 0)
+-        self.querier.indexDocument('0'*40,
+-                                   '/tmp/Tartuffe.txt',
+-                                   title,
+-                                   text,
+-                                   len(text),
+-                                   30000,
+-                                   digest,
+-                                   'text',
+-                                   Document.PUBLISHED_STATE,
+-                                   FileInfo.CREATED_FILE_STATE)
++        self.querier.indexDocument('0'*40, FutureDocument(
++            filename='/tmp/Tartuffe.txt',
++            title=title,
++            text=text,
++            fileSize=len(text),
++            lastModificationTime=30000,
++            content_hash=digest,
++            mime_type='text',
++            state=Document.PUBLISHED_STATE,
++            file_state=FileInfo.CREATED_FILE_STATE))
+         matchingDocs = Document.selectWhere(cursor, document_id=digest)
+         self.assertEquals(len(matchingDocs), 1)
+         self.assertEquals(matchingDocs[0].text, '%s %s' % (title, text))
+@@ -77,7 +77,6 @@
+ 
+     def test_normalizeText(self):
+         self.assertEquals(normalizeText(u&quot;&#201;t&#249;&#239;&#196;&#231;&quot;), &quot;etuiac&quot;)
+-
+-
++        
+ if __name__ == '__main__':
+     unittest.main()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000221.html">[Maay-svncheckins] r247 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000223.html">[Maay-svncheckins] r249 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#222">[ date ]</a>
+              <a href="thread.html#222">[ thread ]</a>
+              <a href="subject.html#222">[ subject ]</a>
+              <a href="author.html#222">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

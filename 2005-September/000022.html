@@ -1,0 +1,233 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r48 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r48%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509201203.j8KC3b6e030961%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000021.html">
+   <LINK REL="Next"  HREF="000023.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r48 - in trunk/maay: . test</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r48%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200509201203.j8KC3b6e030961%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r48 - in trunk/maay: . test">afayolle at berlios.de
+       </A><BR>
+    <I>Tue Sep 20 14:03:37 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000021.html">[Maay-svncheckins] r47 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000023.html">[Maay-svncheckins] r49 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22">[ date ]</a>
+              <a href="thread.html#22">[ thread ]</a>
+              <a href="subject.html#22">[ subject ]</a>
+              <a href="author.html#22">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-20 14:03:37 +0200 (Tue, 20 Sep 2005)
+New Revision: 48
+
+Added:
+   trunk/maay/test/test_dbentity.py
+Modified:
+   trunk/maay/dbentity.py
+Log:
+added a few tests, moved selectWhere to a static method, extracted selectQuery. 
+Renamed a few methods to mark them as &quot;private&quot;
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-09-19 13:15:54 UTC (rev 47)
++++ trunk/maay/dbentity.py	2005-09-20 12:03:37 UTC (rev 48)
+@@ -1,7 +1,7 @@
+ &quot;&quot;&quot;this module provides a simple document abstraction&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+-__all__ = ['Document', 'FileInfo', 'DocumentProvider', 'DocumentScore'
++__all__ = ['Document', 'FileInfo', 'DocumentProvider', 'DocumentScore',
+            'Word', 'Node', 'NodeInterest']
+ 
+ class DBEntity:
+@@ -11,7 +11,7 @@
+     
+     def __init__(self, **values):
+         for attrname, value in values.iteritems():
+-            assert attrname in self.attributes
++            assert attrname in self.attributes, 'Unknown attribute %s' % attrname
+             setattr(self, attrname, value)
+         for keyattr in self.key:
+             assert keyattr in self.attributes, \
+@@ -21,15 +21,20 @@
+         return dict([(attr, getattr(self, attr)) for attr in self.attributes])
+     stateDict = property(buildStateDict, doc=&quot;current object's state&quot;)
+ 
+-    def selectWhere(cls, cursor, **args):
+-        if args:
+-            wheres = ['%s=%%(%s)s' % (attr, attr) for attr in args]
+-            where =  'WHERE ' + ' AND '.join(wheres)
++    def _selectQuery(cls, whereColumns=()):
++        if whereColumns:
++            wheres = ['%s=%%(%s)s' % (attr, attr) for attr in whereColumns]
++            where =  ' WHERE ' + ' AND '.join(wheres)
+         else:
+             where = ''
+-        query = 'SELECT %s FROM %s %s' % (', '.join(cls.attributes),
++        query = 'SELECT %s FROM %s%s' % (', '.join(cls.attributes),
+                                                 cls.tableName,
+                                                 where)
++        return query
++    _selectQuery = classmethod(_selectQuery)
++
++    def selectWhere(cls, cursor, **args):
++        query = cls._selectQuery(args.keys())
+         cursor.execute(query, args)
+         results = cursor.fetchall()
+         return [cls(**dict(zip(cls.attributes, row))) for row in results]
+@@ -37,13 +42,13 @@
+     
+     def commit(self, cursor, update=False):
+         if update:
+-            query = self.updateQuery()
++            query = self._updateQuery()
+         else:
+-            query = self.insertQuery()
++            query = self._insertQuery()
+         cursor.execute(query, self.stateDict)
+         
+ 
+-    def updateQuery(self):
++    def _updateQuery(self):
+         &quot;&quot;&quot;generates an UPDATE query according to object's state&quot;&quot;&quot;
+         attrClauses = ['%s=%%(%s)s' % (attr, attr) for attr in self.attributes
+                        if getattr(self, attr, None)]
+@@ -54,7 +59,7 @@
+                                                where)
+         return query
+ 
+-    def insertQuery(self):
++    def _insertQuery(self):
+         &quot;&quot;&quot;generates an INSERT query according to object's state&quot;&quot;&quot;
+         values = ['%%(%s)s' % attr for attr in self.attributes
+                   if getattr(self, attr, None)]
+@@ -252,7 +257,7 @@
+      * fload download_count: sum of the weights of the downloads
+        divided by the length of the queries
+     &quot;&quot;&quot;
+-    table = 'words'
++    tableName = 'words'
+     attributes = ('word', 'claim_count', 'download_count')
+     key = ('word',)
+ 
+@@ -276,7 +281,7 @@
+      
+      * int bandwidth: constant for now (value = 10)
+     &quot;&quot;&quot;
+-    table = 'nodes'
++    tableName = 'nodes'
+     attributes = ('node_id', 'ip', 'port', 'last_seen_time', 'counter',
+                   'claim_count', 'affinity', 'bandwidth')
+     key = ('node_id',)
+@@ -298,7 +303,7 @@
+      * float expertise: interest of the node for a word compared to
+        other nodes
+     &quot;&quot;&quot;
+-    table = 'node_interests'
++    tableName = 'node_interests'
+     attributes = ('node_id', 'word', 'claim_count',
+                   'specialisation', 'expertise')
+     key = ('node_id', 'word')
+
+Added: trunk/maay/test/test_dbentity.py
+===================================================================
+--- trunk/maay/test/test_dbentity.py	2005-09-19 13:15:54 UTC (rev 47)
++++ trunk/maay/test/test_dbentity.py	2005-09-20 12:03:37 UTC (rev 48)
+@@ -0,0 +1,43 @@
++&quot;&quot;&quot;querier test cases&quot;&quot;&quot;
++
++import unittest
++from mimetypes import guess_type
++
++from logilab.common.testlib import MockConnection
++
++from maay.dbentity import *
++
++class NodeInterest_TC(unittest.TestCase):
++    def setUp(self):
++        self.entity = NodeInterest(node_id=&quot;0&quot;*40, word=&quot;espadon&quot;,claim_count=0.5,
++                              specialisation=.25, expertise = .75)
++
++    def tearDown(self):
++        pass
++
++    def testInsertQuery(self):
++        query = self.entity._insertQuery()
++        self.assertEquals(query,
++                          &quot;INSERT INTO node_interests (node_id, word, &quot;
++                          &quot;claim_count, specialisation, expertise) &quot;
++                          &quot;VALUES (%(node_id)s, %(word)s, %(claim_count)s, &quot;
++                          &quot;%(specialisation)s, %(expertise)s)&quot;)
++    def testUpdateQuery(self):
++        query = self.entity._updateQuery()
++        self.assertEquals(query,
++                          &quot;UPDATE node_interests SET node_id=%(node_id)s, word=%(word)s, &quot;
++                          &quot;claim_count=%(claim_count)s, &quot;
++                          &quot;specialisation=%(specialisation)s, expertise=%(expertise)s &quot;
++                          &quot;WHERE node_id=%(node_id)s AND word=%(word)s&quot;)
++
++    def testSelectQuery(self):
++        query = NodeInterest._selectQuery()
++        self.assertEquals(query,
++                          &quot;SELECT node_id, word, claim_count, specialisation, expertise FROM node_interests&quot;)
++    def testSelectQueryWhere(self):
++        query = NodeInterest._selectQuery(('word', 'node_id'))
++        self.assertEquals(query,
++                          &quot;SELECT node_id, word, claim_count, specialisation, expertise FROM node_interests WHERE word=%(word)s AND node_id=%(node_id)s&quot;)
++
++if __name__ == '__main__':
++    unittest.main()
+
+
+Property changes on: trunk/maay/test/test_dbentity.py
+___________________________________________________________________
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000021.html">[Maay-svncheckins] r47 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000023.html">[Maay-svncheckins] r49 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#22">[ date ]</a>
+              <a href="thread.html#22">[ thread ]</a>
+              <a href="subject.html#22">[ subject ]</a>
+              <a href="author.html#22">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

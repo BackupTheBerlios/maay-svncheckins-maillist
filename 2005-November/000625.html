@@ -1,0 +1,572 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r653 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r653%20-%20trunk/maay&In-Reply-To=%3C200511241809.jAOI9ftJ029257%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000623.html">
+   <LINK REL="Next"  HREF="000626.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r653 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r653%20-%20trunk/maay&In-Reply-To=%3C200511241809.jAOI9ftJ029257%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r653 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov 24 19:09:41 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000623.html">[Maay-svncheckins] r652 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000626.html">[Maay-svncheckins] r654 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#625">[ date ]</a>
+              <a href="thread.html#625">[ thread ]</a>
+              <a href="subject.html#625">[ subject ]</a>
+              <a href="author.html#625">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-24 19:09:28 +0100 (Thu, 24 Nov 2005)
+New Revision: 653
+
+Removed:
+   trunk/maay/indexerconfig.py
+   trunk/maay/nodeconfig.py
+Modified:
+   trunk/maay/configuration.py
+   trunk/maay/image.py
+   trunk/maay/indexer.py
+   trunk/maay/node.py
+   trunk/maay/p2pquerier.py
+   trunk/maay/query.py
+   trunk/maay/rpc.py
+   trunk/maay/webapplication.py
+Log:
+Another round of the infamous configuration saga
+
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/configuration.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -376,3 +376,7 @@
+     pass
+ 
+ 
++
++INDEXER_CONFIG = IndexerConfiguration()
++NODE_CONFIG = NodeConfiguration()
++
+
+Modified: trunk/maay/image.py
+===================================================================
+--- trunk/maay/image.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/image.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -47,7 +47,7 @@
+ 
+ ############## EXIF stuff
+ from maay.texttool import AbstractParser
+-from maay.indexerconfig import indexerConfig
++from maay.configuration import INDEXER_CONFIG
+ 
+ class ExifParser(AbstractParser):
+     &quot;&quot;&quot;A parser for Exif information found in image files&quot;&quot;&quot;
+@@ -57,7 +57,7 @@
+ 
+     def get_thumbnails_dir(self):
+         if not self.thumbnails_dir:
+-            self.thumbnails_dir = indexerConfig.get_thumbnails_dir()
++            self.thumbnails_dir = INDEXER_CONFIG.get_thumbnails_dir()
+         return self.thumbnails_dir
+ 
+     def parseFile(self, filepath, pristineFilename, encoding=None):
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/indexer.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -33,6 +33,8 @@
+ from xmlrpclib import ServerProxy, Fault, ProtocolError
+ import mimetypes
+ import socket
++from threading import Thread
++from twisted.python import log
+ 
+ from logilab.common.compat import set
+ 
+@@ -42,12 +44,9 @@
+ from maay.dbentity import FutureDocument, Document, FileInfo
+ from maay.querier import MaayAuthenticationError, MaayQuerier
+ from maay.texttool import removeControlChar
+-from threading import Thread
+-from twisted.python import log
++from maay.configuration import INDEXER_CONFIG
+ 
+-from maay.indexerconfig import indexerConfig
+ 
+-
+ class IIndexerObserver(Interface):
+ 
+     def newDocumentIndexed(filename, state):
+@@ -385,7 +384,7 @@
+ def run(observers=None):
+     try:
+         try:
+-            indexer = Indexer(indexerConfig, observers=observers)
++            indexer = Indexer(INDEXER_CONFIG, observers=observers)
+         except MaayAuthenticationError, exc:
+             print &quot;AuthenticationError:&quot;, exc
+             sys.exit(1)
+@@ -393,7 +392,7 @@
+     except socket.error, exc:
+         print &quot;Cannot contact Node:&quot;, exc
+         print &quot;Check that the Node is running on %s:%s&quot; % \
+-              (indexerConfig.host, indexerConfig.port)
++              (INDEXER_CONFIG.host, INDEXER_CONFIG.port)
+         sys.exit(1)
+ 
+ 
+@@ -414,7 +413,7 @@
+     return indexer_thread and indexer_thread.isAlive()
+ 
+ def runLocally(localQuerier, observers=None):
+-    indexer = LocalIndexer(indexerConfig, localQuerier, observers)
++    indexer = LocalIndexer(INDEXER_CONFIG, localQuerier, observers)
+     indexer.start()
+     
+ def start_as_thread(nodeConfig, webpage):
+@@ -437,7 +436,7 @@
+     thread.start()
+ 
+ def _just_one(querier, filepath):
+-    indexer = LocalIndexer(indexerConfig, querier)
++    indexer = LocalIndexer(INDEXER_CONFIG, querier)
+     print 'going to index file %s', filepath
+     try:
+         # log.startLogging(open('maay-indexer.log', 'w'))
+@@ -446,5 +445,5 @@
+         print fif
+ 
+ if __name__ == '__main__':
+-    indexerConfig.load()
++    INDEXER_CONFIG.load()
+     run()
+
+Deleted: trunk/maay/indexerconfig.py
+===================================================================
+--- trunk/maay/indexerconfig.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/indexerconfig.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -1,25 +0,0 @@
+-#     Maay : a network of peers for document search
+-#
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This program is free software; you can redistribute it and/or modify it
+-#     under the terms of the GNU General Public License as published by the
+-#     Free Software Foundation; either version 2 of the License, or (at your
+-#     option) any later version.
+-#     
+-#     This program is distributed in the hope that it will be useful, but
+-#     WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+-#     Public License for more details.
+-#     
+-#     You should have received a copy of the GNU General Public License along
+-#     with this program; if not, write to the Free Software Foundation, Inc.,
+-#     59 Temple Place - Suite 330, Boston, MA 02111-1307 USA.
+-#     
+-
+-
+-from maay.configuration import IndexerConfiguration
+-
+-indexerConfig = IndexerConfiguration()
+-
+-
+
+Modified: trunk/maay/node.py
+===================================================================
+--- trunk/maay/node.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/node.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -25,8 +25,6 @@
+ 
+ __revision__ = '$Id$'
+ 
+-from maay.nodeconfig import nodeConfig
+-
+ import platform
+ import sha
+ import time
+@@ -63,10 +61,15 @@
+ from maay import presenceclient
+ from maay.webapplication import Maay404, INodeConfiguration, SearchForm
+ from maay.localinfo import NODE_HOST
+-from maay.nodeconfig import NODE_PORT, NODE_ID
++from maay.configuration import NODE_CONFIG, INDEXER_CONFIG
+ 
++
+ ## nevow app/server setup ############################################
+ 
++NODE_ID = None
++NODE_PORT = None
++NODE_HOST = None
++
+ # MaayMindFactory might be helpful to access request informations
+ # in portal. (not sure it's really aimed to be used this way :-)
+ class MaayMindFactory:
+@@ -251,22 +254,29 @@
+     
+ def run():
+     log.startLogging(open('maay-node.log', 'w'))
+-    maayPortal = MaayPortal(nodeConfig)
++    NODE_CONFIG.load()
++    global NODE_ID, NODE_PORT, NODE_HOST
++    NODE_ID = NODE_CONFIG.get_node_id()
++    NODE_PORT = NODE_CONFIG.rpcserver_port
++    NODE_HOST = socket.gethostbyname(socket.gethostname())
++    INDEXER_CONFIG.load_from_files()
++    
++    maayPortal = MaayPortal(NODE_CONFIG)
+     website = appserver.NevowSite(MaaySessionWrapper(maayPortal,
+                                                      mindFactory=MaayMindFactory))
+     website.remember(Maay404(), inevow.ICanHandleNotFound)
+-    website.remember(nodeConfig, INodeConfiguration)
+-    presenceclient.notify(nodeConfig.presence_host,
+-                          nodeConfig.presence_port,
++    website.remember(NODE_CONFIG, INodeConfiguration)
++    presenceclient.notify(NODE_CONFIG.presence_host,
++                          NODE_CONFIG.presence_port,
+                           maayPortal.webQuerier,
+                           NODE_ID,
+-                          socket.gethostbyname(socket.gethostname()),
+-                          nodeConfig.rpcserver_port,
+-                          nodeConfig.bandwidth)
++                          NODE_HOST,
++                          NODE_PORT,
++                          NODE_CONFIG.bandwidth)
+     
+     rpcserver = server.Site(MaayRPCServer(maayPortal))
+-    reactor.listenTCP(nodeConfig.webserver_port, website)
+-    reactor.listenTCP(nodeConfig.rpcserver_port, rpcserver)
++    reactor.listenTCP(NODE_CONFIG.webserver_port, website)
++    reactor.listenTCP(NODE_CONFIG.rpcserver_port, rpcserver)
+     try:
+         try:
+             print &quot;-------------Starting Node mainloop-------------&quot;
+
+Deleted: trunk/maay/nodeconfig.py
+===================================================================
+--- trunk/maay/nodeconfig.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/nodeconfig.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -1,30 +0,0 @@
+-#     Maay : a network of peers for document search
+-#
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This library is free software; you can redistribute it and/or
+-#     modify it under the terms of the GNU General Public
+-#     License as published by the Free Software Foundation; either
+-#     version 2.1 of the License, or (at your option) any later version.
+-#
+-#     This library is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-#     General Public License for more details.
+-#
+-#     You should have received a copy of the GNU General Public
+-#     License along with this library; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-
+-
+-from maay.configuration import NodeConfiguration, IndexerConfiguration
+-
+-nodeConfig = NodeConfiguration()
+-nodeConfig.load()
+-indexerConfig = IndexerConfiguration()
+-indexerConfig.load_from_files()
+-
+-NODE_PORT = nodeConfig.rpcserver_port
+-NODE_ID = nodeConfig.get_node_id()
+-
+-QUERY_LIFE_TIME = nodeConfig.query_life_time
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/p2pquerier.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -36,9 +36,8 @@
+ from maay.texttool import makeAbstract, removeSpace, untagText
+ from maay.query import Query
+ from maay.localinfo import NODE_LOGIN, NODE_HOST
+-from maay.nodeconfig import NODE_PORT, NODE_ID, QUERY_LIFE_TIME
++from maay.configuration import NODE_CONFIG
+ 
+-
+ QUERIER = None
+ 
+ class QueryVersionMismatch(Exception):
+@@ -84,7 +83,7 @@
+         # *** default args are typically used from webapplication instantiation
+         # *** but NOT at rpc level, where we MUST use the transmited values
+         self.client_host = client_host or NODE_HOST
+-        self.client_port = client_port or NODE_PORT
++        self.client_port = client_port or NODE_CONFIG.rpcserver_port
+ 
+     #### qid accessors
+ 
+@@ -188,7 +187,7 @@
+         self._answerCallbacks = {}
+         # now, read a config. provided value for EXPIRATION_TIME
+         # and fire the garbage collector
+-        P2pQuerier._EXPIRATION_TIME = max(QUERY_LIFE_TIME,
++        P2pQuerier._EXPIRATION_TIME = max(NODE_CONFIG.query_life_time,
+                                           P2pQuerier._EXPIRATION_TIME)
+         reactor.callLater(self._EXPIRATION_TIME, self._markQueries)
+ 
+@@ -287,9 +286,9 @@
+ 
+         # provider is a 4-uple (login, node_id, IP, xmlrpc-port)
+         provider = (NODE_LOGIN,
+-                    NODE_ID,
++                    NODE_CONFIG.get_node_id(),
+                     NODE_HOST,
+-                    NODE_PORT)
++                    NODE_CONFIG.rpcserver_port)
+             
+         self.relayAnswer(P2pAnswer(query.qid, provider, documents))
+ 
+@@ -323,7 +322,7 @@
+                 #       of duplicates, so as to add a new provider entry ?
+                 print &quot;we already know this doc !!!@~^#{&quot;
+ 
+-        if query.sender != NODE_ID:
++        if query.sender != NODE_CONFIG.get_node_id():
+             self.querier.registerNodeActivity(answer.provider[1])
+             (host, port) = (query.client_host, query.client_port)
+             print &quot; ... relaying Answer to %s:%s ...&quot; % (host, port)
+@@ -331,7 +330,7 @@
+             proxy = Proxy(senderUrl)
+             d = proxy.callRemote('distributedQueryAnswer',
+                                  query.qid,
+-                                 NODE_ID,
++                                 NODE_CONFIG.get_node_id(),
+                                  answer.provider,
+                                  toSend) 
+             d.addErrback(answerQueryErrback(query))
+@@ -344,7 +343,7 @@
+         &quot;&quot;&quot;
+         nbNodes = 2**(max(5, query.ttl))
+         # TODO: use the neighbors' profiles to route requests
+-        return self.querier.getActiveNeighbors(NODE_ID, nbNodes)
++        return self.querier.getActiveNeighbors(NODE_CONFIG.get_node_id(), nbNodes)
+         
+ 
+ ##### Custommized errbacks for send/answer ops
+
+Modified: trunk/maay/query.py
+===================================================================
+--- trunk/maay/query.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/query.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -22,10 +22,8 @@
+ import sha
+ import time
+ 
+-from maay.nodeconfig import nodeConfig
++from maay.configuration import NODE_CONFIG
+ 
+-NODE_ID = nodeConfig.get_node_id()
+-
+ def normalizeMimetype(fileExtension):
+     import mimetypes
+     return mimetypes.types_map.get('.%s' % fileExtension)
+@@ -65,7 +63,7 @@
+     
+     def __init__(self, words, offset=0, filetype=None, filename=None,
+                  order=None, direction=None, qid=None):
+-        self.qid = qid or hashIt(NODE_ID, self)
++        self.qid = qid or hashIt(NODE_CONFIG.get_node_id(), self)
+         self.words = words # unicode string 
+         self.offset = offset
+         self.filetype = filetype
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/rpc.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -40,11 +40,7 @@
+ from maay.dbentity import FutureDocument, Document
+ from maay.p2pquerier import P2pQuerier, P2pQuery, P2pAnswer
+ from maay.query import Query
+-from maay.nodeconfig import nodeConfig
+ 
+-NODE_ID = nodeConfig.get_node_id()
+-
+-
+ def make_uid(username, password):
+     &quot;&quot;&quot;forge a unique identifier&quot;&quot;&quot;
+     # FIXME: need a better implementation
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-24 16:18:19 UTC (rev 652)
++++ trunk/maay/webapplication.py	2005-11-24 18:09:28 UTC (rev 653)
+@@ -40,16 +40,13 @@
+ 
+ from maay import VERSION
+ from maay.querier import IQuerier, WEB_AVATARID
+-from maay.configuration import get_path_of
+-from maay.nodeconfig import indexerConfig, NODE_ID
++from maay.configuration import get_path_of, INDEXER_CONFIG, NODE_CONFIG
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query, parseWords
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+ from maay.dbentity import ScoredDocument, Document
+ import maay.indexer as indexer
+ 
+-
+-
+ def _is_valid_directory(directory):
+     try:
+         mode = os.stat(directory)[stat.ST_MODE]
+@@ -134,8 +131,7 @@
+ 
+     def __init__(self):
+         athena.LivePage.__init__(self)
+-        self.indexerConfig = indexerConfig
+-        self.indexerConfig.load_from_files()
++        self.indexerConfig = INDEXER_CONFIG
+         self.msg = 'not running'
+ 
+     def macro_footer(self, context):
+@@ -263,7 +259,7 @@
+         MaayPage.__init__(self, maayId)
+         self.querier = querier
+         self.p2pquerier = p2pquerier
+-        self.download_dir = indexerConfig.download_dir
++        self.download_dir = INDEXER_CONFIG.download_dir
+ 
+     def render_custom_htmlheader(self, context):
+         return [
+@@ -294,23 +290,22 @@
+     def child_indexation(self, context, _factory=IndexationPageFactory(IndexationPage)):
+         alertMsg = &quot;&quot;
+         context.remember(self.querier, IQuerier)
++        INDEXER_CONFIG.load_from_files()
+         # TODO: check if the added folders are valid
+-
+         # Actions (add/remove) on private folders
+-
+         addPrivateFolder = context.arg('addPrivateFolder', 0)
+         if addPrivateFolder:
+             if _is_valid_directory(addPrivateFolder):
+-                indexerConfig.private_dir.append(addPrivateFolder)
+-                indexerConfig.save()
++                INDEXER_CONFIG.private_dir.append(addPrivateFolder)
++                INDEXER_CONFIG.save()
+             else:
+                 alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addPrivateFolder
+  
+         removePrivateFolder = context.arg('removePrivateFolder', 0)
+         if removePrivateFolder:
+             try:
+-                indexerConfig.private_dir.remove(removePrivateFolder)
+-                indexerConfig.save()
++                INDEXER_CONFIG.private_dir.remove(removePrivateFolder)
++                INDEXER_CONFIG.save()
+             except ValueError:
+                 print &quot;Folder '%s' not in the private directory list&quot;
+ 
+@@ -318,16 +313,16 @@
+         addPublicFolder = context.arg('addPublicFolder', 0)
+         if addPublicFolder:
+             if _is_valid_directory(addPublicFolder):
+-                indexerConfig.public_dir.append(addPublicFolder)
+-                indexerConfig.save()
++                INDEXER_CONFIG.public_dir.append(addPublicFolder)
++                INDEXER_CONFIG.save()
+             else:
+                 alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addPublicFolder
+  
+         removePublicFolder = context.arg('removePublicFolder', 0)
+         if removePublicFolder:
+             try:
+-                indexerConfig.public_dir.remove(removePublicFolder)
+-                indexerConfig.save()
++                INDEXER_CONFIG.public_dir.remove(removePublicFolder)
++                INDEXER_CONFIG.save()
+             except ValueError:
+                 print &quot;Folder '%s' not in the private directory list&quot;
+ 
+@@ -335,16 +330,16 @@
+         addSkippedFolder = context.arg('addSkippedFolder', 0)
+         if addSkippedFolder:
+             if _is_valid_directory(addSkippedFolder):
+-                indexerConfig.skip_dir.append(addSkippedFolder)
+-                indexerConfig.save()
++                INDEXER_CONFIG.skip_dir.append(addSkippedFolder)
++                INDEXER_CONFIG.save()
+             else:
+                 alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addSkippedFolder
+  
+         removeSkippedFolder = context.arg('removeSkippedFolder', 0)
+         if removeSkippedFolder:
+             try:
+-                indexerConfig.skip_dir.remove(removeSkippedFolder)
+-                indexerConfig.save()
++                INDEXER_CONFIG.skip_dir.remove(removeSkippedFolder)
++                INDEXER_CONFIG.save()
+             except ValueError:
+                 print &quot;Folder '%s' not in the private directory list&quot;
+ 
+@@ -637,7 +632,7 @@
+             self.p2pQuery = p2pQuery
+             # purge old results
+             self.querier.purgeOldResults()
+-            self.querier.pushDocuments(self.qid, results, NODE_ID, provider=None)
++            self.querier.pushDocuments(self.qid, results, NODE_CONFIG.get_node_id(), provider=None)
+             self.results = self.querier.getQueryResults(self.query)
+             
+     # XXX (refactoring): provide a common base class for LivePages
+@@ -650,7 +645,7 @@
+         
+     def onNewResults(self, provider, results):
+         results = [ScoredDocument(**params) for params in results]
+-        self.querier.pushDocuments(self.qid, results, NODE_ID, provider)
++        self.querier.pushDocuments(self.qid, results, NODE_CONFIG.get_node_id(), provider)
+         results = self.querier.getQueryResults(self.query,
+                                                onlyLocal=self.onlyLocal,
+                                                onlyDistant=self.onlyDistant)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000623.html">[Maay-svncheckins] r652 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000626.html">[Maay-svncheckins] r654 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#625">[ date ]</a>
+              <a href="thread.html#625">[ thread ]</a>
+              <a href="subject.html#625">[ subject ]</a>
+              <a href="author.html#625">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

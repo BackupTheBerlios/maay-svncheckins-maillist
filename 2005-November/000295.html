@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r319 - trunk/doc
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r319%20-%20trunk/doc&In-Reply-To=%3C200511071055.jA7AtDPn006813%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000294.html">
+   <LINK REL="Next"  HREF="000296.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r319 - trunk/doc</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r319%20-%20trunk/doc&In-Reply-To=%3C200511071055.jA7AtDPn006813%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r319 - trunk/doc">afayolle at berlios.de
+       </A><BR>
+    <I>Mon Nov  7 11:55:13 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000294.html">[Maay-svncheckins] r318 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000296.html">[Maay-svncheckins] r320 - trunk/doc
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#295">[ date ]</a>
+              <a href="thread.html#295">[ thread ]</a>
+              <a href="subject.html#295">[ subject ]</a>
+              <a href="author.html#295">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-07 11:55:11 +0100 (Mon, 07 Nov 2005)
+New Revision: 319
+
+Added:
+   trunk/doc/CR_20051107.rest
+Log:
+minutes of today's meeting
+
+Added: trunk/doc/CR_20051107.rest
+===================================================================
+--- trunk/doc/CR_20051107.rest	2005-11-07 10:29:20 UTC (rev 318)
++++ trunk/doc/CR_20051107.rest	2005-11-07 10:55:11 UTC (rev 319)
+@@ -0,0 +1,110 @@
++=========================================
++Compte rendu de la r&#233;union du 7 Nov. 2005
++=========================================
++
++Participants
++~~~~~~~~~~~~
++
++Joaquin Keller (FTRD)
++Fr&#233;d&#233;ric Dang Ngoc (FTRD)
++Alexandre Fayolle (Logilab)
++
++But de la r&#233;union
++~~~~~~~~~~~~~~~~~
++
++Dang NGoc a du temps pour travailler sur le code de Maay. La r&#233;union
++vise a identifier les t&#226;ches et &#224; les r&#233;partir entre FTRD et Logilab.
++
++&#201;ch&#233;ances
++~~~~~~~~~~
++
++D&#233;monstration publique le 30 Nov. 
++
++On a besoin d'une version distribuable le 15 Nov.
++
++Points abord&#233;s
++~~~~~~~~~~~~~~
++
++Installeurs
++----------
++
++Keller a install&#233; Maay r&#233;cemment sur une machine RedHat Fedora. Il a
++trouv&#233; la t&#226;che ardue en raison des d&#233;pendances requises dans des
++versions r&#233;centes. 
++
++Fayolle mentionne un travail en cours sur des paquets Debian.
++
++Keller note certains probl&#232;mes avec la d&#233;sinstallation de Maay sous
++Windows (&#233;chec si Maay est en cours d'ex&#233;cution, fichiers de la base
++de donn&#233;es MySQL encore pr&#233;sents sur le disque apr&#232;s la
++d&#233;sinstallation).
++
++L'installeur windows doit configurer automatiquement les r&#233;pertoires
++index&#233;s :
++
++ * r&#233;pertoire public : &quot;bureau\Maay Documents&quot; (&#224; cr&#233;er lors de
++   l'installation)
++
++ * r&#233;pertoires priv&#233;s : bureau de l'utilisateur, &quot;Mes Documents&quot;
++
++Requ&#234;tes distribu&#233;es
++--------------------
++
++Keller demande ce qui se passe si un Noeud Maay pervertit le protocol,
++par exemple en ne fermant pas une connexion r&#233;seau suite &#224; un appel
++xmlrpc. Fayolle r&#233;pond que la r&#233;ponse n'est pas connue. Il est conclu
++de noter ce probl&#232;me mais de ne pas le traiter pour le moment.
++
++Il faut s'assurer que l'&#233;chec de connexion &#224; un noeud est trait&#233;
++correctement.
++
++Pour ce qui est des r&#233;ponses &#224; une requ&#234;te distribu&#233;e :
++
++ * ne renvoyer que le texte correspondant au contexte de la requ&#234;te et
++   pas tout le texte du document stock&#233; en base
++
++ * ne renvoyer que les 10 documents les plus r&#233;cents
++
++L'affichage des r&#233;sultats doit se faire par un m&#233;canisme de
++rafra&#238;chissement de l'affichage par le navigateur web: premier
++affichage 1,5 secondes apr&#232;s l'envoi de la requ&#234;te distribu&#233;e,
++deuxi&#232;me affichage 5 secondes plus tard, troisi&#232;me et dernier
++affichage 15 secondes plus tard. Veiller &#224; ne pas r&#233;&#233;mettre la requ&#234;te
++lors des demandes de rafra&#238;chissement.
++
++Les documents affich&#233;s sur l'interface web doivent &#234;tre tri&#233;s par
++date, les plus r&#233;cents &#233;tant affich&#233;s en premier (&#224; d&#233;faut de
++ranking).
++
++Serveur d'enregistrement
++-------------------
++
++Keller dit que le serveur d'enregistrement devrait &#234;tre un serveur de
++pr&#233;sence. L'id&#233;e qu'un noeud se d&#233;senregistre est abandonn&#233;e. Par
++contre chaque noeud devra envoyer un message de pr&#233;sence toutes les
++heures, et le serveur d'enregistrement nettoiera les noeuds inactifs
++depuis plus d'une heure.
++
++Divers
++------
++
++Il faudrait changer les endroits o&#249; l'on parle de serveur (server)
++pour utiliser le terme noeud (node). 
++
++Conclusion de la r&#233;union
++~~~~~~~~~~~~~~~~~~~~~~~~
++
++Logilab s'occupe des requ&#234;tes distribu&#233;es et du renommage de server en
++node.
++
++FTRD s'occupe de transformer le serveur d'enregistrement en serveur de
++pr&#233;sence. 
++
++Les questions concernant les installeurs seront trait&#233;es une fois que
++les pr&#233;cents points auront &#233;t&#233; r&#233;solus.
++
++La prochaine r&#233;union aura lieu par t&#233;l&#233;phone le 9 Nov. &#224; 14h30.
++
++ -- Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;  Mon,  7 Nov 2005 11:53:09 +0100
++
++
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000294.html">[Maay-svncheckins] r318 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000296.html">[Maay-svncheckins] r320 - trunk/doc
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#295">[ date ]</a>
+              <a href="thread.html#295">[ thread ]</a>
+              <a href="subject.html#295">[ subject ]</a>
+              <a href="author.html#295">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r396 - in trunk/maay/data: . images
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r396%20-%20in%20trunk/maay/data%3A%20.%20images&In-Reply-To=%3C200511101108.jAAB8XpR015327%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000371.html">
+   <LINK REL="Next"  HREF="000373.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r396 - in trunk/maay/data: . images</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r396%20-%20in%20trunk/maay/data%3A%20.%20images&In-Reply-To=%3C200511101108.jAAB8XpR015327%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r396 - in trunk/maay/data: . images">dnf at berlios.de
+       </A><BR>
+    <I>Thu Nov 10 12:08:33 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000371.html">[Maay-svncheckins] r395 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000373.html">[Maay-svncheckins] r397 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#372">[ date ]</a>
+              <a href="thread.html#372">[ thread ]</a>
+              <a href="subject.html#372">[ subject ]</a>
+              <a href="author.html#372">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-10 12:08:30 +0100 (Thu, 10 Nov 2005)
+New Revision: 396
+
+Added:
+   trunk/maay/data/images/python_icon.png
+Modified:
+   trunk/maay/data/liveresults.html
+   trunk/maay/data/maay.css
+Log:
+Some esthetic modifications...
+
+
+Added: trunk/maay/data/images/python_icon.png
+===================================================================
+(Binary files differ)
+
+
+Property changes on: trunk/maay/data/images/python_icon.png
+___________________________________________________________________
+Name: svn:mime-type
+   + application/octet-stream
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-10 10:49:02 UTC (rev 395)
++++ trunk/maay/data/liveresults.html	2005-11-10 11:08:30 UTC (rev 396)
+@@ -25,14 +25,17 @@
+     &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+       &lt;table&gt;
+         &lt;tr&gt;
+-          &lt;td&gt;&lt;img src=&quot;images/smallmaay.png&quot; /&gt;&lt;/td&gt;
++          &lt;td&gt;&lt;a href=&quot;/&quot;&gt;&lt;img border=&quot;0&quot; src=&quot;images/smallmaay.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
+           &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;words&quot; nevow:render=&quot;searchfield&quot;&gt;&lt;nevow:attr name=&quot;value&quot; &gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;/input&gt;&lt;/td&gt;
+           &lt;td&gt;&lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;&lt;/td&gt;
+ 	&lt;/tr&gt;
+       &lt;/table&gt;
+     &lt;/form&gt;      
+   &lt;/div&gt;
+-  &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results for &quot;&lt;nevow:slot name=&quot;words&quot; /&gt;&quot;&lt;/div&gt;
++  &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
++  &lt;!--
++  &lt;div class=&quot;sort&quot;&gt;&lt;a href=&quot;&quot;&gt;Sort by date&lt;/a&gt; - &lt;a href=&quot;&quot;&gt;Sort by popularity&lt;/a&gt;&lt;/div&gt;
++  --&gt;
+   &lt;div id=&quot;resultsDiv&quot;&gt;&lt;/div&gt;
+   &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+     &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+@@ -49,4 +52,4 @@
+   nevow:render=&quot;prevset_url&quot;/&gt;Previous&lt;/a&gt; - &lt;a&gt;&lt;nevow:attr
+   name=&quot;href&quot; nevow:render=&quot;nextset_url&quot;/&gt;Next&lt;/a&gt;&lt;/div&gt;
+   &lt;/body&gt;
+-&lt;/html&gt;
+\ No newline at end of file
++&lt;/html&gt;
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-11-10 10:49:02 UTC (rev 395)
++++ trunk/maay/data/maay.css	2005-11-10 11:08:30 UTC (rev 396)
+@@ -77,6 +77,11 @@
+   border: 0px;
+ }
+ 
++div.sort {
++  font-size: 60%;
++  text-align: right;
++}
++
+ /** icon *******/
+ div.text_html {
+   /* display: block; */
+@@ -95,3 +100,12 @@
+   height: 16px;
+   background: url(images/txt_icon.png);
+ }
++
++div.text_x-python {
++  /* display: block; */
++  margin-bottom: 0px;
++  padding: 0 0 0 0;
++  width: 16px;
++  height: 16px;
++  background: url(images/python_icon.png);
++}
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000371.html">[Maay-svncheckins] r395 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000373.html">[Maay-svncheckins] r397 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#372">[ date ]</a>
+              <a href="thread.html#372">[ thread ]</a>
+              <a href="subject.html#372">[ subject ]</a>
+              <a href="author.html#372">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

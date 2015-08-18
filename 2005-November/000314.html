@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r338 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r338%20-%20trunk/maay&In-Reply-To=%3C200511081118.jA8BI719022864%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000313.html">
+   <LINK REL="Next"  HREF="000315.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r338 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r338%20-%20trunk/maay&In-Reply-To=%3C200511081118.jA8BI719022864%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r338 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 12:18:07 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000313.html">[Maay-svncheckins] r337 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000315.html">[Maay-svncheckins] r339 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#314">[ date ]</a>
+              <a href="thread.html#314">[ thread ]</a>
+              <a href="subject.html#314">[ subject ]</a>
+              <a href="author.html#314">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-08 12:18:07 +0100 (Tue, 08 Nov 2005)
+New Revision: 338
+
+Modified:
+   trunk/maay/presenceclient.py
+Log:
+Verbosify
+
+
+Modified: trunk/maay/presenceclient.py
+===================================================================
+--- trunk/maay/presenceclient.py	2005-11-08 11:16:51 UTC (rev 337)
++++ trunk/maay/presenceclient.py	2005-11-08 11:18:07 UTC (rev 338)
+@@ -72,6 +72,7 @@
+ def notify(reactor, regIP, regPort, querier, nodeId, nodeIP, xmlrpcPort, bandwidth):
+     &quot;&quot;&quot;registers and transmits the node catalog to querier.registerNode
+     &quot;&quot;&quot;
++    print &quot;PresenceClient notify %s %s&quot; % (nodeIP, xmlrpcPort)
+     if querier is not None:
+         c = ClientCreator(reactor, PresenceClient, querier.registerNode)
+         d = c.connectTCP(regIP, regPort)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000313.html">[Maay-svncheckins] r337 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000315.html">[Maay-svncheckins] r339 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#314">[ date ]</a>
+              <a href="thread.html#314">[ thread ]</a>
+              <a href="subject.html#314">[ subject ]</a>
+              <a href="author.html#314">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

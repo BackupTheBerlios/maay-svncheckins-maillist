@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r519 - in trunk: . maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r519%20-%20in%20trunk%3A%20.%20maay&In-Reply-To=%3C200511161346.jAGDkgDp016143%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000489.html">
+   <LINK REL="Next"  HREF="000491.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r519 - in trunk: . maay</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r519%20-%20in%20trunk%3A%20.%20maay&In-Reply-To=%3C200511161346.jAGDkgDp016143%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r519 - in trunk: . maay">adimasci at berlios.de
+       </A><BR>
+    <I>Wed Nov 16 14:46:42 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000489.html">[Maay-svncheckins] r518 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000491.html">[Maay-svncheckins] r520 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#490">[ date ]</a>
+              <a href="thread.html#490">[ thread ]</a>
+              <a href="subject.html#490">[ subject ]</a>
+              <a href="author.html#490">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-16 14:46:28 +0100 (Wed, 16 Nov 2005)
+New Revision: 519
+
+Modified:
+   trunk/ChangeLog
+   trunk/maay/p2pquerier.py
+Log:
+- use socket.gethostname() instead of 'anonymous' when
+  user's login could not be guessed
+- P2P queries now returns files' basename instead of 
+  absolute path (because os.path.basename() on the
+  originator's machine might give bad results if
+  platforms differ)
+
+Modified: trunk/ChangeLog
+===================================================================
+--- trunk/ChangeLog	2005-11-16 13:13:22 UTC (rev 518)
++++ trunk/ChangeLog	2005-11-16 13:46:28 UTC (rev 519)
+@@ -1,6 +1,6 @@
+ Maay-0.2.1 2005-11-16
+-        * Fixed bug preventing P2P queries from being processed on
+-        Windows
++        * Fixed bug #5647 caused by bad use of os.getlogin() preventing P2P
++	   queries from being processed on Windows
+         * Fixed off by one error in document abstract generation
+         * Fixed auto indexation of downloaded documents
+         * Fixed some display inconsistencies in web interface
+@@ -8,7 +8,7 @@
+         * Logging now happens in maay-node.log
+ 
+ Maay-0.2.0 2005-11-15
+-	* Added P2P queries
++        * Added P2P queries
+         * Added presence server
+         * Can launch indexation through web interface
+         * Maay node runs as a windows service
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-16 13:13:22 UTC (rev 518)
++++ trunk/maay/p2pquerier.py	2005-11-16 13:46:28 UTC (rev 519)
+@@ -57,7 +57,8 @@
+             guessed = os.environ.get(var)
+             if guessed:
+                 return guessed
+-        return 'anonymous'
++        # could not guess username, use host name
++        return socket.gethostname()
+ 
+ class QueryVersionMismatch(Exception):
+     &quot;&quot;&quot;we beginning a versionning nightmare trip on queries
+@@ -339,6 +340,8 @@
+         for document in answer.documents:
+             if not isinstance(document, dict):
+                 document = document.__dict__
++                if 'url' in document:
++                    document['url'] = os.path.basename(document['url'])
+             # TODO: record answer in database if local is False
+             # auc : to cache them ?
+             if not query.isKnown(document):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000489.html">[Maay-svncheckins] r518 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000491.html">[Maay-svncheckins] r520 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#490">[ date ]</a>
+              <a href="thread.html#490">[ thread ]</a>
+              <a href="subject.html#490">[ subject ]</a>
+              <a href="author.html#490">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

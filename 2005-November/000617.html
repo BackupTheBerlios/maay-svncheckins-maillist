@@ -1,0 +1,660 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r645 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r645%20-%20trunk/maay&In-Reply-To=%3C200511241156.jAOBulKh002548%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000616.html">
+   <LINK REL="Next"  HREF="000618.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r645 - trunk/maay</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r645%20-%20trunk/maay&In-Reply-To=%3C200511241156.jAOBulKh002548%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r645 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Thu Nov 24 12:56:47 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000616.html">[Maay-svncheckins] r644 - trunk
+</A></li>
+        <LI>Next message: <A HREF="000618.html">[Maay-svncheckins] r646 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#617">[ date ]</a>
+              <a href="thread.html#617">[ thread ]</a>
+              <a href="subject.html#617">[ subject ]</a>
+              <a href="author.html#617">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-24 12:56:42 +0100 (Thu, 24 Nov 2005)
+New Revision: 645
+
+Added:
+   trunk/maay/indexerconfig.py
+Modified:
+   trunk/maay/configuration.py
+   trunk/maay/converter.py
+   trunk/maay/dbentity.py
+   trunk/maay/image.py
+   trunk/maay/indexer.py
+   trunk/maay/node.py
+   trunk/maay/nodeconfig.py
+   trunk/maay/p2pquerier.py
+   trunk/maay/querier.py
+   trunk/maay/webapplication.py
+Log:
+Cleanup config stuff
+
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/configuration.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -92,22 +92,14 @@
+ class Configuration(BaseConfiguration):
+ 
+     config_file = None
+-    options = [
+-        ('config-name',
+-         {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;config-name&gt;&quot;, 'short' : &quot;C&quot;,
+-         'help' : &quot;allow to specify a config directory name&quot;,
+-          'default' : &quot;maay&quot;,
+-        }),
+-        ]
+ 
+-
+     def __init__(self, name=None):
+         BaseConfiguration.__init__(self, options=self.options,
+                                    config_file=self.config_file,
+                                    name=name)
+         
+     def load(self):
+-        self.load_command_line_configuration()
++        print &quot;loading %s configuration&quot; % self.name
+         self.load_from_files()
+         # then override with command-line options
+         self.load_command_line_configuration()
+@@ -118,11 +110,11 @@
+             self.load_file_configuration(path)
+ 
+     def get_config_dirs(self):
+-        if sys.platform == &quot;win32&quot;: # XXX: fix Win32 with self.config_name attr
++        if sys.platform == &quot;win32&quot;:
+             return [os.path.normpath(os.path.join(_get_data_dir(), '..'))]
+         else:
+-            return _filter_files_with([osp.join('/etc/', self.config_name),
+-                                       os.path.expanduser('~/.' + self.config_name),
++            return _filter_files_with([osp.join('/etc/maay'),
++                                       os.path.expanduser('~/.maay'),
+                                        '.'],
+                                       os.R_OK)
+ 
+@@ -141,7 +133,7 @@
+ ################ Web server, rpc server stuff
+ 
+ class NodeConfiguration(Configuration):
+-    options = Configuration.options + [
++    options =  [
+         ('db-name',
+          {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;dbname&gt;&quot;, 'short' : &quot;d&quot;,
+           'help' : &quot;name of the Maay database&quot;,
+@@ -269,7 +261,7 @@
+ 
+     
+ class IndexerConfiguration(Configuration):
+-    options = Configuration.options + [
++    options = [
+         ('host',
+          {'type' : &quot;string&quot;, 'metavar' : &quot;&lt;host&gt;&quot;, 'short' : &quot;H&quot;,
+           'help' : &quot;where Maay node can be found&quot;,
+@@ -314,6 +306,12 @@
+           'help': 'the indexer will skip this directory',
+           'default' : []
+           }),
++        ('download-dir',
++         {'type': 'string',
++          'metavar': '&lt;downloads&gt;',
++          'help': 'downloaded files will go there and be immediately indexed',
++          'default' : _default_download_dir()
++          }),
+        ('verbose',
+          {'type': 'yn',
+           'metavar': '&lt;y or n&gt;', 'short': 'v',
+@@ -326,11 +324,10 @@
+           'metavar' : '&lt;y or n&gt;',
+           'default' : False,
+           }),
+-        ('download-dir',
+-         {'type': 'string',
+-          'metavar': '&lt;downloads&gt;',
+-          'help': 'downloaded files will go there and be immediately indexed',
+-          'default' : _default_download_dir()
++        ('thumbnails-dir',
++         {'type' : &quot;string&quot;, 'metavar' : &quot;--thumbnailsdir&quot;,
++          'help' : &quot;Thumbnail files repository&quot;,
++          'default' : '.maay_thumbnails'
+           })
+         
+         ]
+@@ -339,13 +336,11 @@
+ 
+     def __init__(self):
+         Configuration.__init__(self, name=&quot;Indexer&quot;)
+-        if not self.download_dir:
+-            self.download_dir = _download_dir()
+ 
+-    def load(self):
+-        Configuration.load(self)
+-        if not osp.exists(self.download_dir):
+-            os.makedirs(self.download_dir)
++##     def load(self):
++##         Configuration.load(self)
++##         if not osp.exists(self.download_dir):
++##             os.makedirs(self.download_dir)
+ 
+     def save(self):
+         # FIXME: since there may be several configuration files, which
+@@ -358,35 +353,7 @@
+         except IOError, e:
+             print &quot;Cannot open file '%s' to update configuration&quot; % self.config_file
+ 
+-################ Image stuff 
+ 
+-class NoThumbnailsDir(Exception):
+-    &quot;&quot;&quot;Represents impossibility to access or create RW the
+-       maay thumbnails dir repository&quot;&quot;&quot;
+-    pass
+-
+-class ImageConfiguration(BaseConfiguration):
+-    options = Configuration.options + [
+-        ('thumbnails-dir',
+-         {'type' : &quot;string&quot;, 'metavar' : &quot;--thumbnailsdir&quot;,
+-          'help' : &quot;Thumbnail files repository&quot;,
+-          'default' : '.maay_thumbnails'},)]
+-    config_file = 'image.ini'
+-
+-    def __init__(self):
+-        BaseConfiguration.__init__(self, options=self.options,
+-                                   config_file=self.config_file,
+-                                   name='Image')
+-
+-    def load_command_line_configuration(self):
+-        &quot;&quot;&quot;We won't load command line stuff because ImageConfiguration
+-           is an auxiliary config thing which will purely and simply
+-           choke on the cmd-line args it doesn't know about
+-           Let's just pretend for now that thumbnail-dir can't be
+-           specified on command line.
+-        &quot;&quot;&quot;
+-        pass
+-
+     def get_thumbnails_dir(self):
+         &quot;&quot;&quot;Returns the complete path to Maay thumnails directory
+            XXX: It will try to create the dir if absent&quot;&quot;&quot;
+@@ -402,3 +369,10 @@
+             return path
+         else:
+             raise NoThumbnailsDir(&quot;Access to %s is impossible.&quot; % path)
++
++class NoThumbnailsDir(Exception):
++    &quot;&quot;&quot;Represents impossibility to access or create RW the
++       maay thumbnails dir repository&quot;&quot;&quot;
++    pass
++
++
+
+Modified: trunk/maay/converter.py
+===================================================================
+--- trunk/maay/converter.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/converter.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -157,7 +157,7 @@
+             return ExifParser()
+ except ImportError:
+     print &quot;Python Imaging Library not installed for your version of Python.&quot;,
+-    print &quot;Thumbnail support will not work.&quot;
++    print &quot;Thumbnail and EXIF support will not work.&quot;
+     
+ 
+ def uncompressFile(filepath, outputDir):
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/dbentity.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -32,8 +32,9 @@
+ 
+ from maay.texttool import normalizeText, WORD_MIN_LEN, WORD_MAX_LEN,\
+      WORDS_RGX
+-from maay.p2pquerier import NODE_ID
+ 
++
++
+ class DBEntity:
+     attributes = []
+     tableName = None
+@@ -361,7 +362,7 @@
+     key = ('document_id', 'query_id')
+     tableName = 'results'
+ 
+-    def fromDocument(document, qid, provider=None):
++    def fromDocument(document, qid, our_node_id, provider=None):
+         stateDict = document.__dict__ # document.stateDict is wrong
+         for key, value in stateDict.items():
+             if key not in Result.attributes or value is None:
+@@ -371,7 +372,7 @@
+         else:
+             stateDict['host'] = 'localhost'
+             stateDict['port'] = 0
+-            stateDict['node_id'] = NODE_ID # local node id
++            stateDict['node_id'] = our_node_id # local node id
+             stateDict['login'] = NODE_LOGIN
+         stateDict['query_id'] = qid
+         return Result(**stateDict)
+
+Modified: trunk/maay/image.py
+===================================================================
+--- trunk/maay/image.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/image.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -46,8 +46,8 @@
+ 
+ 
+ ############## EXIF stuff
+-from maay.configuration import ImageConfiguration as ImConfig
+ from maay.texttool import AbstractParser
++from maay.indexerconfig import indexerConfig
+ 
+ class ExifParser(AbstractParser):
+     &quot;&quot;&quot;A parser for Exif information found in image files&quot;&quot;&quot;
+@@ -57,7 +57,7 @@
+ 
+     def get_thumbnails_dir(self):
+         if not self.thumbnails_dir:
+-            self.thumbnails_dir = ImConfig().get_thumbnails_dir()
++            self.thumbnails_dir = indexerConfig.get_thumbnails_dir()
+         return self.thumbnails_dir
+ 
+     def parseFile(self, filepath, pristineFilename, encoding=None):
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/indexer.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -26,11 +26,7 @@
+ 
+ __revision__ = '$Id$'
+ 
+-from maay.configuration import IndexerConfiguration
+ 
+-indexerConfig = IndexerConfiguration()
+-indexerConfig.load()
+-
+ import os
+ import sys
+ import sha
+@@ -49,6 +45,9 @@
+ from threading import Thread
+ from twisted.python import log
+ 
++from maay.indexerconfig import indexerConfig
++
++
+ class IIndexerObserver(Interface):
+ 
+     def newDocumentIndexed(filename, state):
+@@ -441,6 +440,5 @@
+         print fif
+ 
+ if __name__ == '__main__':
++    indexerConfig.load()
+     run()
+-
+-
+
+Added: trunk/maay/indexerconfig.py
+===================================================================
+--- trunk/maay/indexerconfig.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/indexerconfig.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -0,0 +1,25 @@
++#     Maay : a network of peers for document search
++#
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify it
++#     under the terms of the GNU General Public License as published by the
++#     Free Software Foundation; either version 2 of the License, or (at your
++#     option) any later version.
++#     
++#     This program is distributed in the hope that it will be useful, but
++#     WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
++#     Public License for more details.
++#     
++#     You should have received a copy of the GNU General Public License along
++#     with this program; if not, write to the Free Software Foundation, Inc.,
++#     59 Temple Place - Suite 330, Boston, MA 02111-1307 USA.
++#     
++
++
++from maay.configuration import IndexerConfiguration
++
++indexerConfig = IndexerConfiguration()
++
++
+
+Modified: trunk/maay/node.py
+===================================================================
+--- trunk/maay/node.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/node.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -62,14 +62,11 @@
+ 
+ from maay import presenceclient
+ from maay.webapplication import Maay404, INodeConfiguration, SearchForm
++from maay.localinfo import NODE_HOST
++from maay.nodeconfig import NODE_PORT, NODE_ID
+ 
+-
+ ## nevow app/server setup ############################################
+ 
+-NODE_HOST = socket.gethostbyname(socket.gethostname())
+-NODE_PORT = nodeConfig.rpcserver_port
+-
+-
+ # MaayMindFactory might be helpful to access request informations
+ # in portal. (not sure it's really aimed to be used this way :-)
+ class MaayMindFactory:
+@@ -157,7 +154,7 @@
+             webQuerier = None
+         else:
+             realm.createUserSession(WEB_AVATARID, webQuerier)
+-            webQuerier.registerNode(self.config.get_node_id(),
++            webQuerier.registerNode(NODE_ID,
+                                     ip=NODE_HOST,
+                                     port=NODE_PORT,
+                                     bandwidth=nodeConfig.bandwidth)
+@@ -262,7 +259,7 @@
+     presenceclient.notify(nodeConfig.presence_host,
+                           nodeConfig.presence_port,
+                           maayPortal.webQuerier,
+-                          nodeConfig.get_node_id(),
++                          NODE_ID,
+                           socket.gethostbyname(socket.gethostname()),
+                           nodeConfig.rpcserver_port,
+                           nodeConfig.bandwidth)
+
+Modified: trunk/maay/nodeconfig.py
+===================================================================
+--- trunk/maay/nodeconfig.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/nodeconfig.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -17,7 +17,14 @@
+ #     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ 
+ 
+-from maay.configuration import NodeConfiguration
++from maay.configuration import NodeConfiguration, IndexerConfiguration
+ 
+ nodeConfig = NodeConfiguration()
+ nodeConfig.load()
++indexerConfig = IndexerConfiguration()
++indexerConfig.load_from_files()
++
++NODE_PORT = nodeConfig.rpcserver_port
++NODE_ID = nodeConfig.get_node_id()
++
++QUERY_LIFE_TIME = nodeConfig.query_life_time
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/p2pquerier.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -34,15 +34,11 @@
+ from twisted.web.xmlrpc import Proxy
+ from twisted.internet import reactor
+ from maay.texttool import makeAbstract, removeSpace, untagText
+-from maay.nodeconfig import nodeConfig
+ from maay.query import Query
+ from maay.localinfo import NODE_LOGIN, NODE_HOST
++from maay.nodeconfig import NODE_PORT, NODE_ID, QUERY_LIFE_TIME
+ 
+-nodeConfig.load()
+ 
+-NODE_PORT = nodeConfig.rpcserver_port
+-NODE_ID = nodeConfig.get_node_id()
+-
+ QUERIER = None
+ 
+ class QueryVersionMismatch(Exception):
+@@ -192,7 +188,7 @@
+         self._answerCallbacks = {}
+         # now, read a config. provided value for EXPIRATION_TIME
+         # and fire the garbage collector
+-        P2pQuerier._EXPIRATION_TIME = max(nodeConfig.query_life_time,
++        P2pQuerier._EXPIRATION_TIME = max(QUERY_LIFE_TIME,
+                                           P2pQuerier._EXPIRATION_TIME)
+         reactor.callLater(self._EXPIRATION_TIME, self._markQueries)
+ 
+@@ -300,8 +296,8 @@
+     def relayAnswer(self, answer): 
+         &quot;&quot;&quot;record and forward answers to a query.&quot;&quot;&quot;
+         print &quot;P2pQuerier relayAnswer : %s document(s) from %s:%s&quot; \
+-              % (len(answer.documents), answer.provider[1],
+-                 answer.provider[2])
++              % (len(answer.documents), answer.provider[2],
++                 answer.provider[3])
+         query = self._receivedQueries.get(answer.qid)
+         if not query :
+             query = self._sentQueries.get(answer.qid)
+@@ -323,6 +319,8 @@
+                 query.addMatch(document)
+                 toSend.append(document)
+             else:
++                #FIXME: shouldn't we add all documents regardless
++                #       of duplicates, so as to add a new provider entry ?
+                 print &quot;we already know this doc !!!@~^#{&quot;
+ 
+         if query.sender != NODE_ID:
+@@ -432,7 +430,7 @@
+         reactor.callLater(abs(CHECK_DELAY - right_now + now), checkOldest)
+ 
+ 
+-socket.setdefaulttimeout(30)
++#socket.setdefaulttimeout(30)
+ def nodeSleeps(node_ip, node_port):
+     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     try:
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/querier.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -34,6 +34,7 @@
+ from zope.interface import Interface, implements
+ 
+ from logilab.common.db import get_dbapi_compliant_module
++
+ from maay.dbentity import ScoredDocument, Document, FileInfo, \
+      DBEntity, DocumentProvider, DocumentScore, Word, Node, Result
+ from maay.texttool import normalizeText, WORDS_RGX, MAX_STORED_SIZE
+@@ -373,14 +374,14 @@
+         cursor.close()
+         return providers
+         
+-    def pushDocuments(self, qid, documents, provider=None):
++    def pushDocuments(self, qid, documents, our_node_id, provider=None):
+         &quot;&quot;&quot;push &lt;documents&gt; into the temporary table built for
+         &lt;qid&gt;
+         &quot;&quot;&quot;
+         cursor = self._cnx.cursor()
+         try:
+             for document in documents:
+-                res = Result.fromDocument(document, qid, provider)
++                res = Result.fromDocument(document, qid, our_node_id, provider)
+                 res.commit(cursor, update=False)
+             cursor.close()
+             self._cnx.commit()
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-24 10:12:25 UTC (rev 644)
++++ trunk/maay/webapplication.py	2005-11-24 11:56:42 UTC (rev 645)
+@@ -41,13 +41,15 @@
+ from maay import VERSION
+ from maay.querier import IQuerier, WEB_AVATARID
+ from maay.configuration import get_path_of
++from maay.nodeconfig import indexerConfig, NODE_ID
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query, parseWords
+ from maay.p2pquerier import P2pQuerier, P2pQuery
+ from maay.dbentity import ScoredDocument, Document
+-from maay import indexer 
++import maay.indexer as indexer
+ 
+ 
++
+ def _is_valid_directory(directory):
+     try:
+         mode = os.stat(directory)[stat.ST_MODE]
+@@ -132,7 +134,7 @@
+ 
+     def __init__(self):
+         athena.LivePage.__init__(self)
+-        self.indexerConfig = indexer.indexerConfig
++        self.indexerConfig = indexerConfig
+         self.indexerConfig.load_from_files()
+         self.msg = 'not running'
+ 
+@@ -261,7 +263,7 @@
+         MaayPage.__init__(self, maayId)
+         self.querier = querier
+         self.p2pquerier = p2pquerier
+-        self.download_dir = indexer.indexerConfig.download_dir
++        self.download_dir = indexerConfig.download_dir
+ 
+     def render_custom_htmlheader(self, context):
+         return [
+@@ -299,16 +301,16 @@
+         addPrivateFolder = context.arg('addPrivateFolder', 0)
+         if addPrivateFolder:
+             if _is_valid_directory(addPrivateFolder):
+-                indexer.indexerConfig.private_dir.append(addPrivateFolder)
+-                indexer.indexerConfig.save()
++                indexerConfig.private_dir.append(addPrivateFolder)
++                indexerConfig.save()
+             else:
+                 alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addPrivateFolder
+  
+         removePrivateFolder = context.arg('removePrivateFolder', 0)
+         if removePrivateFolder:
+             try:
+-                indexer.indexerConfig.private_dir.remove(removePrivateFolder)
+-                indexer.indexerConfig.save()
++                indexerConfig.private_dir.remove(removePrivateFolder)
++                indexerConfig.save()
+             except ValueError:
+                 print &quot;Folder '%s' not in the private directory list&quot;
+ 
+@@ -316,16 +318,16 @@
+         addPublicFolder = context.arg('addPublicFolder', 0)
+         if addPublicFolder:
+             if _is_valid_directory(addPublicFolder):
+-                indexer.indexerConfig.public_dir.append(addPublicFolder)
+-                indexer.indexerConfig.save()
++                indexerConfig.public_dir.append(addPublicFolder)
++                indexerConfig.save()
+             else:
+                 alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addPublicFolder
+  
+         removePublicFolder = context.arg('removePublicFolder', 0)
+         if removePublicFolder:
+             try:
+-                indexer.indexerConfig.public_dir.remove(removePublicFolder)
+-                indexer.indexerConfig.save()
++                indexerConfig.public_dir.remove(removePublicFolder)
++                indexerConfig.save()
+             except ValueError:
+                 print &quot;Folder '%s' not in the private directory list&quot;
+ 
+@@ -333,16 +335,16 @@
+         addSkippedFolder = context.arg('addSkippedFolder', 0)
+         if addSkippedFolder:
+             if _is_valid_directory(addSkippedFolder):
+-                indexer.indexerConfig.skip_dir.append(addSkippedFolder)
+-                indexer.indexerConfig.save()
++                indexerConfig.skip_dir.append(addSkippedFolder)
++                indexerConfig.save()
+             else:
+                 alertMsg = &quot;\\'%s\\' is not a valid folder&quot; % addSkippedFolder
+  
+         removeSkippedFolder = context.arg('removeSkippedFolder', 0)
+         if removeSkippedFolder:
+             try:
+-                indexer.indexerConfig.skip_dir.remove(removeSkippedFolder)
+-                indexer.indexerConfig.save()
++                indexerConfig.skip_dir.remove(removeSkippedFolder)
++                indexerConfig.save()
+             except ValueError:
+                 print &quot;Folder '%s' not in the private directory list&quot;
+ 
+@@ -481,17 +483,17 @@
+     def render_sort_rel(self, context, data):
+         if self.query.order == 'relevance':
+             return '[relevance]'
+-        return 'relevance'
++        return ' relevance '
+     
+     def render_sort_pop(self, context, data):
+         if self.query.order == 'popularity':
+             return '[popularity]'
+-        return 'popularity'
++        return ' popularity '
+         
+     def render_sort_pub(self, context, data):
+         if self.query.order == 'publication_time':
+             return '[publication time]'
+-        return 'publication time'
++        return ' publication time '
+ 
+     def render_totalcount(self, context, data):
+         localCount, distantCount = self.querier.countResults(self.qid)
+@@ -601,7 +603,7 @@
+             self.p2pQuery = p2pQuery
+             # purge old results
+             self.querier.purgeOldResults()
+-            self.querier.pushDocuments(self.qid, results, provider=None)
++            self.querier.pushDocuments(self.qid, results, NODE_ID, provider=None)
+             self.results = self.querier.getQueryResults(self.query)
+             
+     # XXX (refactoring): provide a common base class for LivePages
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000616.html">[Maay-svncheckins] r644 - trunk
+</A></li>
+	<LI>Next message: <A HREF="000618.html">[Maay-svncheckins] r646 - trunk/maay/data
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#617">[ date ]</a>
+              <a href="thread.html#617">[ thread ]</a>
+              <a href="subject.html#617">[ subject ]</a>
+              <a href="author.html#617">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

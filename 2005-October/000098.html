@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r125 - in trunk/maay: . data test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r125%20-%20in%20trunk/maay%3A%20.%20data%20test&In-Reply-To=%3C200510041517.j94FHHXg015934%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000097.html">
+   <LINK REL="Next"  HREF="000099.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r125 - in trunk/maay: . data test</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r125%20-%20in%20trunk/maay%3A%20.%20data%20test&In-Reply-To=%3C200510041517.j94FHHXg015934%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r125 - in trunk/maay: . data test">adimasci at berlios.de
+       </A><BR>
+    <I>Tue Oct  4 17:17:17 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000097.html">[Maay-svncheckins] r124 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000099.html">[Maay-svncheckins] r126 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#98">[ date ]</a>
+              <a href="thread.html#98">[ thread ]</a>
+              <a href="subject.html#98">[ subject ]</a>
+              <a href="author.html#98">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-10-04 17:15:33 +0200 (Tue, 04 Oct 2005)
+New Revision: 125
+
+Modified:
+   trunk/maay/data/maay.css
+   trunk/maay/data/resultpage.html
+   trunk/maay/dbentity.py
+   trunk/maay/querier.py
+   trunk/maay/server.py
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+- several minor UI changes. (essentially try to emphasis query's words
+  in the document's abstract)
+- had to add some small funcs / tests
+
+
+
+Modified: trunk/maay/data/maay.css
+===================================================================
+--- trunk/maay/data/maay.css	2005-10-04 14:00:50 UTC (rev 124)
++++ trunk/maay/data/maay.css	2005-10-04 15:15:33 UTC (rev 125)
+@@ -20,8 +20,13 @@
+   margin-bottom: 5px;
+ }
+ 
+-pre.resultDesc {
+-  font-size: 80%;
++div.resultDesc {
++  /* display: block; */
++  font-size: 90%;
++  font-family: &quot;New Century Schoolbook&quot;, serif;
++  margin-bottom: 0px;
++  padding: 0 0 0 0;
++  width: 40%;
+ }
+ 
+ a.docTitle {
+@@ -29,6 +34,9 @@
+ }
+ 
+ span.resultUrl {
++  font-size: 90%;
++  font-family: &quot;New Century Schoolbook&quot;, serif;
++  font-weight: bold;
+   color: green;
+   text-decoration: none;
+ }
+
+Modified: trunk/maay/data/resultpage.html
+===================================================================
+--- trunk/maay/data/resultpage.html	2005-10-04 14:00:50 UTC (rev 124)
++++ trunk/maay/data/resultpage.html	2005-10-04 15:15:33 UTC (rev 125)
+@@ -20,10 +20,8 @@
+ 	&lt;td&gt;
+ 	  &lt;div class=&quot;resultItem&quot;&gt;
+ 	    &lt;a class=&quot;docTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/download?docid=&lt;nevow:slot name=&quot;docid&quot; /&gt;&amp;words=&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;
+-	    &lt;pre class=&quot;resultDesc&quot;&gt;
+-	      &lt;nevow:slot name=&quot;abstract&quot;&gt;doc abstract&lt;/nevow:slot&gt;
+-	    &lt;/pre&gt;
+-	    &lt;span class=&quot;resultUrl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt;&lt;/span&gt;
++	    &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
++	    &lt;span class=&quot;resultUrl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
+ 	  &lt;/div&gt;
+ 	&lt;/td&gt;
+       &lt;/tr&gt;
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-10-04 14:00:50 UTC (rev 124)
++++ trunk/maay/dbentity.py	2005-10-04 15:15:33 UTC (rev 125)
+@@ -4,6 +4,8 @@
+ __all__ = ['Document', 'FileInfo', 'DocumentProvider', 'DocumentScore',
+            'Word', 'Node', 'NodeInterest']
+ 
++import re
++
+ from maay.texttool import normalizeText, WORD_MIN_LEN, WORD_MAX_LEN
+ 
+ class DBEntity:
+@@ -101,7 +103,7 @@
+     def __str__(self):
+         return '%s: %s' % (self.__class__.__name__,
+                            ', '.join(['%s=%s' % (attr, getattr(self, attr))
+-                                      for attr in self.attributes]))
++                                      for attr in self.boundAttributes()]))
+     def __repr__(self):
+         return str(self)
+     
+@@ -185,8 +187,7 @@
+             return u'%s MB' % (bytes / 10**6)
+         else:
+             return u'%s GB' % (bytes / 10**9)
+-
+-
++            
+     def get_abstract(self):
+         return self.text[:200]
+     abstract = property(get_abstract)
+@@ -210,7 +211,8 @@
+                         &quot;D.size, &quot;
+                         &quot;D.text, &quot;
+                         &quot;D.url, &quot;
+-                        &quot;D.mime_type &quot;
++                        &quot;D.mime_type, &quot;
++                        &quot;D.publication_time &quot;
+                  &quot;FROM documents D, document_scores DS &quot;
+                  &quot;WHERE DS.db_document_id=D.db_document_id &quot;
+                      &quot;AND DS.word IN (%s) &quot;
+@@ -227,7 +229,7 @@
+         if query:
+             cursor.execute(query, params)
+             results = cursor.fetchall()
+-            return [cls(**dict(zip(['db_document_id', 'document_id', 'title', 'size', 'text', 'url', 'mime_type'],
++            return [cls(**dict(zip(['db_document_id', 'document_id', 'title', 'size', 'text', 'url', 'mime_type', 'publication_time'],
+                                    row)))
+                     for row in results]
+         else:
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-10-04 14:00:50 UTC (rev 124)
++++ trunk/maay/querier.py	2005-10-04 15:15:33 UTC (rev 125)
+@@ -75,7 +75,6 @@
+         print &quot;hello ?&quot;
+         if connection is None:
+             dbapiMod = get_dbapi_compliant_module('mysql')
+-            print &quot;Got&quot;, dbapiMod
+             try:
+                 connection = dbapiMod.connect(host=host, database=database,
+                                               user=user, password=password,
+
+Modified: trunk/maay/server.py
+===================================================================
+--- trunk/maay/server.py	2005-10-04 14:00:50 UTC (rev 124)
++++ trunk/maay/server.py	2005-10-04 15:15:33 UTC (rev 125)
+@@ -2,6 +2,7 @@
+ 
+ __revision__ = '$Id$'
+ 
++from datetime import datetime
+ import warnings
+ warnings.filterwarnings(&quot;ignore&quot;, &quot;.*&quot;, DeprecationWarning, &quot;nevow.static&quot;)
+ warnings.filterwarnings(&quot;ignore&quot;, &quot;.*&quot;, DeprecationWarning, &quot;twisted.python.reflect&quot;)
+@@ -30,6 +31,7 @@
+ from maay.querier import MaayQuerier, IQuerier, MaayAuthenticationError
+ from maay.rpc import MaayRPCServer
+ from maay.configuration import get_path_of, Configuration
++from maay.texttool import makeAbstract
+ 
+ class MaayPage(rend.Page):
+     child_maaycss = static.File(get_path_of('maay.css'))
+@@ -106,7 +108,7 @@
+         self.results = results
+         self.query = unicode(query)
+ 
+-    def data_results(self, context, data):
++    def data_results(self, context, data):        
+         return self.results
+ 
+     def render_title(self, context, data):
+@@ -118,18 +120,20 @@
+         context.fillSlots('doctitle',  document.title)
+         # XXX abstract attribute should be a unicode string
+         try:
+-            abstract = normalize_text(unicode(document.abstract))
++            abstract = makeAbstract(document.text, self.query.split())
++            abstract = normalize_text(unicode(abstract))
+         except Exception, exc:
+             print exc
+             abstract = u'No abstract available for this document [%s]' % exc
+-        context.fillSlots('abstract', abstract)
++        context.fillSlots('abstract', tags.xml(abstract))
+         context.fillSlots('docid', document.db_document_id)
+         context.fillSlots('docurl', document.url)
+         context.fillSlots('words', self.query)
+         context.fillSlots('readable_size', document.readable_size())
++        date = datetime.fromtimestamp(document.publication_time)
++        context.fillSlots('publication_date', date.strftime('%d/%m/%Y'))
+         return context.tag
+ 
+-
+ ## nevow app/server setup ############################################
+ class MaayRealm:
+     &quot;&quot;&quot;simple realm for Maay application&quot;&quot;&quot;
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-10-04 14:00:50 UTC (rev 124)
++++ trunk/maay/test/test_texttool.py	2005-10-04 15:15:33 UTC (rev 125)
+@@ -1,10 +1,10 @@
+-# -*- coding: ISO-8859-1 -*-
++# -*- coding: iso-8859-1 -*-
+ &quot;&quot;&quot;unit tests for Text and HTML parsers&quot;&quot;&quot;
+ 
+ import unittest
+ from os.path import join, dirname
+ 
+-from maay.texttool import MaayHTMLParser, guessEncoding, open
++from maay.texttool import MaayHTMLParser, guessEncoding, open, untagText
+ 
+ ROW_TEXT = u&quot;foo &#233;t&#233; bar baz top bim bam boum&quot;
+ 
+@@ -103,5 +103,10 @@
+         self.assertEquals(type(data), unicode)
+         self.failUnless(u'ent&#234;te' in data)
+ 
++class UtilitiesTC(unittest.TestCase):
++    def testUntag(self):
++        text = 'Hello &lt;a href=&quot;foo.bar.com&quot;&gt;world &lt;b&gt;!&lt;/b&gt;&lt;/a&gt;&lt;img alt=&quot;&quot; /&gt;'
++        self.assertEquals(untagText(text), 'Hello world !')
++
+ if __name__ == '__main__':
+     unittest.main()
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-10-04 14:00:50 UTC (rev 124)
++++ trunk/maay/texttool.py	2005-10-04 15:15:33 UTC (rev 125)
+@@ -1,4 +1,4 @@
+-# -*- coding: ISO-8859-1 -*-
++# -*- coding: iso-8859-1 -*-
+ &quot;&quot;&quot;this module provide text / parsing tools&quot;&quot;&quot;
+ 
+ __revision__ = '$Id$'
+@@ -224,3 +224,36 @@
+     return ' '.join(text.split())
+ 
+ del _table
++
++
++def untagText(text):
++    &quot;&quot;&quot;remove every tag in &lt;text&gt;
++    &gt;&gt;&gt; text = &lt;a href=&quot;...&quot;&gt;hello &lt;b&gt;world&lt;/b&gt;&lt;/a&gt;
++    &gt;&gt;&gt; untagText(text)
++    hello world
++    &quot;&quot;&quot;
++    rgx = re.compile('&lt;.*?&gt;')
++    return rgx.sub('', text)
++    
++def makeAbstract(text, words):
++    &quot;&quot;&quot;return the original text with HTML emphasis tags
++    around &lt;words&gt; occurences
++    XXX: this is a quick and dirty implementation
++    &quot;&quot;&quot;
++    rgx = re.compile('|'.join(words), re.I)
++    text = untagText(text)
++    buf = []
++    size = 0
++    for occurence in rgx.finditer(text):
++        wordFound = occurence.group(0)
++        start, end = occurence.start(), occurence.end()
++        before = text[start-30:start-1]
++        after = text[end+1:end+30]
++        size += len(wordFound) + 60
++        buf.append('%s &lt;b&gt;%s&lt;/b&gt; %s' % (before, wordFound, after))
++        if size &gt;= 200:
++            break
++    else:
++        # case where we have less than 200 characters to display
++        print &quot;should do something sensible here&quot;
++    return ' &lt;b&gt;[...]&lt;/b&gt; '.join(buf)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000097.html">[Maay-svncheckins] r124 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000099.html">[Maay-svncheckins] r126 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#98">[ date ]</a>
+              <a href="thread.html#98">[ thread ]</a>
+              <a href="subject.html#98">[ subject ]</a>
+              <a href="author.html#98">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

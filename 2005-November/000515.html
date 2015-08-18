@@ -1,0 +1,369 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r544 - in trunk/maay: . data
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r544%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511171230.jAHCU7tm013995%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000514.html">
+   <LINK REL="Next"  HREF="000516.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r544 - in trunk/maay: . data</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r544%20-%20in%20trunk/maay%3A%20.%20data&In-Reply-To=%3C200511171230.jAHCU7tm013995%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r544 - in trunk/maay: . data">adimasci at berlios.de
+       </A><BR>
+    <I>Thu Nov 17 13:30:07 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000514.html">[Maay-svncheckins] r543 - in trunk/maay: . sql
+</A></li>
+        <LI>Next message: <A HREF="000516.html">[Maay-svncheckins] r545 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#515">[ date ]</a>
+              <a href="thread.html#515">[ thread ]</a>
+              <a href="subject.html#515">[ subject ]</a>
+              <a href="author.html#515">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-17 13:30:04 +0100 (Thu, 17 Nov 2005)
+New Revision: 544
+
+Added:
+   trunk/maay/data/livefragment.html
+Modified:
+   trunk/maay/data/liveresults.html
+   trunk/maay/webapplication.py
+Log:
+implemented the GUT for liveresults and PleaseCloseYourEyes' template file.
+
+
+
+Added: trunk/maay/data/livefragment.html
+===================================================================
+--- trunk/maay/data/livefragment.html	2005-11-17 11:58:13 UTC (rev 543)
++++ trunk/maay/data/livefragment.html	2005-11-17 12:30:04 UTC (rev 544)
+@@ -0,0 +1,38 @@
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
++    &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++
++&lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
++  &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;b&gt;&lt;nevow:slot name=&quot;start_result&quot; /&gt;&lt;/b&gt; - &lt;b&gt;&lt;nevow:slot name=&quot;end_result&quot; /&gt;&lt;/b&gt; of &lt;b&gt;&lt;nevow:slot name=&quot;count&quot; /&gt;&lt;/b&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
++  &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
++  &lt;table&gt;
++    &lt;tr&gt;
++      &lt;td&gt;&lt;div class=&quot;localPublicResult&quot;&gt;&lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;&lt;span nevow:render=&quot;localcount&quot; /&gt; local&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
++      &lt;td&gt; - &lt;/td&gt;
++      &lt;td&gt; &lt;div class=&quot;distantResult&quot;&gt;&lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;&lt;span nevow:render=&quot;distantcount&quot; /&gt; distant&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
++      &lt;td&gt;-&lt;/td&gt;
++      &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; all&lt;/a&gt;&lt;/td&gt;
++    &lt;/tr&gt;
++  &lt;/table&gt;
++  &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
++    &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
++      &lt;td&gt;
++	&lt;div&gt;
++	  &lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;resultClass&quot; /&gt;&lt;/nevow:attr&gt;
++	  &lt;table&gt;
++	    &lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot;/&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;
++	    &lt;td&gt;
++	      &lt;a&gt;
++		&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;url&quot; /&gt;&lt;/nevow:attr&gt;
++		&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;
++	      &lt;/a&gt;
++	    &lt;/td&gt;
++	    &lt;/tr&gt;
++	  &lt;/table&gt;
++	  &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
++	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;span nevow:render=&quot;peer&quot; /&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
++	&lt;/div&gt;
++      &lt;/td&gt;
++    &lt;/tr&gt;
++  &lt;/table&gt;
++  &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
++&lt;/div&gt;
+
+Modified: trunk/maay/data/liveresults.html
+===================================================================
+--- trunk/maay/data/liveresults.html	2005-11-17 11:58:13 UTC (rev 543)
++++ trunk/maay/data/liveresults.html	2005-11-17 12:30:04 UTC (rev 544)
+@@ -1,5 +1,5 @@
+ &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+-    &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
+ &lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; lang=&quot;en&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot;&gt;
+   &lt;head&gt;
+     &lt;title&gt;Live results&lt;/title&gt;
+@@ -9,78 +9,53 @@
+ 
+     &lt;script type='text/javascript' language='javascript'&gt;
+ function updateResults(source) {
+-  div = document.getElementById('resultsDiv');
+-  div.innerHTML = source;
++ div = document.getElementById('resultsDiv');
++ div.innerHTML = source;
+ }
++
+ function startConnection() {
+-  var d = server.callRemote('connect');
++ var d = server.callRemote('connect');
+ }
+ 
+ function browseResults(offset) {
+-  var d = server.callRemote('browseResults', offset);
+-  d.addCallback(updateResults);
++ var d = server.callRemote('browseResults', offset);
++ d.addCallback(updateResults);
+ }
+ 
+ function onlyLocalResults() {
+-  var d = server.callRemote('setLocalFlag', 1);
+-  d.addCallback(updateResults);
++ var d = server.callRemote('setLocalFlag', 1);
++ d.addCallback(updateResults);
+ }
+ 
+ function onlyDistantResults() {
+-  var d = server.callRemote('setDistantFlag', 1);
+-  d.addCallback(updateResults);
++ var d = server.callRemote('setDistantFlag', 1);
++ d.addCallback(updateResults);
+ }
+ 
+ function allResults() {
+-  var d = server.callRemote('unsetFlags');
+-  d.addCallback(updateResults);
++ var d = server.callRemote('unsetFlags');
++ d.addCallback(updateResults);
+ }
+-
+     &lt;/script&gt;
+ 
+   &lt;/head&gt;
+   &lt;body onload=&quot;startConnection()&quot;&gt;
+-  &lt;div class=&quot;headlinks&quot;&gt;&lt;a href=&quot;/indexation&quot; class=&quot;headlink&quot;&gt;[Indexation&nbsp;Page]&nbsp;&lt;/a&gt;&lt;/div&gt;
+-  &lt;div class=&quot;reSearch&quot;&gt;
+-    &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
+-      &lt;table&gt;
+-        &lt;tr&gt;
+-          &lt;td&gt;&lt;a href=&quot;/&quot;&gt;&lt;img border=&quot;0&quot; src=&quot;images/smallmaay.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
+-          &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;words&quot; nevow:render=&quot;searchfield&quot;&gt;&lt;nevow:attr name=&quot;value&quot; &gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;/input&gt;&lt;/td&gt;
+-          &lt;td&gt;&lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;&lt;/td&gt;
+-	&lt;/tr&gt;
+-      &lt;/table&gt;
+-    &lt;/form&gt;
+-  &lt;/div&gt;
+-  &lt;!--
+-    &lt;div class=&quot;sort&quot;&gt;&lt;a href=&quot;&quot;&gt;Sort by date&lt;/a&gt; - &lt;a href=&quot;&quot;&gt;Sort by popularity&lt;/a&gt;&lt;/div&gt;
+-  --&gt;
+-  &lt;div id=&quot;resultsDiv&quot;&gt;
+-   &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;nevow:slot name=&quot;start_result&quot; /&gt; - &lt;nevow:slot name=&quot;end_result&quot; /&gt; (&lt;nevow:slot name=&quot;count&quot; /&gt;) for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
+-   &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
+-   &lt;table&gt;
+-     &lt;tr&gt;
+-       &lt;td&gt;&lt;div class=&quot;localPublicResult&quot;&gt;&lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;&lt;span nevow:render=&quot;localcount&quot; /&gt; local&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
+-       &lt;td&gt; - &lt;/td&gt;
+-       &lt;td&gt; &lt;div class=&quot;distantResult&quot;&gt;&lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;&lt;span nevow:render=&quot;distantcount&quot; /&gt; distant&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
+-       &lt;td&gt;-&lt;/td&gt;
+-       &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; all&lt;/a&gt;&lt;/td&gt;
+-     &lt;/tr&gt;
+-   &lt;/table&gt;
+-    &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+-      &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+-        &lt;td&gt;
+-  	&lt;div&gt;
+-      &lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;resultClass&quot; /&gt;&lt;/nevow:attr&gt;
+-  	  &lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot; /&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;&lt;td&gt;&lt;a class=&quot;docTitle&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;/download?docid=&lt;nevow:slot name=&quot;docid&quot; /&gt;&amp;words=&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+-  	  &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
+-  	  &lt;span class=&quot;resultUrl&quot;&gt;&lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt;&lt;/nevow:attr&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
+-  	&lt;/div&gt;
+-        &lt;/td&gt;
+-      &lt;/tr&gt;
+-    &lt;/table&gt;
+-    &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
++    &lt;div class=&quot;headlinks&quot;&gt;&lt;a href=&quot;/indexation&quot; class=&quot;headlink&quot;&gt;[Indexation&nbsp;Page]&nbsp;&lt;/a&gt;&lt;/div&gt;
++    &lt;div class=&quot;reSearch&quot;&gt;
++      &lt;form action=&quot;search&quot; accept-charset=&quot;utf-8&quot;&gt;
++	&lt;table&gt;
++	  &lt;tr&gt;
++	    &lt;td&gt;&lt;a href=&quot;/&quot;&gt;&lt;img border=&quot;0&quot; src=&quot;images/smallmaay.png&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
++	    &lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;words&quot; nevow:render=&quot;searchfield&quot;&gt;&lt;nevow:attr name=&quot;value&quot; &gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/nevow:attr&gt;&lt;/input&gt;&lt;/td&gt;
++	    &lt;td&gt;&lt;input type=&quot;submit&quot; class=&quot;searchButton&quot; value=&quot;search&quot; /&gt;&lt;/td&gt;
++	  &lt;/tr&gt;
++	&lt;/table&gt;
++      &lt;/form&gt;
++    &lt;/div&gt;
++    &lt;!--
++      &lt;div class=&quot;sort&quot;&gt;&lt;a href=&quot;&quot;&gt;Sort by date&lt;/a&gt; - &lt;a href=&quot;&quot;&gt;Sort by popularity&lt;/a&gt;&lt;/div&gt;
++    --&gt;
++    &lt;nevow:invisible nevow:macro=&quot;resultset&quot; /&gt;
+     &lt;nevow:invisible nevow:macro=&quot;footer&quot; /&gt;
+-  &lt;/div&gt;
+- &lt;/body&gt;
++  &lt;/body&gt;
+ &lt;/html&gt;
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-17 11:58:13 UTC (rev 543)
++++ trunk/maay/webapplication.py	2005-11-17 12:30:04 UTC (rev 544)
+@@ -241,6 +241,9 @@
+ 
+     def macro_prevnext(self, context):
+         return loaders.xmlfile(get_path_of('prevnext.html'))
++
++    def macro_resultset(self, context):
++        return loaders.xmlfile(get_path_of('livefragment.html'))
+     
+     def render_title(self, context, data):
+         localCount, distantCount = self.querier.countResults(self.queryId)
+@@ -295,7 +298,12 @@
+         offset = self.query.offset - 15
+         return tags.xml('&lt;a href=&quot;javascript: browseResults(%s);&quot;&gt;Previous&lt;/a&gt;' % (offset))
+     
+-
++    def render_peer(self, context, data):
++        &quot;&quot;&quot;:type data: Result&quot;&quot;&quot;
++        if data.login is None:
++            return ''
++        return '%s (%s) - ' % (data.login, data.host)
++    
+     def render_row(self, context, data):
+         document = data
+         words = self.query.words #WORDS (was .split())
+@@ -312,13 +320,23 @@
+             print exc
+             abstract = u'No abstract available for this document [%s]' % exc
+         context.fillSlots('abstract', tags.xml(abstract))
+-        context.fillSlots('docid', document.document_id)
+         context.fillSlots('docurl', tags.xml(boldifyText(document.url, words)))
+         context.fillSlots('words', self.query.joinwords(' ')) #WORDS
+         context.fillSlots('readable_size', document.readable_size())
+         date = datetime.fromtimestamp(document.publication_time)
+         context.fillSlots('publication_date', date.strftime('%d %b %Y'))
+-        context.fillSlots('resultClass', &quot;localPublicResult&quot;)
++        if document.host == 'localhost':
++            baseurl = '/download?docid=%s' % (document.document_id,)
++            # TODO: make a difference between private and public results
++            context.fillSlots('resultClass', &quot;localPublicResult&quot;)
++        else:
++            baseurl = '/distantfile?docid=%s' % (document.document_id,)
++            context.fillSlots('resultClass', &quot;distantResult&quot;)
++            baseurl += '&amp;host=%s' % (document.host,)
++            baseurl += '&amp;port=%s' % (document.port,)
++        baseurl += '&amp;filename=%s' % osp.basename(document.url)
++        baseurl += '&amp;words=%s' % '+'.join(self.query.words)
++        context.fillSlots('url', baseurl)
+         return context.tag
+     
+ from nevow import athena, inevow
+@@ -422,44 +440,7 @@
+     It will be refactored later. The idea is to have something working
+     quickly.
+     &quot;&quot;&quot;
+-    docFactory = loaders.xmlstr(&quot;&quot;&quot;
+-  &lt;div id=&quot;resultsDiv&quot; xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xmlns:nevow=&quot;<A HREF="http://nevow.com/ns/nevow/0.1">http://nevow.com/ns/nevow/0.1</A>&quot; &gt;
+-   &lt;div class=&quot;message&quot; nevow:render=&quot;title&quot;&gt;Results &lt;b&gt;&lt;nevow:slot name=&quot;start_result&quot; /&gt;&lt;/b&gt; - &lt;b&gt;&lt;nevow:slot name=&quot;end_result&quot; /&gt;&lt;/b&gt; of &lt;b&gt;&lt;nevow:slot name=&quot;count&quot; /&gt;&lt;/b&gt; for &lt;b&gt;&lt;nevow:slot name=&quot;words&quot; /&gt;&lt;/b&gt;.&lt;/div&gt;
+-    &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
+-   &lt;table&gt;
+-     &lt;tr&gt;
+-       &lt;td&gt;&lt;div class=&quot;localPublicResult&quot;&gt;&lt;a href=&quot;javascript: onlyLocalResults();&quot;&gt;&lt;span nevow:render=&quot;localcount&quot; /&gt; local&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
+-       &lt;td&gt; - &lt;/td&gt;
+-       &lt;td&gt; &lt;div class=&quot;distantResult&quot;&gt;&lt;a href=&quot;javascript: onlyDistantResults();&quot;&gt;&lt;span nevow:render=&quot;distantcount&quot; /&gt; distant&lt;/a&gt;&lt;/div&gt;&lt;/td&gt;
+-       &lt;td&gt;-&lt;/td&gt;
+-       &lt;td&gt;&lt;a href=&quot;javascript: allResults();&quot;&gt;&lt;span nevow:render=&quot;totalcount&quot; /&gt; all&lt;/a&gt;&lt;/td&gt;
+-     &lt;/tr&gt;
+-   &lt;/table&gt;
+-    &lt;table class=&quot;results&quot; nevow:render=&quot;sequence&quot; nevow:data=&quot;results&quot;&gt;
+-      &lt;tr nevow:pattern=&quot;item&quot; nevow:render=&quot;row&quot;&gt;
+-        &lt;td&gt;
+-          &lt;div&gt;
+-            &lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;resultClass&quot; /&gt;&lt;/nevow:attr&gt;
+-            &lt;table&gt;
+-              &lt;tr&gt;&lt;td&gt;&lt;div&gt;&lt;nevow:attr name=&quot;class&quot;&gt;&lt;nevow:slot name=&quot;mime_type&quot;/&gt;&lt;/nevow:attr&gt;&lt;/div&gt;&lt;/td&gt;
+-                  &lt;td&gt;
+-                   &lt;a&gt;
+-                    &lt;nevow:attr name=&quot;href&quot;&gt;&lt;nevow:slot name=&quot;url&quot; /&gt;&lt;/nevow:attr&gt;
+-                    &lt;nevow:slot name=&quot;doctitle&quot;&gt;DOC TITLE&lt;/nevow:slot&gt;
+-                   &lt;/a&gt;
+-                  &lt;/td&gt;
+-              &lt;/tr&gt;
+-            &lt;/table&gt;
+-            &lt;div class=&quot;resultDesc&quot;&gt;&lt;nevow:slot name=&quot;abstract&quot; /&gt;&lt;/div&gt;
+-            &lt;span class=&quot;resultUrl&quot;&gt;&lt;span nevow:render=&quot;peer&quot; /&gt;&lt;nevow:slot name=&quot;docurl&quot; /&gt; - &lt;nevow:slot name=&quot;readable_size&quot; /&gt; - &lt;nevow:slot name=&quot;publication_date&quot; /&gt;&lt;/span&gt;
+-          &lt;/div&gt;
+-        &lt;/td&gt;
+-      &lt;/tr&gt;
+-    &lt;/table&gt;
+-    &lt;nevow:invisible nevow:macro=&quot;prevnext&quot; /&gt;
+-    &lt;nevow:invisble nevow:macro=&quot;footer&quot; /&gt;
+-  &lt;/div&gt;
+-    &quot;&quot;&quot;)
++    docFactory = loaders.xmlfile(get_path_of('livefragment.html'))
+     
+     def __init__(self, results, querier, query, queryId,
+                  onlyLocal=False, onlyDistant=False):
+@@ -470,28 +451,6 @@
+         self.onlyLocal = onlyLocal
+         self.onlyDistant = onlyDistant
+ 
+-    def render_peer(self, context, data):
+-        &quot;&quot;&quot;:type data: Result&quot;&quot;&quot;
+-        if data.login is None:
+-            return ''
+-        return '%s (%s) - ' % (data.login, data.host)
+-    
+-    def render_row(self, context, data):
+-        document = data
+-        ResultsPageMixIn.render_row(self, context, data)
+-        if document.host == 'localhost':
+-            baseurl = '/download?docid=%s' % (document.document_id,)
+-            # TODO: make a difference between private and public results
+-            context.fillSlots('resultClass', &quot;localPublicResult&quot;)
+-        else:
+-            baseurl = '/distantfile?docid=%s' % (document.document_id,)
+-            context.fillSlots('resultClass', &quot;distantResult&quot;)
+-            baseurl += '&amp;host=%s' % (document.host,)
+-            baseurl += '&amp;port=%s' % (document.port,)
+-        baseurl += '&amp;filename=%s' % osp.basename(document.url)
+-        baseurl += '&amp;words=%s' % '+'.join(self.query.words)
+-        context.fillSlots('url', baseurl)
+-        return context.tag
+ 
+ class ResultsPageFactory(athena.LivePageFactory):
+     def getLivePage(self, context):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000514.html">[Maay-svncheckins] r543 - in trunk/maay: . sql
+</A></li>
+	<LI>Next message: <A HREF="000516.html">[Maay-svncheckins] r545 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#515">[ date ]</a>
+              <a href="thread.html#515">[ thread ]</a>
+              <a href="subject.html#515">[ subject ]</a>
+              <a href="author.html#515">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

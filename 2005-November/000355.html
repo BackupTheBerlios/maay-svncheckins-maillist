@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r379 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r379%20-%20trunk/maay&In-Reply-To=%3C200511091702.jA9H2Jbh017020%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000354.html">
+   <LINK REL="Next"  HREF="000356.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r379 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r379%20-%20trunk/maay&In-Reply-To=%3C200511091702.jA9H2Jbh017020%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r379 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 18:02:19 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000354.html">[Maay-svncheckins] r378 - in trunk/maay: . test
+</A></li>
+        <LI>Next message: <A HREF="000356.html">[Maay-svncheckins] r380 - in trunk: . maay maay/configuration maay/configuration/win32
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#355">[ date ]</a>
+              <a href="thread.html#355">[ thread ]</a>
+              <a href="subject.html#355">[ subject ]</a>
+              <a href="author.html#355">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-09 18:02:17 +0100 (Wed, 09 Nov 2005)
+New Revision: 379
+
+Modified:
+   trunk/maay/p2pquerier.py
+Log:
+Add automatic periodic removal of old cached queries.
+
+
+Modified: trunk/maay/p2pquerier.py
+===================================================================
+--- trunk/maay/p2pquerier.py	2005-11-09 16:46:59 UTC (rev 378)
++++ trunk/maay/p2pquerier.py	2005-11-09 17:02:17 UTC (rev 379)
+@@ -26,7 +26,9 @@
+ from logilab.common.compat import set
+ 
+ from twisted.web.xmlrpc import Proxy
++from twisted.internet import reactor
+ from maay.texttool import makeAbstract, removeSpace, untagText
++from configuration import WebappConfiguration
+ 
+ def hashIt(item, uname=''.join(platform.uname())):
+     hasher = sha.sha()
+@@ -110,6 +112,8 @@
+     the statistical information available about the neighbors'
+     documents.
+     &quot;&quot;&quot;
++    _EXPIRATION_TIME = 10 # secs, this is a min default guard value
++    _markedQueries = {}
+     _receivedQueries = {} # key : queryId, val : query
+     _sentQueries = {}     
+     _answerCallbacks = []
+@@ -117,7 +121,42 @@
+     def __init__(self, nodeId, querier):
+         self.nodeId = nodeId  
+         self.querier = querier
++        reactor.callLater(20, self._markQueries)
++        # now, read a config. provided value for EXPIRATION_TIME
++        config = WebappConfiguration()
++        config.load()
++        P2pQuerier._EXPIRATION_TIME = max(config.query_life_time,
++                                          P2pQuerier._EXPIRATION_TIME)
+ 
++    def _markQueries(self):
++        queries = self._receivedQueries.keys() + self._sentQueries.keys()
++        stamp = time.time()
++        for q in queries:
++            if q not in self._markedQueries:
++                self._markedQueries[q] = stamp
++        reactor.callLater(self._EXPIRATION_TIME, self._expireQueries)
++        reactor.callLater(self._EXPIRATION_TIME+1, self._markQueries)
++
++    def _expireQueries(self):
++        curtime = time.time()
++        expiredQueries = []
++        for q in self._markedQueries:
++            if curtime - self._markedQueries[q] &gt; self._EXPIRATION_TIME:
++                expiredQueries.append(q)
++                try:
++                    del self._receivedQueries[q]
++                except:
++                    pass
++                try:
++                    del self._sentQueries[q]
++                except:
++                    pass
++        for q in expiredQueries:
++            del self._markedQueries[q]
++        if len(expiredQueries) &gt; 0:
++            print &quot;P2pQuerier garbage collected old queries : %s&quot; % \
++            expiredQueries
++
+     def sendQuery(self, query):
+         &quot;&quot;&quot;
+         :type query: `maay.p2pquerier.P2pQuery`
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000354.html">[Maay-svncheckins] r378 - in trunk/maay: . test
+</A></li>
+	<LI>Next message: <A HREF="000356.html">[Maay-svncheckins] r380 - in trunk: . maay maay/configuration maay/configuration/win32
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#355">[ date ]</a>
+              <a href="thread.html#355">[ thread ]</a>
+              <a href="subject.html#355">[ subject ]</a>
+              <a href="author.html#355">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

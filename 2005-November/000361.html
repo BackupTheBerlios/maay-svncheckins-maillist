@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r385 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r385%20-%20trunk&In-Reply-To=%3C200511091856.jA9IuA1m005832%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000360.html">
+   <LINK REL="Next"  HREF="000362.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r385 - trunk</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r385%20-%20trunk&In-Reply-To=%3C200511091856.jA9IuA1m005832%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r385 - trunk">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 19:56:10 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000360.html">[Maay-svncheckins] r384 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000362.html">[Maay-svncheckins] r386 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#361">[ date ]</a>
+              <a href="thread.html#361">[ thread ]</a>
+              <a href="subject.html#361">[ subject ]</a>
+              <a href="author.html#361">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 19:56:08 +0100 (Wed, 09 Nov 2005)
+New Revision: 385
+
+Added:
+   trunk/maayservice.py
+Modified:
+   trunk/maay.iss
+   trunk/setup.py
+Log:
+tried to build a service for the node. The registration still needs some work (dependency on mysql service not there yet)
+
+Modified: trunk/maay.iss
+===================================================================
+--- trunk/maay.iss	2005-11-09 18:54:51 UTC (rev 384)
++++ trunk/maay.iss	2005-11-09 18:56:08 UTC (rev 385)
+@@ -58,16 +58,16 @@
+ Filename: &quot;NET&quot;; Parameters:&quot;start MySQL&quot;; StatusMsg: &quot;Starting MySQL server&quot;; WorkingDir:&quot;{app}\mysql&quot;; Flags:runhidden
+ Filename: &quot;{app}\createdb.exe&quot;; StatusMsg: &quot;Installing database&quot;; WorkingDir:&quot;{app}&quot;; Flags:runhidden
+ Filename: &quot;{app}\updateconfig.exe&quot;; Parameters:&quot;&quot;&quot;{userdesktop}&quot;&quot; &quot;&quot;{userdocs}&quot;&quot;&quot;; WorkingDir:&quot;{app}&quot;; Flags:runhidden
+-;Filename: &quot;{app}\maay_server.exe&quot;; Parameters:&quot;--install Maay&quot;; StatusMsg: &quot;Registering Maay as a service&quot;; WorkingDir:&quot;{app}&quot;; Flags:runhidden
+-;Filename: &quot;NET&quot;; Parameters: &quot;start Maay&quot;; StatusMsg: &quot;Starting Maay node&quot;; Flags:runhidden
+-Filename: &quot;{app}\maay_server.exe&quot;; StatusMsg: &quot;Launching maay server&quot;; WorkingDir:&quot;{app}&quot;; Flags:postinstall nowait
++Filename: &quot;{app}\maay.exe&quot;; Parameters:&quot;-install&quot;; StatusMsg: &quot;Registering Maay as a service&quot;; WorkingDir:&quot;{app}&quot;; Flags:runhidden
++Filename: &quot;NET&quot;; Parameters: &quot;start Maay&quot;; StatusMsg: &quot;Starting Maay node&quot;; Flags:runhidden
++;Filename: &quot;{app}\maay_server.exe&quot;; StatusMsg: &quot;Launching maay server&quot;; WorkingDir:&quot;{app}&quot;; Flags:postinstall nowait
+ 
+ 
+ [UninstallRun]
+ Filename: &quot;NET&quot;; Parameters: &quot;stop MySQL&quot;; StatusMsg: &quot;Stopping MySQL database&quot;; Flags:runhidden
+-;Filename: &quot;NET&quot;; Parameters: &quot;stop Maay&quot;; StatusMsg: &quot;Stopping Maay node&quot;; Flags:runhidden
++Filename: &quot;NET&quot;; Parameters: &quot;stop Maay&quot;; StatusMsg: &quot;Stopping Maay node&quot;; Flags:runhidden
+ Filename: &quot;{app}\mysql\bin\mysqld-max-nt.exe&quot;; Parameters:&quot;--remove MySQL&quot;; StatusMsg: &quot;Unregistering MySQL as a service&quot;; WorkingDir:&quot;{app}\mysql&quot;; Flags:runhidden
+-;Filename: &quot;{app}\maay_server.exe&quot;; Parameters:&quot;--remove Maay&quot;; StatusMsg: &quot;Unregistering Maay as a service&quot;; WorkingDir:&quot;{app}\mysql&quot;; Flags:runhidden
++Filename: &quot;{app}\maay.exe&quot;; Parameters:&quot;-remove&quot;; StatusMsg: &quot;Unregistering Maay as a service&quot;; WorkingDir:&quot;{app}\mysql&quot;; Flags:runhidden
+ 
+ [UninstallDelete]
+ Type: filesandordirs; Name: {app}\mysql\
+
+Added: trunk/maayservice.py
+===================================================================
+--- trunk/maayservice.py	2005-11-09 18:54:51 UTC (rev 384)
++++ trunk/maayservice.py	2005-11-09 18:56:08 UTC (rev 385)
+@@ -0,0 +1,55 @@
++#     Copyright (C) 2005 France Telecom R&amp;D
++#
++#     This program is free software; you can redistribute it and/or modify
++#     it under the terms of the GNU General Public License as published by
++#     the Free Software Foundation; either version 2 of the License, or
++#     (at your option) any later version.
++#
++#     This program is distributed in the hope that it will be useful,
++#     but WITHOUT ANY WARRANTY; without even the implied warranty of
++#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#     GNU General Public License for more details.
++#
++#     You should have received a copy of the GNU General Public License
++#     along with this program; if not, write to the Free Software
++#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++import win32serviceutil
++import win32service
++import win32event
++import win32evtlogutil
++
++from twisted.internet import reactor
++
++class MyService(win32serviceutil.ServiceFramework):
++    _svc_name_ = &quot;Maay&quot;
++    _svc_display_name_ = &quot;Maay&quot;
++    _svc_deps_ = [&quot;EventLog&quot;]
++    def __init__(self, args):
++        win32serviceutil.ServiceFramework.__init__(self, args)
++
++    def SvcStop(self):
++        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
++        reactor.stop()
++
++    def SvcDoRun(self):
++        import servicemanager
++        from maay.server import run
++        win32evtlogutil.ReportEvent(self._svc_name_,
++                                    servicemanager.PYS_SERVICE_STARTED,
++                                    0, # category
++                                    servicemanager.EVENTLOG_INFORMATION_TYPE,
++                                    (self._svc_name_, ''))
++
++        run()
++        # and write a 'stopped' event to the event log.
++        win32evtlogutil.ReportEvent(self._svc_name_,
++                                    servicemanager.PYS_SERVICE_STOPPED,
++                                    0, # category
++                                    servicemanager.EVENTLOG_INFORMATION_TYPE,
++                                    (self._svc_name_, ''))
++
++
++if __name__ == '__main__':
++    # Note that this code will not be run in the 'frozen' exe-file!!!
++    win32serviceutil.HandleCommandLine(MyService)
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-11-09 18:54:51 UTC (rev 384)
++++ trunk/setup.py	2005-11-09 18:56:08 UTC (rev 385)
+@@ -54,13 +54,19 @@
+ 			    script = 'maay/updateconfig.py',
+ 			    dest_base = &quot;updateconfig&quot;)
+ 
++maay_service = Target(description = &quot;The Maay service&quot;,
++                      modules = [&quot;maayservice&quot;],
++                      dest_base = &quot;Maay&quot;)
++
+ if sys.platform == 'win32':
+ 	import py2exe
+         if len(sys.argv) == 1:
+             sys.argv.append('py2exe')
+             
+         
+-	setup(console = [maay_server, maay_indexer, createdb, updateConfig],
++	setup(console = [maay_server, maay_indexer,
++                         createdb, updateConfig],
++              service = [maay_service],
+ 		name = name,
+ 		version = version,
+ 		description = description,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000360.html">[Maay-svncheckins] r384 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000362.html">[Maay-svncheckins] r386 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#361">[ date ]</a>
+              <a href="thread.html#361">[ thread ]</a>
+              <a href="subject.html#361">[ subject ]</a>
+              <a href="author.html#361">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

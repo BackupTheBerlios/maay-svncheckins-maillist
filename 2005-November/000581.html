@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r609 - in trunk/maay: . sql
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r609%20-%20in%20trunk/maay%3A%20.%20sql&In-Reply-To=%3C200511221733.jAMHXvNk023123%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000580.html">
+   <LINK REL="Next"  HREF="000582.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r609 - in trunk/maay: . sql</H1>
+    <B>aurelienc at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r609%20-%20in%20trunk/maay%3A%20.%20sql&In-Reply-To=%3C200511221733.jAMHXvNk023123%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r609 - in trunk/maay: . sql">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov 22 18:33:57 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000580.html">[Maay-svncheckins] r608 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000582.html">[Maay-svncheckins] r610 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#581">[ date ]</a>
+              <a href="thread.html#581">[ thread ]</a>
+              <a href="subject.html#581">[ subject ]</a>
+              <a href="author.html#581">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-22 18:33:57 +0100 (Tue, 22 Nov 2005)
+New Revision: 609
+
+Modified:
+   trunk/maay/dbentity.py
+   trunk/maay/sql/mysql.sql
+Log:
+Update result entity to store relevance and popularity
+
+
+Modified: trunk/maay/dbentity.py
+===================================================================
+--- trunk/maay/dbentity.py	2005-11-22 17:30:47 UTC (rev 608)
++++ trunk/maay/dbentity.py	2005-11-22 17:33:57 UTC (rev 609)
+@@ -127,8 +127,6 @@
+         return '%s: %s' % (self.__class__.__name__,
+                            ', '.join(['%s=%s' % (attr, getattr(self, attr))
+                                       for attr in self.boundAttributes()]))
+-##     def __repr__(self):
+-##         return str(self)
+ 
+ 
+ class FutureDocument:
+@@ -141,9 +139,11 @@
+             assert attrname in self.attributes, 'Unknown attribute %s' % attrname
+             setattr(self, attrname, value)
+ 
++#TODO : shoot me !
+ class DocumentOrder:
+     &quot;&quot;&quot;a small helper class to translate search criteria
+        from crystal-clear high-level stuff to SQL junk&quot;&quot;&quot;
++    # This is really strongly coupled with Document._selectContaining
+     
+     orders = {'publication_time' : 1,
+               'score_relevance'  : 2,
+@@ -167,16 +167,28 @@
+             raise NotImplemented(&quot;Document direction %s is unkown&quot; %
+                                  direction)
+ 
+-    def __str__(self):
++    def sqlOrder(self):
+         if self.order == 1:
+             res = &quot;ORDER BY D.publication_time &quot; 
+         elif self.order == 2:
+             res = &quot;ORDER BY DS.relevance &quot; 
+         else:
+-            res = &quot;ORDER BY DS.popularity&quot;
++            res = &quot;ORDER BY DS.popularity &quot;
+         return res + self.direction
+ 
++    def sqlCriterium(self):
++        return (&quot;D.publication_time, &quot;
++                &quot;DS.relevance, &quot;
++                &quot;DS.popularity &quot;)
++        # yes, code below is currently unreachable
++        if self.order == 1:
++            return &quot;D.publication_time &quot;
++        elif self.order == 1:
++            return &quot;DS.relevance &quot;
++        else:
++            return &quot;DS.popularity &quot;
+ 
++
+ class Document(DBEntity):
+     &quot;&quot;&quot;Represent a Document in the database
+     A Document is different from a file, because several files can store
+@@ -270,9 +282,8 @@
+ 
+     # XXX Please rewrite this method. The way we build the SQL
+     #     query is quite messy
+-    def _selectContainingQuery(cls, words, mimetype=None, offset=0,
+-                               limit=None, allowPrivate=False,
+-			       order=None):
++    def _selectContainingQuery(cls, words, order, mimetype=None, offset=0,
++                               limit=None, allowPrivate=False):
+         # XXX mimetype handling is a HACK. It needs to be integrated
+         #     nicely in order to handle any kind of restrictions easily
+         #word = WORDS_RGX.finditer(normalizeText(' '.join(words)))
+@@ -285,8 +296,6 @@
+         if not allowPrivate:
+             restriction += &quot; AND D.state!=%s &quot;
+             restrictionParams.append(cls.PRIVATE_STATE)
+-	# just translate the plain-text ordering to SQL stuff
+-	sql_order = order or str(DocumentOrder('publication_time'))
+         # Question: what is the HAVING clause supposed to do ?
+         # Answer: we select all documents containing one of the words
+         # that we are looking for, group them by their identifier, and
+@@ -299,14 +308,15 @@
+                         &quot;D.size, &quot;
+                         &quot;D.text, &quot;
+                         &quot;D.url, &quot;
+-                        &quot;D.mime_type, &quot;
+-                        &quot;D.publication_time &quot;
+-                 &quot;FROM documents D, document_scores DS &quot;
+-                 &quot;WHERE DS.db_document_id=D.db_document_id &quot;
+-                 &quot;AND DS.word IN (%s) &quot;
+-                 &quot; %s &quot;
+-                 &quot;GROUP BY DS.db_document_id &quot;
+-                 &quot;HAVING count(DS.db_document_id) = %%s &quot;) + sql_order
++                        &quot;D.mime_type, &quot;)
++        query += order.sqlCriterium()
++        query += (&quot;FROM documents D, document_scores DS &quot;
++                  &quot;WHERE DS.db_document_id=D.db_document_id &quot;
++                  &quot;AND DS.word IN (%s) &quot;
++                  &quot; %s &quot;
++                  &quot;GROUP BY DS.db_document_id &quot;
++                  &quot;HAVING count(DS.db_document_id) = %%s &quot;)
++        query += order.sqlOrder()
+ 	query = query % (', '.join(['%s'] * len(words)), restriction)
+         # XXX SQL: how to specify only the OFFSET ???????
+         if limit or offset:
+@@ -321,12 +331,12 @@
+         print &quot;Document selectContaining %s&quot; % words
+         if not words:
+             return []
+-	doc_order = str(DocumentOrder(order, direction))
+-        query, params = cls._selectContainingQuery(words, mimetype,
++        doc_order = DocumentOrder(order, direction)
++        query, params = cls._selectContainingQuery(words, doc_order,
++                                                   mimetype=mimetype,
+                                                    offset=offset,
+                                                    limit=limit,
+-                                                   allowPrivate=allowPrivate,
+-						   order=doc_order)
++                                                   allowPrivate=allowPrivate)
+         if query:
+             cursor.execute(query, params)
+             results = cursor.fetchall()
+@@ -365,7 +375,8 @@
+        they contain documents matching both local and distributed requests
+     &quot;&quot;&quot;
+     attributes = ('document_id', 'query_id', 'node_id', 'mime_type',
+-                  'title', 'size', 'text', 'publication_time', 'url',
++                  'title', 'size', 'text', 'publication_time',
++                  'score_relevance', 'score_popularity', 'url',
+                   'host', 'port', 'login', 'record_ts')
+     key = ('document_id', 'query_id')
+     tableName = 'results'
+@@ -567,7 +578,7 @@
+ 	query = cls._selectQuery()
+         query += (&quot; WHERE node_id != %s AND last_seen_time &gt; last_sleep_time&quot;
+                   &quot; ORDER BY last_seen_time DESC LIMIT %s&quot;)
+-         return query
++        return query
+     _selectActiveNodesQuery = classmethod(_selectActiveNodesQuery)
+ 
+     def _selectRegisteredNodesQuery(cls):
+
+Modified: trunk/maay/sql/mysql.sql
+===================================================================
+--- trunk/maay/sql/mysql.sql	2005-11-22 17:30:47 UTC (rev 608)
++++ trunk/maay/sql/mysql.sql	2005-11-22 17:33:57 UTC (rev 609)
+@@ -148,7 +148,6 @@
+  
+ 
+ CREATE TABLE `results` (
+---  `db_document_id` varchar(40) NOT NULL,
+   `document_id` varchar(40) NOT NULL default '',
+   `query_id` varchar(64) NOT NULL,
+   `node_id` char(40) NOT NULL default '',
+@@ -157,6 +156,8 @@
+   `size` int(11) default NULL,
+   `text` text,
+   `publication_time` int(14) default NULL,
++  `score_relevance` int(14) default NULL,
++  `score_popularity` int(14) default NULL,
+   `url` varchar(255) NOT NULL default '',
+   `host` varchar(15),
+   `port` int(11), -- check this
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000580.html">[Maay-svncheckins] r608 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000582.html">[Maay-svncheckins] r610 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#581">[ date ]</a>
+              <a href="thread.html#581">[ thread ]</a>
+              <a href="subject.html#581">[ subject ]</a>
+              <a href="author.html#581">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

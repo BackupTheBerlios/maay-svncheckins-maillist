@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r669 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r669%20-%20trunk/maay&In-Reply-To=%3C200511251806.jAPI67A0030552%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000640.html">
+   <LINK REL="Next"  HREF="000642.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r669 - trunk/maay</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r669%20-%20trunk/maay&In-Reply-To=%3C200511251806.jAPI67A0030552%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r669 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Fri Nov 25 19:06:07 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000640.html">[Maay-svncheckins] r668 - trunk/maay/data
+</A></li>
+        <LI>Next message: <A HREF="000642.html">[Maay-svncheckins] r670 - in trunk: . maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#641">[ date ]</a>
+              <a href="thread.html#641">[ thread ]</a>
+              <a href="subject.html#641">[ subject ]</a>
+              <a href="author.html#641">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-25 19:06:04 +0100 (Fri, 25 Nov 2005)
+New Revision: 669
+
+Modified:
+   trunk/maay/configuration.py
+Log:
+fixed configuration saving on windows
+
+Modified: trunk/maay/configuration.py
+===================================================================
+--- trunk/maay/configuration.py	2005-11-25 17:03:06 UTC (rev 668)
++++ trunk/maay/configuration.py	2005-11-25 18:06:04 UTC (rev 669)
+@@ -343,11 +343,11 @@
+ ##             os.makedirs(self.download_dir)
+ 
+     def save(self):
+-        # FIXME: since there may be several configuration files, which
+-        # one do we choose. By default, we take the one in the current
+-        # directory
++        # Save in the directory that will be loaded last
++        saveDirectory = self.get_writable_config_dirs()[-1]
++        filepath = os.path.join(saveDirectory, self.config_file)
+         try:
+-            fd = file(self.config_file, 'wb')
++            fd = file(filepath, 'wb')
+             self.generate_config(stream=fd)
+             fd.close()
+         except IOError, e:
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000640.html">[Maay-svncheckins] r668 - trunk/maay/data
+</A></li>
+	<LI>Next message: <A HREF="000642.html">[Maay-svncheckins] r670 - in trunk: . maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#641">[ date ]</a>
+              <a href="thread.html#641">[ thread ]</a>
+              <a href="subject.html#641">[ subject ]</a>
+              <a href="author.html#641">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

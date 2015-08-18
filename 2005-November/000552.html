@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r580 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r580%20-%20trunk/maay&In-Reply-To=%3C200511181656.jAIGu6o5001036%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000551.html">
+   <LINK REL="Next"  HREF="000553.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r580 - trunk/maay</H1>
+    <B>afayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r580%20-%20trunk/maay&In-Reply-To=%3C200511181656.jAIGu6o5001036%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r580 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 17:56:06 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000551.html">[Maay-svncheckins] r579 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000553.html">[Maay-svncheckins] r581 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#552">[ date ]</a>
+              <a href="thread.html#552">[ thread ]</a>
+              <a href="subject.html#552">[ subject ]</a>
+              <a href="author.html#552">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-18 17:56:06 +0100 (Fri, 18 Nov 2005)
+New Revision: 580
+
+Modified:
+   trunk/maay/querier.py
+Log:
+handle possible node id duplication, which can be legit.
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-18 16:50:29 UTC (rev 579)
++++ trunk/maay/querier.py	2005-11-18 16:56:06 UTC (rev 580)
+@@ -33,11 +33,12 @@
+ from zope.interface import Interface, implements
+ 
+ from logilab.common.db import get_dbapi_compliant_module
+-
+ from maay.dbentity import Document, FileInfo, DBEntity, \
+      DocumentProvider, DocumentScore, Word, Node, Result
+ from maay.texttool import normalizeText, WORDS_RGX, MAX_STORED_SIZE
+ 
++IntegrityError = None
++
+ class MaayAuthenticationError(Exception):
+     &quot;&quot;&quot;raised on db authentication failure&quot;&quot;&quot;
+ 
+@@ -103,7 +104,9 @@
+     def __init__(self, host='', database='', user='', password='',
+                  connection=None):
+         if connection is None:
++            global IntegrityError
+             dbapiMod = get_dbapi_compliant_module('mysql')
++            IntegrityError = dbapiMod.IntegrityError
+             try:
+                 connection = dbapiMod.connect(host=host, database=database,
+                                               user=user, password=password,
+@@ -281,13 +284,23 @@
+             return
+         lastSeenTime = lastSeenTime or int(time.time())
+         cursor = self._cnx.cursor()
+-        node = Node.selectOrInsertWhere(cursor, ip=ip, port=port, node_id=nodeId)[0]
++        node = Node.selectOrInsertWhere(cursor, ip=ip, port=port)[0]
+         node.ip = ip
++        node.node_id = nodeId
+         node.port = port
+         node.bandwidth = bandwidth or 1
+         node.last_seen_time = lastSeenTime
+-        node.commit(cursor, update=True)
+-        cursor.close()
++        try:
++            node.commit(cursor, update=True)
++        except IntegrityError:
++            print &quot;Is this a node Id hijack ?&quot; 
++            self._cnx.rollback()
++            cursor.execute('DELETE FROM nodes WHERE node_id = %s', nodeId)
++            cursor.close()
++            self._cnx.commit()
++            self.registerNode(nodeId, ip, port, bandwidth, lastSeenTime)
++        else:
++            cursor.close()
+ 
+     def registerNodeActivity(self, nodeId):
+         cursor = self._cnx.cursor()
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000551.html">[Maay-svncheckins] r579 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000553.html">[Maay-svncheckins] r581 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#552">[ date ]</a>
+              <a href="thread.html#552">[ thread ]</a>
+              <a href="subject.html#552">[ subject ]</a>
+              <a href="author.html#552">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r332 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r332%20-%20trunk/maay&In-Reply-To=%3C200511080902.jA892ikX022568%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000307.html">
+   <LINK REL="Next"  HREF="000309.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r332 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r332%20-%20trunk/maay&In-Reply-To=%3C200511080902.jA892ikX022568%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r332 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 10:02:44 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000307.html">[Maay-svncheckins] r331 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000309.html">[Maay-svncheckins] r333 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#308">[ date ]</a>
+              <a href="thread.html#308">[ thread ]</a>
+              <a href="subject.html#308">[ subject ]</a>
+              <a href="author.html#308">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-08 10:02:44 +0100 (Tue, 08 Nov 2005)
+New Revision: 332
+
+Modified:
+   trunk/maay/webapplication.py
+Log:
+Introduction of p2p operations.
+
+
+Modified: trunk/maay/webapplication.py
+===================================================================
+--- trunk/maay/webapplication.py	2005-11-08 09:01:03 UTC (rev 331)
++++ trunk/maay/webapplication.py	2005-11-08 09:02:44 UTC (rev 332)
+@@ -33,6 +33,7 @@
+ from maay.configuration import get_path_of
+ from maay.texttool import makeAbstract, WORDS_RGX, normalizeText, boldifyText
+ from maay.query import Query
++from maay.p2pquerier import P2pQuerier, P2pQuery
+ 
+ class IServerConfiguration(Interface):
+     &quot;&quot;&quot;provide an interface in order to be able to remember webappconfig&quot;&quot;&quot;
+@@ -92,6 +93,7 @@
+     def __init__(self, maayId, querier):
+         MaayPage.__init__(self, maayId)
+         self.querier = querier
++        self.p2pquerier = None # no webappconfig yet to get our node_id
+ 
+     def logout(self):
+         print &quot;Bye %s !&quot; % (self.maayId,)
+@@ -101,28 +103,17 @@
+     def child_peers(self, context):
+         return PeersList(self.maayId, self.querier)
+ 
+-    def _harvest_peer_results(self, query, context):
+-        results = []
++    def _askForPeerResults(self, query, context):
++        &quot;&quot;&quot;Launches a P2P cascade of queries
++           The result of this shall be used ~ 5 and 15 secs. later
++           by the ResultPage
++        &quot;&quot;&quot;
+         webappConfig = IServerConfiguration(context)
+-        peers = self.querier.getActiveNeighbors(webappConfig.get_node_id(), 10)
+-        print &quot;SearchForm child_search peers = &quot;, peers
+-        for peer in peers:
+-            server = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (peer.ip, peer.port),
+-                                 allow_none=True,
+-                                 encoding='utf-8')
+-            try:
+-                cnxid, errmsg = server.authenticate('', '')
+-            except Exception, e:
+-                errmsg = &quot;%s&quot; % e
+-            if errmsg:
+-                print &quot;For reason '%s', we couldn't authenticate with node %s:%s&quot; \
+-                      % (errmsg, peer.ip, peer.port)
+-                continue # for whatever reason, we couldn't authenticate
+-            try: #XXX: xmlrpc serialization problems arise here
+-                results += server.findDocuments(cnxid, query)
+-            except Exception, e:
+-                print &quot;SearchForm _harvest_peer_results pb : %s&quot;, e
+-        return results
++        nodeId = webappConfig.get_node_id()
++        if not self.p2pquerier:
++            self.p2pquerier = P2pQuerier(nodeId, self.querier)
++        theDistributedQuery = P2pQuery(123, nodeId, 3, query)
++        self.p2pquerier.sendQuery(theDistributedQuery)
+ 
+     def child_search(self, context):
+         # query = unicode(context.arg('words'))        
+@@ -130,10 +121,8 @@
+         rawQuery = unicode(context.arg('words'), 'utf-8')
+         query = Query.fromRawQuery(rawQuery, offset)
+         localResults = self.querier.findDocuments(query)
+-        peerResults = self._harvest_peer_results(rawQuery, context)
+-        print &quot;Results from the peers :&quot;, peerResults
+-        results = localResults + peerResults
+-        return ResultsPage(self.maayId, results, query)
++        self._askForPeerResults(query, context)
++        return ResultsPage(self.maayId, localResults, query)
+ 
+     # XXX make sure that the requested document is really in the database
+     # XXX don't forget to update the download statistics of the document
+@@ -153,6 +142,7 @@
+     bodyFactory = loaders.xmlfile(get_path_of('resultpage.html'))
+     addSlash = False
+     
++    
+     def __init__(self, maayId, results, query):
+         MaayPage.__init__(self, maayId)
+         self.results = results
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000307.html">[Maay-svncheckins] r331 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000309.html">[Maay-svncheckins] r333 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#308">[ date ]</a>
+              <a href="thread.html#308">[ thread ]</a>
+              <a href="subject.html#308">[ subject ]</a>
+              <a href="author.html#308">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

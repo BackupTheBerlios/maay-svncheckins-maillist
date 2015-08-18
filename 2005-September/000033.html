@@ -1,0 +1,357 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r59 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r59%20-%20trunk/maay&In-Reply-To=%3C200509211404.j8LE4utX006858%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000032.html">
+   <LINK REL="Next"  HREF="000034.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r59 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r59%20-%20trunk/maay&In-Reply-To=%3C200509211404.j8LE4utX006858%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r59 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Sep 21 16:04:56 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000032.html">[Maay-svncheckins] r58 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000034.html">[Maay-svncheckins] r60 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#33">[ date ]</a>
+              <a href="thread.html#33">[ thread ]</a>
+              <a href="subject.html#33">[ subject ]</a>
+              <a href="author.html#33">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-09-21 16:04:55 +0200 (Wed, 21 Sep 2005)
+New Revision: 59
+
+Modified:
+   trunk/maay/indexer.py
+   trunk/maay/querier.py
+   trunk/maay/rpc.py
+Log:
+changed the logic of document indexation to something sounder
+changed some prototypes in rpc server
+
+
+Modified: trunk/maay/indexer.py
+===================================================================
+--- trunk/maay/indexer.py	2005-09-21 13:48:36 UTC (rev 58)
++++ trunk/maay/indexer.py	2005-09-21 14:04:55 UTC (rev 59)
+@@ -10,22 +10,25 @@
+ import os, stat
+ import sha
+ from xmlrpclib import ServerProxy
++import mimetypes
+ 
+ from maay import converter
+ from maay.configuration import Configuration
++from maay.dbentity import Document
+ 
+ class AuthenticationError(Exception):
+     &quot;&quot;&quot;raised when authentication on xmlrpc server failed&quot;&quot;&quot;
+ 
+-def getLastModificationTime(filename):
+-    return int(os.stat(filename)[stat.ST_MTIME])
+-
+-def getFileSize(filename):
+-    return int(os.stat(filename)[stat.ST_SIZE])
+-
+ def makeDocumentId(filename):
+-    content = file(filename, 'rb').read()
+-    return sha.sha(content).hexdigest()
++    &quot;&quot;&quot;return the SHA hash value from of the contents of the file&quot;&quot;&quot;
++    stream = file(filename, 'rb')
++    hasher = sha.sha()
++    data = stream.read(4096)
++    while data:        
++        hasher.update(data)
++        data = stream.read(4096)
++    stream.close()
++    return hasher.hexdigest()
+     
+ # TODO: manage published/private documents
+ # TODO: manage periodical runs
+@@ -45,7 +48,7 @@
+         password = self.indexerConfig.password
+         host = self.indexerConfig.host
+         port = self.indexerConfig.port
+-        self.serverProxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port))
++        self.serverProxy = ServerProxy('<A HREF="http://%s:%s">http://%s:%s</A>' % (host, port), allow_none=True)
+         self.cnxId = self.serverProxy.authenticate(username, password)
+         if not self.cnxId:
+             raise AuthenticationError(&quot;Failed to connect as '%s'&quot; % username)
+@@ -57,40 +60,35 @@
+ 
+     def start(self):
+         for filename in self.getFileIterator():
+-            lastModificationTime = getLastModificationTime(filename)
++            lastModificationTime = os.path.getmtime(filename)
+             lastIndexationTime = self.getLastIndexationTime(filename)
+             if lastIndexationTime &gt; lastModificationTime:
+                 print &quot;%s didn't change since last indexation&quot;
+             else:
+-                fileSize = getFileSize(filename)
++                fileSize = os.path.getsize(filename)
+                 title, text, links, offset = converter.extractWordsFromFile(filename)
+                 docId = makeDocumentId(filename)
++                mime_type = mimetypes.guess_types(filename)
+ 
+-                if lastIndexationTime == 0: # means never indexed
+-                    # XXX FIXME: need to provide nodeId
+-                    self.insertFileInformations(docId, filename, title, text, links,
+-                                                offset, fileSize, lastModificationTime)
+-                elif lastIndexationTime &lt; lastModificationTime: 
+-                    # XXX FIXME: need to provide nodeId
+-                    self.updateFileInformations(docId, filename, title, text, links,
+-                                                offset, fileSize, lastModificationTime)
+-
++                self.indexDocument(filename, title, fileSize, lastModificationTime,
++                                   docId, mime_type, Document.PUBLISHED_STATE)
++        # FIXME: do some cleanup of the database after indexing
++        # * remove FileInfo for files that are no longer on disk
++        # * remove Documents with no corresponding files
++        
+     def getLastIndexationTime(self, filename):
+         lastIndexationTime = self.serverProxy.lastIndexationTime(self.cnxId, filename)
+         if lastIndexationTime is None:
+             raise AuthenticationError(&quot;Bad cnxId sent to the server&quot;)
+         return lastIndexationTime
+ 
+-    def updateFileInformations(self, docId, filename, title, text, links,
+-                               offset, fileSize, lastModTime):
+-        self.serverProxy.insertDocument(self.cnxId, docId, filename, title, text,
+-                                        links, offset, fileSize, lastModTime)
++    def indexDocument(self, filename, title, text, fileSize,
++                               lastModTime, content_hash, mime_type, state, file_state=None):
+         print &quot;I should now update DB with all these new words ! (%s)&quot; % filename
++        self.serverProxy.indexDocument(self.cnxId, filename, title, text,
++                                       fileSize, lastModTime, content_hash,
++                                       mime_type, state, file_state)
+         
+-    def insertFileInformations(self, docId, filename, title, text, links,
+-                               offset, fileSize, lastModTime):
+-        self.serverProxy.updatetDocument(self.cnxId, docId, filename, title, text,
+-                                         links, offset, fileSize, lastModTime)
+     
+      
+ class FileIterator:
+@@ -99,9 +97,9 @@
+         self.indexed = indexed
+         self.skipped = skipped or []
+         for dirpath in self.indexed:
+-            assert dirpath.startswith(os.path.sep), &quot;relative paths not supported !&quot;
++            assert os.path.isabs(dirpath), &quot;relative paths not supported !&quot;
+         for dirpath in self.skipped:
+-            assert dirpath.startswith(os.path.sep), &quot;relative paths not supported !&quot;
++            assert os.path.isabs(dirpath), &quot;relative paths not supported !&quot;
+ 
+     def __iter__(self):
+         for path in self.indexed:
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-09-21 13:48:36 UTC (rev 58)
++++ trunk/maay/querier.py	2005-09-21 14:04:55 UTC (rev 59)
+@@ -33,7 +33,7 @@
+     def findDocuments(words):
+         &quot;&quot;&quot;returns all Documents matching &lt;words&gt;&quot;&quot;&quot;
+ 
+-    def getFilesInformations(**wheres):
++    def getFileInformations(filename):
+         &quot;&quot;&quot;returns a list of FileInfo's instances according
+         to DB's content
+         &quot;&quot;&quot;
+@@ -102,11 +102,12 @@
+         return results
+ 
+ 
+-    def getFilesInformations(self, **args):
++    def getFileInformations(self, filename):
+         cursor = self._cnx.cursor()
+-        results = FileInfo.selectWhere(cursor, filename=args['file_name'])
++        results = FileInfo.selectWhere(cursor, file_name=filename)
+         cursor.close()
+-        return results
++        print results
++        return list(results)
+ 
+     def indexDocument(self, filename, title, text, fileSize, lastModifiedOn,
+                       content_hash, mime_type, state, file_state):
+@@ -116,36 +117,49 @@
+         # ourselves or if the indexer should do it and pass the values as an argument
+         cursor = self._cnx.cursor()
+ 
+-        # insert or update in table document
+-        doc = Document.selectWhere(cursor, document_id=content_hash)
+-        if not doc:
+-            doc = Document(document_id=content_hash,
+-                           title=title,
+-                           text=text,
+-                           size=fileSize,
+-                           publication_time=lastModifiedOn,
+-                           download_count=0.,
+-                           url=filename,
+-                           matching=0.,
+-                           indexed='1',
+-                           state=state)
+-            doc.commit(cursor, update=False)
+-            doc = Document.selectWhere(cursor, document_id=content_hash)[0]
+-        else:
+-            #FIXME : update db
+-            pass
+-
+         # insert or update in table file_info
+-        files = FileInfo.selectWhere(cursor,
+-                                     db_document_id=doc.db_document_id,
+-                                     file_name=filename)
+-        if files:
+-            file_info = files[0]
++        fileinfo = FileInfo.selectWhere(cursor,
++                                        file_name=filename)
++        if fileinfo:
++            fileinfo = fileinfo[0]
+             file_info.file_time = lastModifiedOn
+             file_info.state = state
+             file_info.file_state = file_state
++            doc = Document.selectWhere(cursor,
++                                       db_document_id=file_info.db_document_id)
++            if doc.docId!=content_hash:
++                # the contents have changed
++                # we create a new Document (to avoid messing up if we have
++                # multiple files for this document)
++                doc = self._createDocument(content_hash,
++                                           title,
++                                           text,
++                                           fileSize,
++                                           lastModifiedOn,
++                                           filename,
++                                           state)
++                file_info.db_document_id = doc.db_document_id
+             file_info.commit(cursor, update=True)
+         else:
++            # file unknown
++            # try to find a Document with same hash value
++            doc = Document.selectWhere(cursor, document_id=content_hash)
++            if doc:
++                doc = doc[0]
++                doc.state = state
++                doc.publication_time = max(doc.publication_time, lastModifiedOn)
++                doc.commit(cursor, update=True)
++            else:
++                doc = self._createDocument(content_hash,
++                                           title,
++                                           text,
++                                           fileSize,
++                                           lastModifiedOn,
++                                           filename,
++                                           state)
++                doc.commit(cursor, update=False)
++                doc = Document.selectWhere(cursor, document_id=content_hash)[0]
++
+             file_info = FileInfo(db_document_id=doc.db_document_id,
+                                  file_name=filename,
+                                  file_time=lastModifiedOn,
+@@ -156,6 +170,21 @@
+         self._updateScores(cursor, doc.db_document_id, text)
+         cursor.close()
+ 
++    def _createDocument(self, cursor, content_hash, title, text, fileSize,
++                        lastModifiedOn, filename, state):
++        doc = Document(document_id=content_hash,
++                       title=title,
++                       text=text,
++                       size=fileSize,
++                       publication_time=lastModifiedOn,
++                       download_count=0.,
++                       url=filename,
++                       matching=0.,
++                       indexed='1',
++                       state=state)
++        doc.commit(cursor, update=False)
++        doc = Document.selectWhere(cursor, document_id=content_hash)[0]
++        return doc
+ 
+     def _updateScores(self, cursor, db_document_id, text):
+         # insert or update in table document_score
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-09-21 13:48:36 UTC (rev 58)
++++ trunk/maay/rpc.py	2005-09-21 14:04:55 UTC (rev 59)
+@@ -44,29 +44,22 @@
+     def xmlrpc_lastIndexationTime(self, cnxId, filename):
+         if self.cnxIsValid(cnxId):
+             querier = self._sessions[cnxId]
+-            fileInfos = querier.getFilesInformations(file_name=filename)
++            fileInfos = querier.getFileInformations(filename)
+             if len(fileInfos):
+                 return fileInfos[0].file_time
+             return 0
+         # XXX : could we return twisted.python.failure.Failure instance here ?
+ ##         return Failure(ValueError(&quot;invalid connexion&quot;)
+         return -1 # XXX: need to differenciate bad cnxId and no last mod time
+-
+-
+-    def xmlrpc_updateDocument(self, cnxId, docId, filename, title, text,
+-                              links, offset, fileSize, lastModTime):
+-        if self.cnxIsValid(cnxId):
+-            querier = self._sessions[cnxId]
+-            querier.udpateDocument(docId, filename, title, text, links,
+-                                   offset, fileSize, lastModTime)
+-        return False
+     
+-    def xmlrpc_insertDocument(self, cnxId, docId, filename, title, text,
+-                              links, offset, fileSize, lastModTime):
++    def xmlrpc_indexDocument(self, cnxId, filename, title, text, fileSize,
++                             lastModifiedOn, content_hash, mime_type, state,
++                             file_state):
+         if self.cnxIsValid(cnxId):
+             querier = self._sessions[cnxId]
+-            querier.insertDocument(docId, filename, title, text,
+-                                   links, offset, fileSize, lastModTime)
++            querier.indexDocument(filename, title, text, fileSize,
++                             lastModifiedOn, content_hash, mime_type, state,
++                             file_state)
+         return None
+     
+     def cnxIsValid(self, cnxId):
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000032.html">[Maay-svncheckins] r58 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000034.html">[Maay-svncheckins] r60 - trunk/maay/test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#33">[ date ]</a>
+              <a href="thread.html#33">[ thread ]</a>
+              <a href="subject.html#33">[ subject ]</a>
+              <a href="author.html#33">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

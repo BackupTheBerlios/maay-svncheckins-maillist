@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r44 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-September/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r44%20-%20trunk/maay&In-Reply-To=%3C200509171748.j8HHmLs3019443%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000017.html">
+   <LINK REL="Next"  HREF="000019.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r44 - trunk/maay</H1>
+    <B>Adrien Di Mascio at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r44%20-%20trunk/maay&In-Reply-To=%3C200509171748.j8HHmLs3019443%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r44 - trunk/maay">adimasci at berlios.de
+       </A><BR>
+    <I>Sat Sep 17 19:48:21 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000017.html">[Maay-svncheckins] r43 - trunk/maay/test
+</A></li>
+        <LI>Next message: <A HREF="000019.html">[Maay-svncheckins] r45 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18">[ date ]</a>
+              <a href="thread.html#18">[ thread ]</a>
+              <a href="subject.html#18">[ subject ]</a>
+              <a href="author.html#18">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-09-17 19:48:21 +0200 (Sat, 17 Sep 2005)
+New Revision: 44
+
+Added:
+   trunk/maay/registration.py
+   trunk/maay/registration.tac
+Log:
+added simple central registration server.
+
+
+
+Added: trunk/maay/registration.py
+===================================================================
+--- trunk/maay/registration.py	2005-09-16 18:52:41 UTC (rev 43)
++++ trunk/maay/registration.py	2005-09-17 17:48:21 UTC (rev 44)
+@@ -0,0 +1,49 @@
++&quot;&quot;&quot;this module defines the central registration server.
++
++The Registration server keeps track of every connected
++node.
++&quot;&quot;&quot;
++
++__revision__ = '$Id$'
++
++import time
++
++from twisted.protocols.basic import LineReceiver
++
++class RegistrationServer(LineReceiver):
++
++    def __init__(self):
++        self._registeredUsers = {}
++        
++    def lineReceived(self, line):
++        &quot;&quot;&quot;received lines should match the following format :
++        action:parm1:param2:...:paramn
++        &quot;&quot;&quot;
++        try:
++            action, param = line.split(':', 1)
++        except ValueError:
++            result = &quot;unable to decode action: &lt;%s&gt;&quot; % action
++        else:
++            callback = getattr(self, 'do_%s' % action, None)
++            if callback:
++                result = callback(param)
++            else:
++                result = &quot;received invalid action: &lt;%s&gt;&quot; % action
++        
++    def do_login(self, nodeId):
++        print &quot;%s accepts %s&quot; % (id(self), nodeId)
++        if nodeId in self._registeredUsers:
++            print &quot;%s was already registered&quot; % (nodeId,)
++        self._registeredUsers[nodeId] = time.time()
++
++    def do_logout(self, nodeId):
++        try:
++            del self._registeredUsers[nodeId]
++        except KeyError:
++            print &quot;%s was not registered&quot; % (nodeId,)
++
++    def do_who(self):
++        &quot;&quot;&quot;returns the list of logged in nodes&quot;&quot;&quot;
++        for nodeId in self._registeredUsers:
++            self.sendLine(nodeId)
++    
+
+Added: trunk/maay/registration.tac
+===================================================================
+--- trunk/maay/registration.tac	2005-09-16 18:52:41 UTC (rev 43)
++++ trunk/maay/registration.tac	2005-09-17 17:48:21 UTC (rev 44)
+@@ -0,0 +1,9 @@
++from twisted.application import service, internet
++from twisted.internet.protocol import ServerFactory
++
++from maay.registration import RegistrationServer
++
++application = service.Application(&quot;registrationServer&quot;)
++factory = ServerFactory()
++factory.protocol = RegistrationServer
++internet.TCPServer(2345, factory, interface='127.0.0.1').setServiceParent(application)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000017.html">[Maay-svncheckins] r43 - trunk/maay/test
+</A></li>
+	<LI>Next message: <A HREF="000019.html">[Maay-svncheckins] r45 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#18">[ date ]</a>
+              <a href="thread.html#18">[ thread ]</a>
+              <a href="subject.html#18">[ subject ]</a>
+              <a href="author.html#18">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

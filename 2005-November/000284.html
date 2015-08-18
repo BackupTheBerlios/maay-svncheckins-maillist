@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r310 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r310%20-%20trunk/maay&In-Reply-To=%3C200511041719.jA4HJjAB012882%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000283.html">
+   <LINK REL="Next"  HREF="000285.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r310 - trunk/maay</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r310%20-%20trunk/maay&In-Reply-To=%3C200511041719.jA4HJjAB012882%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r310 - trunk/maay">aurelienc at berlios.de
+       </A><BR>
+    <I>Fri Nov  4 18:19:45 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000283.html">[Maay-svncheckins] r309 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000285.html">[Maay-svncheckins] r311 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#284">[ date ]</a>
+              <a href="thread.html#284">[ thread ]</a>
+              <a href="subject.html#284">[ subject ]</a>
+              <a href="author.html#284">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-04 18:19:45 +0100 (Fri, 04 Nov 2005)
+New Revision: 310
+
+Modified:
+   trunk/maay/rpc.py
+Log:
+Remove dead code
+
+
+Modified: trunk/maay/rpc.py
+===================================================================
+--- trunk/maay/rpc.py	2005-11-04 15:38:42 UTC (rev 309)
++++ trunk/maay/rpc.py	2005-11-04 17:19:45 UTC (rev 310)
+@@ -97,12 +97,6 @@
+             querier = self._sessions[cnxId]
+             return querier.getIndexedFiles()
+         return []
+-
+-    def xmlrpc_findDocuments(self, cnxId, query):
+-        if self.cnxIsValid(cnxId):
+-            queryAsObj = Query.fromRawQuery(query)
+-            return self._sessions[cnxId].findDocuments(queryAsObj)
+-        return []
+         
+     def xmlrpc_removeFileInfo(self, cnxId, filename):
+         if self.cnxIsValid(cnxId):
+@@ -150,7 +144,7 @@
+         return self.nodeId
+ 
+     def xmlrpc_distributedQueryAnswer(self, queryId, senderId, documents):
+-        answer = P2pAnswer()
++        answer = P2pAnswer() # FIXME: fill in objects
+         d = reactor.callLater(.01, self._p2pQuerier.receiveAnswer,answer)
+         return self.nodeId
+                          
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000283.html">[Maay-svncheckins] r309 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000285.html">[Maay-svncheckins] r311 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#284">[ date ]</a>
+              <a href="thread.html#284">[ thread ]</a>
+              <a href="subject.html#284">[ subject ]</a>
+              <a href="author.html#284">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

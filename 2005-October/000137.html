@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r164 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r164%20-%20trunk&In-Reply-To=%3C200510070702.j97721aN006223%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000136.html">
+   <LINK REL="Next"  HREF="000138.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r164 - trunk</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r164%20-%20trunk&In-Reply-To=%3C200510070702.j97721aN006223%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r164 - trunk">afayolle at berlios.de
+       </A><BR>
+    <I>Fri Oct  7 09:02:01 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000136.html">[Maay-svncheckins] r163 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000138.html">[Maay-svncheckins] r165 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#137">[ date ]</a>
+              <a href="thread.html#137">[ thread ]</a>
+              <a href="subject.html#137">[ subject ]</a>
+              <a href="author.html#137">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-07 09:01:54 +0200 (Fri, 07 Oct 2005)
+New Revision: 164
+
+Added:
+   trunk/TODO.txt
+Log:
+extracted from the code and did some manual reformating
+
+Added: trunk/TODO.txt
+===================================================================
+--- trunk/TODO.txt	2005-10-07 06:47:57 UTC (rev 163)
++++ trunk/TODO.txt	2005-10-07 07:01:54 UTC (rev 164)
+@@ -0,0 +1,82 @@
++==============
++Maay TODO List
++==============
++
++converter.py:
++-------------
++
++TODO: add support for xls, ppt,  openoffice, mp3, ogg
++
++XXX: need to handle file encodings
++
++
++dbentity.py:   
++------------
++
++FIXME : UNKNOWN_STATE gets stored in the
++          database as a char in table Document or
++          as a tinyint(4) in table files. Check
++
++XXX mimetype handling is a HACK. It needs to be integrated
++     nicely in order to handle any kind of restrictions easily
++
++XXX: LIMIT clause should be optional
++
++indexer.py:
++-----------
++
++TODO: analyse the God class into something understandable
++
++TODO: manage published/private documents
++
++TODO: manage periodical runs
++
++TODO: memorize state of indexed document to avoid db lookup at each run
++
++TODO: do an initial db query to initialize the indexation state (?)
++
++querier.py:                
++-----------
++FIXME: find a better way to perform this operation
++       the autodetection of the charset guesses latin-1 and
++       this obviously does not work with unicode
++
++FIXME: update node_interests too
++
++XXX Decide if we can compute the content_hash and mime_type ourselves
++    or if the indexer should do it and pass the values as an argument
++
++
++registration.py:
++----------------
++
++TODO: auto logout after a given time to save memory
++
++rpc.py:    
++-------
++
++FIXME: need a better implementation
++
++XXX : could we return twisted.python.failure.Failure instance here ?
++
++XXX: need to differenciate bad cnxId and no last mod time
++
++server.py:        
++----------
++
++XXX: logout message should be forwarded to registration server
++
++XXX make sure that the requested document is really in the database
++
++XXX don't forget to update the download statistics of the document
++
++XXX abstract attribute should be a unicode string
++
++texttool.py:
++------------
++
++XXX FIXME: this function probably already exists somewhere ...
++
++TODO: port original code from htmltotext
++
++XXX: this is a quick and dirty implementation
+
+
+Property changes on: trunk/TODO.txt
+___________________________________________________________________
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000136.html">[Maay-svncheckins] r163 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000138.html">[Maay-svncheckins] r165 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#137">[ date ]</a>
+              <a href="thread.html#137">[ thread ]</a>
+              <a href="subject.html#137">[ subject ]</a>
+              <a href="author.html#137">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

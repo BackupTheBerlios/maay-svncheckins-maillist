@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r496 - trunk/maay/sql
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r496%20-%20trunk/maay/sql&In-Reply-To=%3C200511151136.jAFBarZa028478%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000466.html">
+   <LINK REL="Next"  HREF="000468.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r496 - trunk/maay/sql</H1>
+    <B>adimasci at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r496%20-%20trunk/maay/sql&In-Reply-To=%3C200511151136.jAFBarZa028478%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r496 - trunk/maay/sql">adimasci at berlios.de
+       </A><BR>
+    <I>Tue Nov 15 12:36:53 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000466.html">[Maay-svncheckins] r495 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000468.html">[Maay-svncheckins] r497 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#467">[ date ]</a>
+              <a href="thread.html#467">[ thread ]</a>
+              <a href="subject.html#467">[ subject ]</a>
+              <a href="author.html#467">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: adimasci
+Date: 2005-11-15 12:36:45 +0100 (Tue, 15 Nov 2005)
+New Revision: 496
+
+Modified:
+   trunk/maay/sql/mysql.sql
+Log:
+added a timestamp for results' records
+
+Modified: trunk/maay/sql/mysql.sql
+===================================================================
+--- trunk/maay/sql/mysql.sql	2005-11-15 11:27:38 UTC (rev 495)
++++ trunk/maay/sql/mysql.sql	2005-11-15 11:36:45 UTC (rev 496)
+@@ -158,6 +158,7 @@
+   `host` varchar(15),
+   `port` int(11), -- check this
+   `login` varchar(255),
++  `record_ts` TIMESTAMP(8), -- DEFAULT NOW() is not necessary because records are not updated
+   PRIMARY KEY (`db_document_id`, `query_id`, `host`, `port`)
+ --  KEY `document_id` (`document_id`),
+ --  KEY `url` (`url`)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000466.html">[Maay-svncheckins] r495 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000468.html">[Maay-svncheckins] r497 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#467">[ date ]</a>
+              <a href="thread.html#467">[ thread ]</a>
+              <a href="subject.html#467">[ subject ]</a>
+              <a href="author.html#467">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

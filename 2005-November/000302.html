@@ -1,0 +1,329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r326 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r326%20-%20trunk/maay&In-Reply-To=%3C200511071614.jA7GEc9D012453%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000301.html">
+   <LINK REL="Next"  HREF="000303.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r326 - trunk/maay</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r326%20-%20trunk/maay&In-Reply-To=%3C200511071614.jA7GEc9D012453%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r326 - trunk/maay">dnf at berlios.de
+       </A><BR>
+    <I>Mon Nov  7 17:14:38 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000301.html">[Maay-svncheckins] r325 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000303.html">[Maay-svncheckins] r327 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#302">[ date ]</a>
+              <a href="thread.html#302">[ thread ]</a>
+              <a href="subject.html#302">[ subject ]</a>
+              <a href="author.html#302">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-07 17:14:38 +0100 (Mon, 07 Nov 2005)
+New Revision: 326
+
+Removed:
+   trunk/maay/registration.py
+   trunk/maay/registration.tac
+   trunk/maay/registrationclient.py
+Log:
+del old stuff... 
+
+
+
+Deleted: trunk/maay/registration.py
+===================================================================
+--- trunk/maay/registration.py	2005-11-07 15:55:22 UTC (rev 325)
++++ trunk/maay/registration.py	2005-11-07 16:14:38 UTC (rev 326)
+@@ -1,117 +0,0 @@
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This program is free software; you can redistribute it and/or modify
+-#     it under the terms of the GNU General Public License as published by
+-#     the Free Software Foundation; either version 2 of the License, or
+-#     (at your option) any later version.
+-#
+-#     This program is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-#     GNU General Public License for more details.
+-#
+-#     You should have received a copy of the GNU General Public License
+-#     along with this program; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+-
+-&quot;&quot;&quot;this module defines the central presence server.
+-
+-The Presence server keeps track of every connected
+-node.
+-&quot;&quot;&quot;
+-
+-verbose = 1
+-
+-__revision__ = '$Id$'
+-
+-from datetime import datetime
+-
+-from twisted.protocols.basic import LineReceiver
+-
+-class PresenceServer(LineReceiver):
+-    # define this as a static class member since a new instance of the class
+-    # is created after each request
+-    _registeredUsers = {} 
+-    _ruTimestamp = {}
+-    # TODO: auto logout after a given time to save memory
+-
+-    def __init__(self, autoExpirationDelayInSecs=3600):
+-        self._autoExpirationDelayInSecs = autoExpirationDelayInSecs
+-
+-    def _auto_logout_everybody(self):
+-        &quot;&quot;&quot;evicts registered nodes after some time
+-        &quot;&quot;&quot;
+-        now = datetime.utcnow()
+-        for nodeId, values in PresenceServer._ruTimestamp.items():
+-            dt = now - values
+-            if dt.seconds &gt; self._autoExpirationDelayInSecs:
+-                if verbose:
+-                    print &quot;%s removed&quot; % str(PresenceServer._registeredUsers[nodeId])
+-                del PresenceServer._registeredUsers[nodeId]
+-                del PresenceServer._ruTimestamp[nodeId]
+-            elif verbose:
+-                print &quot;keep: %s (%s)&quot; % (str(PresenceServer._registeredUsers[nodeId]), str(values))
+-        
+-    def lineReceived(self, line):
+-        &quot;&quot;&quot;received lines should match the following format :
+-        action:parm1:param2:...:paramn
+-        &quot;&quot;&quot;
+-        try:
+-            action, param = line.split(':', 1)
+-        except ValueError:
+-            result = &quot;unable to decode action: &lt;%s&gt;&quot; % line
+-        else:
+-            callback = getattr(self, 'do_%s' % action, None)
+-            if callback:
+-                param = param.strip()
+-                if param:
+-                    args = param.split(':')
+-                    result = callback(*args)
+-                else:
+-                    result = callback()
+-            else:
+-                result = &quot;received invalid action: &lt;%s&gt;&quot; % action
+-        self._auto_logout_everybody()
+-        
+-    def do_notify(self, nodeId, ip, port, bandwidth):
+-        # For the moment, take IP and port from the TCP socket and not
+-        # those given by the client.
+-        # (to prevent client to give private address...)
+-        # TODO:
+-        # - if the server detect that the IP given by the client is a
+-        # private IP address, use those from the TCP socket
+-        # - the presence server tries to connect to the client to test
+-        # the information...
+-        h = self.transport.getHost()
+-        ip = h.host
+-        port = str(h.port)
+-        if verbose:
+-           print &quot;Notification from %s:%s (id:%s)&quot; % (ip, port, nodeId)
+-        if nodeId in PresenceServer._registeredUsers:
+-            print &quot;%s was already registered&quot; % (nodeId,)
+-        lastseen = datetime.utcnow()
+-        PresenceServer._ruTimestamp[nodeId] = lastseen
+-        PresenceServer._registeredUsers[nodeId] = (lastseen.isoformat(),
+-                                         nodeId,
+-                                         ip,
+-                                         port,
+-                                         bandwidth)
+-
+-    def do_logout(self, nodeId):
+-        try:
+-            print &quot;%s logout&quot; % str(PresenceServer._registeredUsers[nodeId])
+-            del PresenceServer._registeredUsers[nodeId]
+-            del PresenceServer._ruTimestamp[nodeId]
+-        except KeyError:
+-            print &quot;%s was not registered&quot; % (nodeId,)
+-
+-    def do_who(self):
+-        &quot;&quot;&quot;returns the list of logged in nodes&quot;&quot;&quot;
+-        nodes = PresenceServer._registeredUsers.values()
+-        nodes.sort()
+-        nodes.reverse()
+-        for nodeinfo in nodes:
+-            self.sendLine(&quot;\t&quot;.join(nodeinfo))
+-            print &quot;list: %s&quot; % str(nodeinfo)
+-        self.sendLine('EOT')
+-        print 'EOT'
+
+Deleted: trunk/maay/registration.tac
+===================================================================
+--- trunk/maay/registration.tac	2005-11-07 15:55:22 UTC (rev 325)
++++ trunk/maay/registration.tac	2005-11-07 16:14:38 UTC (rev 326)
+@@ -1,27 +0,0 @@
+-#!/usr/bin/twistd2.3 -noy 
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This program is free software; you can redistribute it and/or modify
+-#     it under the terms of the GNU General Public License as published by
+-#     the Free Software Foundation; either version 2 of the License, or
+-#     (at your option) any later version.
+-#
+-#     This program is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-#     GNU General Public License for more details.
+-#
+-#     You should have received a copy of the GNU General Public License
+-#     along with this program; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+-
+-
+-from twisted.application import service, internet
+-from twisted.internet.protocol import ServerFactory
+-
+-from maay.presenceserver import PresenceServer
+-
+-application = service.Application(&quot;presenceServer&quot;)
+-factory = ServerFactory()
+-factory.protocol = PresenceServer
+-internet.TCPServer(2345, factory, interface='').setServiceParent(application)
+
+Deleted: trunk/maay/registrationclient.py
+===================================================================
+--- trunk/maay/registrationclient.py	2005-11-07 15:55:22 UTC (rev 325)
++++ trunk/maay/registrationclient.py	2005-11-07 16:14:38 UTC (rev 326)
+@@ -1,93 +0,0 @@
+-#     Copyright (C) 2005 France Telecom R&amp;D
+-#
+-#     This program is free software; you can redistribute it and/or modify
+-#     it under the terms of the GNU General Public License as published by
+-#     the Free Software Foundation; either version 2 of the License, or
+-#     (at your option) any later version.
+-#
+-#     This program is distributed in the hope that it will be useful,
+-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-#     GNU General Public License for more details.
+-#
+-#     You should have received a copy of the GNU General Public License
+-#     along with this program; if not, write to the Free Software
+-#     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+-
+-from twisted.internet import reactor
+-from twisted.internet.protocol import ClientCreator
+-from twisted.protocols.basic import LineReceiver
+-from time import mktime
+-
+-class PresenceClient(LineReceiver):
+-    &quot;&quot;&quot;Client-side stuff to ask/request things from the presence server.
+-       Tightly coupled with presenceserver.py
+-    &quot;&quot;&quot;
+- 
+-    def __init__(self, nodePresenceCallback):
+-        self.__callback = nodePresenceCallback
+-        self._lineCount = 0
+-        
+-    def notify(self, nodeId, ip, port, bandwidth) :
+-        print &quot;notify to presence server (node %s at %s:%s)&quot; % (nodeId, ip, port)
+-        self.transport.write('notify:%s:%s:%s:%s\r\n' % (nodeId, ip,
+-                                                     port, bandwidth))
+-        return self
+-
+-    def logout(self, nodeId):
+-        print &quot;logout from presence server (node %s)&quot; % nodeId
+-        self.transport.write('logout:%s\r\n' % nodeId)
+-        self.transport.loseConnection()
+-
+-    def who(self):
+-        print &quot;PresenceClient who&quot;
+-        self.transport.write('who:\r\n')
+-
+-    def lineReceived(self, data):
+-        &quot;&quot;&quot;receiving end of the client
+-           for each method of RegisterClient, we might get
+-           an int (=len(registered nodes)) number of lines,
+-           to be properly transformed back
+-           to complete node identification data
+-           WE are responsible for the correct unpacking of said data here
+-           &quot;&quot;&quot;
+-        self._lineCount += 1
+-        data = data.strip()
+-        print &quot;PresenceClient lineReceived (%s) said %s&quot; % (self._lineCount, data)
+-        if data.startswith('EOT'):
+-            self.transport.loseConnection()
+-            return
+-        time, nodeId, nodeIP, nodePort, nodeBandwidth = data.split('\t')
+-        lastSeenTime = parseTime(time)
+-        self._callback(nodeId, nodeIP, nodePort, nodeBandwidth, lastSeenTime)
+-        
+-
+-def parseTime(isodatetime):
+-    date, time = isodatetime.split('T')
+-    date = [int(s) for s in date.split('-')]
+-    time = [int(float(s)) for s in time.split(':')]
+-    return mktime(tuple(date+time+[0,0,0]))
+-
+-
+-def notify(reactor, regIP, regPort, querier, nodeId, nodeIP, xmlrpcPort, bandwidth):
+-    &quot;&quot;&quot;registers and transmits the node catalog to querier.registerNode
+-    &quot;&quot;&quot;
+-    if querier is not None:
+-        c = ClientCreator(reactor, PresenceClient, querier.registerNode)
+-        d = c.connectTCP(regIP, regPort)
+-        d.addCallback(PresenceClient.notify, nodeId, nodeIP, xmlrpcPort, bandwidth)
+-        d.addCallback(PresenceClient.who)
+-    else:
+-        print &quot;Login : no querier found =&gt; no presence / no P2P&quot;
+-
+-def askWho(reactor, regIp, regPort, callback):
+-    &quot;&quot;&quot;transmits node catalog to the callback&quot;&quot;&quot;
+-    c = ClientCreator(reactor, RegistrationClient, callback)
+-    d = c.connectTCP(regIp, regPort)
+-    d.addCallback(RegistrationClient.who)
+-
+-def logout(reactor, regIp, regPort, nodeId):
+-    print &quot;PresenceClient@%s:%s node %s wants to log out.&quot; % (regIp, regPort, nodeId)
+-    c = ClientCreator(reactor, PresenceClient, None)
+-    d = c.connectTCP(regIp, regPort)
+-    d.addCallback(PresenceClient.logout)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000301.html">[Maay-svncheckins] r325 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000303.html">[Maay-svncheckins] r327 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#302">[ date ]</a>
+              <a href="thread.html#302">[ thread ]</a>
+              <a href="subject.html#302">[ subject ]</a>
+              <a href="author.html#302">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

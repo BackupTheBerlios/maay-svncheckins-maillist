@@ -1,0 +1,714 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r570 - in trunk: . doc
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r570%20-%20in%20trunk%3A%20.%20doc&In-Reply-To=%3C200511181514.jAIFEWHC022101%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000541.html">
+   <LINK REL="Next"  HREF="000543.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r570 - in trunk: . doc</H1>
+    <B>afayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r570%20-%20in%20trunk%3A%20.%20doc&In-Reply-To=%3C200511181514.jAIFEWHC022101%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r570 - in trunk: . doc">afayolle at berlios.de
+       </A><BR>
+    <I>Fri Nov 18 16:14:32 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000541.html">[Maay-svncheckins] r569 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000543.html">[Maay-svncheckins] r571 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#542">[ date ]</a>
+              <a href="thread.html#542">[ thread ]</a>
+              <a href="subject.html#542">[ subject ]</a>
+              <a href="author.html#542">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-18 16:14:31 +0100 (Fri, 18 Nov 2005)
+New Revision: 570
+
+Added:
+   trunk/DEVEL.txt
+   trunk/INSTALL.txt
+   trunk/doc/DEVEL.html
+   trunk/doc/INSTALL.html
+Modified:
+   trunk/README.txt
+   trunk/doc/README.html
+Log:
+updated some documentation
+
+Added: trunk/DEVEL.txt
+===================================================================
+--- trunk/DEVEL.txt	2005-11-18 14:47:38 UTC (rev 569)
++++ trunk/DEVEL.txt	2005-11-18 15:14:31 UTC (rev 570)
+@@ -0,0 +1,106 @@
++===========================
++Maay development guidelines
++===========================
++
++.. revision: $Id$
++
++Scope of this document
++======================
++
++This document is a collection of tips to help Maay contributors. It
++will be expanded as needs arise.
++
++
++Generating a Windows installer
++==============================
++
++Setting up the Windows machine
++------------------------------
++
++Download and install `Python 2.4`_ and update your PATH environment variable
++so that c:\python24 belongs to the path. Do it right away this will 
++save precious time and frustration.
++
++Install `Inno Setup`_, `py2exe`_, `pywin32`_ which are used to produce
++the installer. You will probably want to install a Subversion client
++such as `Tortoise SVN`_, as well as putty_ to benefit from the
++``pageant`` ssh agent and avoid typing your berlios password again and
++again. 
++
++Checkout the Maay sources from Berlios. 
++
++You need to install the dependencies of Maay too. Download and install
++the following python modules (take care when downloading a windows
++installer, it has to be built for Python 2.4): 
++
++ * `egenix-mx-base`_
++ * `mysql-python`_
++ * `twisted-2.0.1`_ 
++ * `nevow-0.6`_
++ * `PIL`_
++ * `logilab-common-0.12.1`_
++
++If there is no windows installer available for the package, it most
++certainly means that it is a pure Python library. Unpack the source
++archive in a temporary directory and use a command prompt window to
++run ``python setup.py bdist_wininst`` in that directory. This will
++generate a Windows installer in the ``dist`` subdirectory, which you
++can run to install the library.
++
++Download the `mysql-4.1-noinstall` prebuilt zip file, and unzip it in
++``trunk\thirdparty`` (where ``trunk`` is the Subversion checkout
++directory). Rename ``trunk\thirdparty\mysql-4.1`` to
++``trunk\thirdparty`mysql``.
++
++Download and unpack `antiword`_, `unrtf`_ and `pdftohtml` in
++``trunk\thirdparty``. I think this is all and correct. Fortunately,
++all of this only has to be done once. 
++
++.. _Python 2.4: <A HREF="http://www.python.org/2.4/">http://www.python.org/2.4/</A>
++.. _Inno Setup: <A HREF="http://www.jrsoftware.org/isdl.ph">http://www.jrsoftware.org/isdl.ph</A>
++.. _py2exe: <A HREF="http://sourceforge.net/projects/py2exe/">http://sourceforge.net/projects/py2exe/</A>
++.. _pywin32: <A HREF="http://starship.python.net/crew/mhammond/win32/Downloads.html">http://starship.python.net/crew/mhammond/win32/Downloads.html</A>
++.. _Tortoise SVN: <A HREF="http://tortoisesvn.tigris.org/download.html">http://tortoisesvn.tigris.org/download.html</A>
++.. _putty: <A HREF="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html</A>
++.. _egenix-mx-base: <A HREF="http://www.egenix.com/files/python/eGenix-mx-Extensions.html#Download-mxBASE">http://www.egenix.com/files/python/eGenix-mx-Extensions.html#Download-mxBASE</A>
++.. _mysql-python: <A HREF="http://sourceforge.net/project/showfiles.php?group_id=22307&amp;release_id=102893">http://sourceforge.net/project/showfiles.php?group_id=22307&amp;release_id=102893</A>
++.. _twisted-2.0.1: <A HREF="http://twistedmatrix.com/projects/core/">http://twistedmatrix.com/projects/core/</A>
++.. _nevow-0.6: <A HREF="http://divmod.org/projects/nevow">http://divmod.org/projects/nevow</A>
++.. _PIL: <A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>
++.. _logilab-common-0.12.1:  <A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>
++.. _mysql-4.1-noinstall: <A HREF="http://dev.mysql.com/get/Downloads/MySQL-4.1/mysql-4.1.15-win32.zip/from/pick#mirrors">http://dev.mysql.com/get/Downloads/MySQL-4.1/mysql-4.1.15-win32.zip/from/pick#mirrors</A>
++.. _antiword: <A HREF="http://www.informatik.uni-frankfurt.de/~markus/antiword/">http://www.informatik.uni-frankfurt.de/~markus/antiword/</A>
++.. _unrtf: <A HREF="http://gnuwin32.sourceforge.net/packages/unrtf.htm">http://gnuwin32.sourceforge.net/packages/unrtf.htm</A>
++.. _pdftohtml: <A HREF="http://sourceforge.net/projects/pdftohtml/">http://sourceforge.net/projects/pdftohtml/</A>
++
++Generating the installer
++------------------------
++
++ * In a shell window, navigate to the trunk directory. 
++
++ * Run ``python setup.py py2exe &gt; py2exe.log``
++
++ * Examine ``py2exe.log`` for possible errors or missing modules
++
++ * Launch Inno setup by double clickink on ``maay.iss``
++
++ * Select the right option in the menu to generate the installer
++
++It is probably possible to right click on ``maay.iss`` and to compile
++directly from Windows Explorer. I prefer compiling from the Inno Setup
++GUI because it is possible to run the installer and uninstaller from
++the application and get a log displayed.
++
++What if it does not work?
++-------------------------
++
++The author admits that he may have got one of the preparation step
++wrong. Please send a mail on the ``maay-dev`` mailing list and we will
++try to help.
++
++Generating a source distribution
++================================
++
++Go the trunk directory and run ``python setup.py sdist``
++
++
+
+
+Property changes on: trunk/DEVEL.txt
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+Added: trunk/INSTALL.txt
+===================================================================
+--- trunk/INSTALL.txt	2005-11-18 14:47:38 UTC (rev 569)
++++ trunk/INSTALL.txt	2005-11-18 15:14:31 UTC (rev 570)
+@@ -0,0 +1,93 @@
++========================
++Maay Installation Manual
++========================
++
++.. revision: $Id$
++
++
++Installing Maay on Windows
++==========================
++
++On the Windows platform, it is recommended to use the Windows
++installer available from <A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> 
++
++and run it. This should
++install and setup everything properly. 
++
++Installing Maay on Linux from a package
++=======================================
++
++Maay has not yet been packaged for any Linux distribution. Debian
++packages are being worked on. Contributions of RPMs for various
++RPM-based distributions are welcome. 
++
++Installing Maay from source
++===========================
++
++These instruction are intended for people using a unix-like
++OS. Windows users are strongly advised to use the Windows installer. 
++
++A few Python libraries are required to make the whole think work. Most
++of them should be available in your OS distribution too :
++
++ * logilab common libraries 0.12.1 or above (<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>)
++ * mysql-python (<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>)
++ * python-twisted 2.0 or above (<A HREF="http://twistedmatrix.com/projects/core/">http://twistedmatrix.com/projects/core/</A>)
++ * python-twisted-web 0.5 or above (<A HREF="http://twistedmatrix.com/projects/web/">http://twistedmatrix.com/projects/web/</A>)
++ * python-nevow 0.6 or above (<A HREF="http://divmod.org/projects/nevow">http://divmod.org/projects/nevow</A>) 
++ * python-imaging (<A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>)
++ * mxDatetime (<A HREF="http://www.egenix.com/files/python/mxDateTime.html">http://www.egenix.com/files/python/mxDateTime.html</A>)
++
++You will also need a few helper applications to perform the conversion
++of various binary formats to something that Maay can index. There is
++probably a prebuilt binary available for your OS distribution
++somewhere. You will need to download and install :
++
++ * pdftohtml (<A HREF="http://pdftohtml.sourceforge.net/">http://pdftohtml.sourceforge.net/</A>)
++ * antiword (<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>)
++ * unrtf (<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>)
++ * ghostscript (<A HREF="http://www.cs.wisc.edu/~ghost/">http://www.cs.wisc.edu/~ghost/</A>)
++
++The indexation part uses a MySQL database, version 4.1
++(<A HREF="http://www.mysql.org/">http://www.mysql.org/</A>). You will need to install such a database or
++get in touch with your DBA. The following assumes a local mysql
++installation, with no root password. Maay has not been tested with
++MySQL 5.0, but it should work. Please report if you encounter problems
++with this version of MySQL.
++
++Once everything else is installed, you can point you web browser to
++<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> and download the latest
++source tarball. Unpack it, go to the newly created directory and run::
++
++ # python setup.py install
++
++Create the MySQL database instance that will store the indexation
++data::
++
++ # mysql -u root mysql
++ mysql&gt; \. maay/sql/mysql.sql
++
++You're done! Read the README document to learn how to use Maay. 
++
++Working on the bleeding edge
++============================
++
++You can download the latest Maay sources from the SVN
++repository. Use the following for the initial source checkout::
++
++ svn checkout <A HREF="svn://svn.berlios.de/maay/trunk">svn://svn.berlios.de/maay/trunk</A>
++
++You will also need to download and install all the dependencies
++mentionned in the previous section, and to configure a mysql database
++as explained. 
++
++When working with this directory structure, you don't have to install
++Maay using setup.py. Just add the trunk directory to the PYTHONPATH
++environment variable, and run the trunk/maay/bin/maay-node script to
++launch the server. The --help command line option will provide
++information about what configuration options are available. You can
++also copy the ini files in  trunk/maay/configuration/ files to ~/.maay/ and edit
++them to match your settings. 
++
++ Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;, Fri, 18 Nov 2005 15:00:36 +0100
++
+
+
+Property changes on: trunk/INSTALL.txt
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+Name: svn:keywords
+   + &quot;Id&quot;
+Name: svn:eol-style
+   + native
+
+Modified: trunk/README.txt
+===================================================================
+--- trunk/README.txt	2005-11-18 14:47:38 UTC (rev 569)
++++ trunk/README.txt	2005-11-18 15:14:31 UTC (rev 570)
+@@ -2,6 +2,7 @@
+ Maay documentation
+ ==================
+ 
++.. revision: $Id$
+ 
+ Warning
+ =======
+@@ -36,75 +37,17 @@
+  * a presence server, which can handle presence information from maay
+    nodes, in order to seed the node database. 
+ 
+-How do I install Maay from source?
+-==================================
+ 
+-These instruction are intended for people using a unix-like
+-OS. Windows users are strongly advised to use the prebuilt package
+-(see below).
+-
+-A few Python libraries are required to make the whole think work. Most
+-of them should be available in your OS distribution too :
+-
+- * logilab common libraries 0.12.1 or above (<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>)
+- * mysql-python (<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>)
+- * python-twisted 2.0 or above ((<A HREF="http://twistedmatrix.com/projects/core/">http://twistedmatrix.com/projects/core/</A>)
+- * python-twisted-web 0.5 or above (<A HREF="http://twistedmatrix.com/projects/web/">http://twistedmatrix.com/projects/web/</A>)
+- * python-nevow 0.6 or above (<A HREF="http://divmod.org/projects/nevow">http://divmod.org/projects/nevow</A>) 
+- * python-imaging (<A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>)
+- * mxDatetime (<A HREF="http://www.egenix.com/files/python/mxDateTime.html">http://www.egenix.com/files/python/mxDateTime.html</A>)
+-
+-You will also need a few helper applications to perform the conversion
+-of various binary formats to something that Maay can index. There is
+-probably a prebuilt binary available for your OS distribution
+-somewhere. You will need to download and install :
+-
+- * pdftohtml (<A HREF="http://pdftohtml.sourceforge.net/">http://pdftohtml.sourceforge.net/</A>)
+- * antiword (<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>)
+- * unrtf (<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>)
+-
+-The indexation part uses a MySQL database, version 4.1
+-(<A HREF="http://www.mysql.org/">http://www.mysql.org/</A>). You will need to install such a database or
+-get in touch with your DBA. The following assumes a local mysql
+-installation, with no root password. Maay has not been tested with
+-MySQL 5.0, but it should work. Please report if you encounter problems
+-with this version of MySQL.
+-
+-Once everything else is installed, you can point you web browser to
+-<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> and download the latest
+-source tarball. Unpack it, go to the newly created directory and run::
+-
+- # python setup.py install
+-
+-It is now necessary to create the MySQL database instance that will
+-store the indexation data::
+-
+- # mysql -u root mysql
+- mysql&gt; \. sql/mysql.sql
+-
+-You're done! See a bit further down in this document for how to start
+-using Maay. 
+-
+-How do I install Maay from a package?
+-=====================================
+-
+-For now, only a Windows installer is available. Download it from
+-<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A> and run it. This should
+-install and setup everything properly. 
+-
+-A package for the Debian GNU/Linux distribution will soon be made
+-available. 
+-
+ How do I start using Maay?
+ ==========================
+ 
+-First, edit the configuration files. On Windows, they are in 
++First, edit the configuration files. On Windows, they are in
+ C:\Program Files\Maay\webapp.ini and C:\Program
+ Files\Maay\indexer.ini. The Windows installer should have set the
+-different configuration values
+-On Unix systems, they are in /etc/maay, and you can copy them to 
+-~/.maay/ if you want to have some personnalized settings. Pay attention 
+-to the index-dir and skip-dir settings in indexer.ini.
++different configuration values.  On Unix systems, they are in
++/etc/maay, and you can copy them to ~/.maay/ if you want to have some
++personnalized settings. Pay attention to the index-dir and skip-dir
++settings in indexer.ini.
+ 
+ Then, start the Maay service. On Windows, this is done automatically
+ when your machine boots. On unix systems, use /usr/bin/maay-server
+@@ -145,5 +88,6 @@
+ won't give us any clue to help you. 
+ 
+ 
+- Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;, Tue, 15 Nov 2005 09:41:54 +0100
++ Alexandre Fayolle &lt;<A HREF="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">alexandre.fayolle at logilab.fr</A>&gt;, Fri, 18 Nov 2005 15:00:58 +0100
+ 
++
+
+
+Property changes on: trunk/README.txt
+___________________________________________________________________
+Name: svn:keyword
+   + Id
+
+Added: trunk/doc/DEVEL.html
+===================================================================
+--- trunk/doc/DEVEL.html	2005-11-18 14:47:38 UTC (rev 569)
++++ trunk/doc/DEVEL.html	2005-11-18 15:14:31 UTC (rev 570)
+@@ -0,0 +1,88 @@
++&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
++&lt;head&gt;
++&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
++&lt;meta name=&quot;generator&quot; content=&quot;Docutils 0.3.9: <A HREF="http://docutils.sourceforge.net/">http://docutils.sourceforge.net/</A>&quot; /&gt;
++&lt;title&gt;Maay development guidelines&lt;/title&gt;
++&lt;link rel=&quot;stylesheet&quot; href=&quot;default.css&quot; type=&quot;text/css&quot; /&gt;
++&lt;/head&gt;
++&lt;body&gt;
++&lt;div class=&quot;document&quot; id=&quot;maay-development-guidelines&quot;&gt;
++&lt;h1 class=&quot;title&quot;&gt;Maay development guidelines&lt;/h1&gt;
++&lt;!-- revision: $Id$ --&gt;
++&lt;div class=&quot;section&quot; id=&quot;scope-of-this-document&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;scope-of-this-document&quot;&gt;Scope of this document&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;This document is a collection of tips to help Maay contributors. It
++will be expanded as needs arise.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;generating-a-windows-installer&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;generating-a-windows-installer&quot;&gt;Generating a Windows installer&lt;/a&gt;&lt;/h1&gt;
++&lt;div class=&quot;section&quot; id=&quot;setting-up-the-windows-machine&quot;&gt;
++&lt;h2&gt;&lt;a name=&quot;setting-up-the-windows-machine&quot;&gt;Setting up the Windows machine&lt;/a&gt;&lt;/h2&gt;
++&lt;p&gt;Download and install &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.python.org/2.4/">http://www.python.org/2.4/</A>&quot;&gt;Python 2.4&lt;/a&gt; and update your PATH environment variable
++so that c:python24 belongs to the path. Do it right away this will 
++save precious time and frustration.&lt;/p&gt;
++&lt;p&gt;Install &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.jrsoftware.org/isdl.ph">http://www.jrsoftware.org/isdl.ph</A>&quot;&gt;Inno Setup&lt;/a&gt;, &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://sourceforge.net/projects/py2exe/">http://sourceforge.net/projects/py2exe/</A>&quot;&gt;py2exe&lt;/a&gt;, &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://starship.python.net/crew/mhammond/win32/Downloads.html">http://starship.python.net/crew/mhammond/win32/Downloads.html</A>&quot;&gt;pywin32&lt;/a&gt; which are used to produce
++the installer. You will probably want to install a Subversion client
++such as &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://tortoisesvn.tigris.org/download.html">http://tortoisesvn.tigris.org/download.html</A>&quot;&gt;Tortoise SVN&lt;/a&gt;, as well as &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html</A>&quot;&gt;putty&lt;/a&gt; to benefit from the
++&lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;pageant&lt;/span&gt;&lt;/tt&gt; ssh agent and avoid typing your berlios password again and
++again.&lt;/p&gt;
++&lt;p&gt;Checkout the Maay sources from Berlios.&lt;/p&gt;
++&lt;p&gt;You need to install the dependencies of Maay too. Download and install
++the following python modules (take care when downloading a windows
++installer, it has to be built for Python 2.4):&lt;/p&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.egenix.com/files/python/eGenix-mx-Extensions.html#Download-mxBASE">http://www.egenix.com/files/python/eGenix-mx-Extensions.html#Download-mxBASE</A>&quot;&gt;egenix-mx-base&lt;/a&gt;&lt;/li&gt;
++&lt;li&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://sourceforge.net/project/showfiles.php?group_id=22307&amp;amp;release_id=102893">http://sourceforge.net/project/showfiles.php?group_id=22307&amp;release_id=102893</A>&quot;&gt;mysql-python&lt;/a&gt;&lt;/li&gt;
++&lt;li&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/projects/core/">http://twistedmatrix.com/projects/core/</A>&quot;&gt;twisted-2.0.1&lt;/a&gt;&lt;/li&gt;
++&lt;li&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://divmod.org/projects/nevow">http://divmod.org/projects/nevow</A>&quot;&gt;nevow-0.6&lt;/a&gt;&lt;/li&gt;
++&lt;li&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>&quot;&gt;PIL&lt;/a&gt;&lt;/li&gt;
++&lt;li&gt;&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>&quot;&gt;logilab-common-0.12.1&lt;/a&gt;&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;p&gt;If there is no windows installer available for the package, it most
++certainly means that it is a pure Python library. Unpack the source
++archive in a temporary directory and use a command prompt window to
++run &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;python&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;setup.py&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;bdist_wininst&lt;/span&gt;&lt;/tt&gt; in that directory. This will
++generate a Windows installer in the &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;dist&lt;/span&gt;&lt;/tt&gt; subdirectory, which you
++can run to install the library.&lt;/p&gt;
++&lt;p&gt;Download the &lt;cite&gt;mysql-4.1-noinstall&lt;/cite&gt; prebuilt zip file, and unzip it in
++&lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;trunk\thirdparty&lt;/span&gt;&lt;/tt&gt; (where &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;trunk&lt;/span&gt;&lt;/tt&gt; is the Subversion checkout
++directory). Rename &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;trunk\thirdparty\mysql-4.1&lt;/span&gt;&lt;/tt&gt; to
++&lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;trunk\thirdparty`mysql&lt;/span&gt;&lt;/tt&gt;.&lt;/p&gt;
++&lt;p&gt;Download and unpack &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.informatik.uni-frankfurt.de/~markus/antiword/">http://www.informatik.uni-frankfurt.de/~markus/antiword/</A>&quot;&gt;antiword&lt;/a&gt;, &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://gnuwin32.sourceforge.net/packages/unrtf.htm">http://gnuwin32.sourceforge.net/packages/unrtf.htm</A>&quot;&gt;unrtf&lt;/a&gt; and &lt;cite&gt;pdftohtml&lt;/cite&gt; in
++&lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;trunk\thirdparty&lt;/span&gt;&lt;/tt&gt;. I think this is all and correct. Fortunately,
++all of this only has to be done once.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;generating-the-installer&quot;&gt;
++&lt;h2&gt;&lt;a name=&quot;generating-the-installer&quot;&gt;Generating the installer&lt;/a&gt;&lt;/h2&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;In a shell window, navigate to the trunk directory.&lt;/li&gt;
++&lt;li&gt;Run &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;python&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;setup.py&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;py2exe&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;&gt;&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;py2exe.log&lt;/span&gt;&lt;/tt&gt;&lt;/li&gt;
++&lt;li&gt;Examine &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;py2exe.log&lt;/span&gt;&lt;/tt&gt; for possible errors or missing modules&lt;/li&gt;
++&lt;li&gt;Launch Inno setup by double clickink on &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;maay.iss&lt;/span&gt;&lt;/tt&gt;&lt;/li&gt;
++&lt;li&gt;Select the right option in the menu to generate the installer&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;p&gt;It is probably possible to right click on &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;maay.iss&lt;/span&gt;&lt;/tt&gt; and to compile
++directly from Windows Explorer. I prefer compiling from the Inno Setup
++GUI because it is possible to run the installer and uninstaller from
++the application and get a log displayed.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;what-if-it-does-not-work&quot;&gt;
++&lt;h2&gt;&lt;a name=&quot;what-if-it-does-not-work&quot;&gt;What if it does not work?&lt;/a&gt;&lt;/h2&gt;
++&lt;p&gt;The author admits that he may have got one of the preparation step
++wrong. Please send a mail on the &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;maay-dev&lt;/span&gt;&lt;/tt&gt; mailing list and we will
++try to help.&lt;/p&gt;
++&lt;/div&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;generating-a-source-distribution&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;generating-a-source-distribution&quot;&gt;Generating a source distribution&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;Go the trunk directory and run &lt;tt class=&quot;docutils literal&quot;&gt;&lt;span class=&quot;pre&quot;&gt;python&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;setup.py&lt;/span&gt; &lt;span class=&quot;pre&quot;&gt;sdist&lt;/span&gt;&lt;/tt&gt;&lt;/p&gt;
++&lt;/div&gt;
++&lt;/div&gt;
++&lt;/body&gt;
++&lt;/html&gt;
+
+Added: trunk/doc/INSTALL.html
+===================================================================
+--- trunk/doc/INSTALL.html	2005-11-18 14:47:38 UTC (rev 569)
++++ trunk/doc/INSTALL.html	2005-11-18 15:14:31 UTC (rev 570)
+@@ -0,0 +1,98 @@
++&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
++&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;<A HREF="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</A>&quot;&gt;
++&lt;html xmlns=&quot;<A HREF="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</A>&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
++&lt;head&gt;
++&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
++&lt;meta name=&quot;generator&quot; content=&quot;Docutils 0.3.9: <A HREF="http://docutils.sourceforge.net/">http://docutils.sourceforge.net/</A>&quot; /&gt;
++&lt;title&gt;Maay Installation Manual&lt;/title&gt;
++&lt;link rel=&quot;stylesheet&quot; href=&quot;default.css&quot; type=&quot;text/css&quot; /&gt;
++&lt;/head&gt;
++&lt;body&gt;
++&lt;div class=&quot;document&quot; id=&quot;maay-installation-manual&quot;&gt;
++&lt;h1 class=&quot;title&quot;&gt;Maay Installation Manual&lt;/h1&gt;
++&lt;!-- revision: $Id$ --&gt;
++&lt;div class=&quot;section&quot; id=&quot;installing-maay-on-windows&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;installing-maay-on-windows&quot;&gt;Installing Maay on Windows&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;On the Windows platform, it is recommended to use the Windows
++installer available from &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt;&lt;/p&gt;
++&lt;p&gt;and run it. This should
++install and setup everything properly.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;installing-maay-on-linux-from-a-package&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;installing-maay-on-linux-from-a-package&quot;&gt;Installing Maay on Linux from a package&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;Maay has not yet been packaged for any Linux distribution. Debian
++packages are being worked on. Contributions of RPMs for various
++RPM-based distributions are welcome.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;installing-maay-from-source&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;installing-maay-from-source&quot;&gt;Installing Maay from source&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;These instruction are intended for people using a unix-like
++OS. Windows users are strongly advised to use the Windows installer.&lt;/p&gt;
++&lt;p&gt;A few Python libraries are required to make the whole think work. Most
++of them should be available in your OS distribution too :&lt;/p&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;logilab common libraries 0.12.1 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>&quot;&gt;<A HREF="http://www.logilab.org/projects/common&lt;/a">http://www.logilab.org/projects/common&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;mysql-python (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>&quot;&gt;<A HREF="http://sourceforge.net/projects/mysql-python&lt;/a">http://sourceforge.net/projects/mysql-python&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-twisted 2.0 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/projects/core/">http://twistedmatrix.com/projects/core/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/projects/core/&lt;/a">http://twistedmatrix.com/projects/core/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-twisted-web 0.5 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/projects/web/">http://twistedmatrix.com/projects/web/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/projects/web/&lt;/a">http://twistedmatrix.com/projects/web/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-nevow 0.6 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://divmod.org/projects/nevow">http://divmod.org/projects/nevow</A>&quot;&gt;<A HREF="http://divmod.org/projects/nevow&lt;/a">http://divmod.org/projects/nevow&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;python-imaging (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>&quot;&gt;<A HREF="http://www.pythonware.com/products/pil/&lt;/a">http://www.pythonware.com/products/pil/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;mxDatetime (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.egenix.com/files/python/mxDateTime.html">http://www.egenix.com/files/python/mxDateTime.html</A>&quot;&gt;<A HREF="http://www.egenix.com/files/python/mxDateTime.html&lt;/a">http://www.egenix.com/files/python/mxDateTime.html&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;p&gt;You will also need a few helper applications to perform the conversion
++of various binary formats to something that Maay can index. There is
++probably a prebuilt binary available for your OS distribution
++somewhere. You will need to download and install :&lt;/p&gt;
++&lt;blockquote&gt;
++&lt;ul class=&quot;simple&quot;&gt;
++&lt;li&gt;pdftohtml (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://pdftohtml.sourceforge.net/">http://pdftohtml.sourceforge.net/</A>&quot;&gt;<A HREF="http://pdftohtml.sourceforge.net/&lt;/a">http://pdftohtml.sourceforge.net/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;antiword (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>&quot;&gt;<A HREF="http://www.winfield.demon.nl/&lt;/a">http://www.winfield.demon.nl/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;unrtf (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>&quot;&gt;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html&lt;/a">http://www.gnu.org/software/unrtf/unrtf.html&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;li&gt;ghostscript (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.cs.wisc.edu/~ghost/">http://www.cs.wisc.edu/~ghost/</A>&quot;&gt;<A HREF="http://www.cs.wisc.edu/~ghost/&lt;/a">http://www.cs.wisc.edu/~ghost/&lt;/a</A>&gt;)&lt;/li&gt;
++&lt;/ul&gt;
++&lt;/blockquote&gt;
++&lt;p&gt;The indexation part uses a MySQL database, version 4.1
++(&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.mysql.org/">http://www.mysql.org/</A>&quot;&gt;<A HREF="http://www.mysql.org/&lt;/a">http://www.mysql.org/&lt;/a</A>&gt;). You will need to install such a database or
++get in touch with your DBA. The following assumes a local mysql
++installation, with no root password. Maay has not been tested with
++MySQL 5.0, but it should work. Please report if you encounter problems
++with this version of MySQL.&lt;/p&gt;
++&lt;p&gt;Once everything else is installed, you can point you web browser to
++&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and download the latest
++source tarball. Unpack it, go to the newly created directory and run:&lt;/p&gt;
++&lt;pre class=&quot;literal-block&quot;&gt;
++# python setup.py install
++&lt;/pre&gt;
++&lt;p&gt;Create the MySQL database instance that will store the indexation
++data:&lt;/p&gt;
++&lt;pre class=&quot;literal-block&quot;&gt;
++# mysql -u root mysql
++mysql&gt; \. maay/sql/mysql.sql
++&lt;/pre&gt;
++&lt;p&gt;You're done! Read the README document to learn how to use Maay.&lt;/p&gt;
++&lt;/div&gt;
++&lt;div class=&quot;section&quot; id=&quot;working-on-the-bleeding-edge&quot;&gt;
++&lt;h1&gt;&lt;a name=&quot;working-on-the-bleeding-edge&quot;&gt;Working on the bleeding edge&lt;/a&gt;&lt;/h1&gt;
++&lt;p&gt;You can download the latest Maay sources from the SVN
++repository. Use the following for the initial source checkout:&lt;/p&gt;
++&lt;pre class=&quot;literal-block&quot;&gt;
++svn checkout <A HREF="svn://svn.berlios.de/maay/trunk">svn://svn.berlios.de/maay/trunk</A>
++&lt;/pre&gt;
++&lt;p&gt;You will also need to download and install all the dependencies
++mentionned in the previous section, and to configure a mysql database
++as explained.&lt;/p&gt;
++&lt;p&gt;When working with this directory structure, you don't have to install
++Maay using setup.py. Just add the trunk directory to the PYTHONPATH
++environment variable, and run the trunk/maay/bin/maay-node script to
++launch the server. The --help command line option will provide
++information about what configuration options are available. You can
++also copy the ini files in  trunk/maay/configuration/ files to ~/.maay/ and edit
++them to match your settings.&lt;/p&gt;
++&lt;blockquote&gt;
++Alexandre Fayolle &lt;&lt;a class=&quot;reference&quot; href=&quot;mailto:alexandre.fayolle&#64;logilab.fr&quot;&gt;alexandre.fayolle&#64;logilab.fr&lt;/a&gt;&gt;, Fri, 18 Nov 2005 15:00:36 +0100&lt;/blockquote&gt;
++&lt;/div&gt;
++&lt;/div&gt;
++&lt;/body&gt;
++&lt;/html&gt;
+
+Modified: trunk/doc/README.html
+===================================================================
+--- trunk/doc/README.html	2005-11-18 14:47:38 UTC (rev 569)
++++ trunk/doc/README.html	2005-11-18 15:14:31 UTC (rev 570)
+@@ -10,6 +10,7 @@
+ &lt;body&gt;
+ &lt;div class=&quot;document&quot; id=&quot;maay-documentation&quot;&gt;
+ &lt;h1 class=&quot;title&quot;&gt;Maay documentation&lt;/h1&gt;
++&lt;!-- revision: $Id$ --&gt;
+ &lt;div class=&quot;section&quot; id=&quot;warning&quot;&gt;
+ &lt;h1&gt;&lt;a name=&quot;warning&quot;&gt;Warning&lt;/a&gt;&lt;/h1&gt;
+ &lt;p&gt;This is beta quality software. Before launching anything be sure to read 
+@@ -41,73 +42,15 @@
+ &lt;/ul&gt;
+ &lt;/blockquote&gt;
+ &lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;how-do-i-install-maay-from-source&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;how-do-i-install-maay-from-source&quot;&gt;How do I install Maay from source?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;These instruction are intended for people using a unix-like
+-OS. Windows users are strongly advised to use the prebuilt package
+-(see below).&lt;/p&gt;
+-&lt;p&gt;A few Python libraries are required to make the whole think work. Most
+-of them should be available in your OS distribution too :&lt;/p&gt;
+-&lt;blockquote&gt;
+-&lt;ul class=&quot;simple&quot;&gt;
+-&lt;li&gt;logilab common libraries 0.12.1 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.logilab.org/projects/common">http://www.logilab.org/projects/common</A>&quot;&gt;<A HREF="http://www.logilab.org/projects/common&lt;/a">http://www.logilab.org/projects/common&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;mysql-python (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://sourceforge.net/projects/mysql-python">http://sourceforge.net/projects/mysql-python</A>&quot;&gt;<A HREF="http://sourceforge.net/projects/mysql-python&lt;/a">http://sourceforge.net/projects/mysql-python&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-twisted 2.0 or above ((&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/projects/core/">http://twistedmatrix.com/projects/core/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/projects/core/&lt;/a">http://twistedmatrix.com/projects/core/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-twisted-web 0.5 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://twistedmatrix.com/projects/web/">http://twistedmatrix.com/projects/web/</A>&quot;&gt;<A HREF="http://twistedmatrix.com/projects/web/&lt;/a">http://twistedmatrix.com/projects/web/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-nevow 0.6 or above (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://divmod.org/projects/nevow">http://divmod.org/projects/nevow</A>&quot;&gt;<A HREF="http://divmod.org/projects/nevow&lt;/a">http://divmod.org/projects/nevow&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;python-imaging (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.pythonware.com/products/pil/">http://www.pythonware.com/products/pil/</A>&quot;&gt;<A HREF="http://www.pythonware.com/products/pil/&lt;/a">http://www.pythonware.com/products/pil/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;mxDatetime (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.egenix.com/files/python/mxDateTime.html">http://www.egenix.com/files/python/mxDateTime.html</A>&quot;&gt;<A HREF="http://www.egenix.com/files/python/mxDateTime.html&lt;/a">http://www.egenix.com/files/python/mxDateTime.html&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;/ul&gt;
+-&lt;/blockquote&gt;
+-&lt;p&gt;You will also need a few helper applications to perform the conversion
+-of various binary formats to something that Maay can index. There is
+-probably a prebuilt binary available for your OS distribution
+-somewhere. You will need to download and install :&lt;/p&gt;
+-&lt;blockquote&gt;
+-&lt;ul class=&quot;simple&quot;&gt;
+-&lt;li&gt;pdftohtml (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://pdftohtml.sourceforge.net/">http://pdftohtml.sourceforge.net/</A>&quot;&gt;<A HREF="http://pdftohtml.sourceforge.net/&lt;/a">http://pdftohtml.sourceforge.net/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;antiword (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.winfield.demon.nl/">http://www.winfield.demon.nl/</A>&quot;&gt;<A HREF="http://www.winfield.demon.nl/&lt;/a">http://www.winfield.demon.nl/&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;li&gt;unrtf (&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html">http://www.gnu.org/software/unrtf/unrtf.html</A>&quot;&gt;<A HREF="http://www.gnu.org/software/unrtf/unrtf.html&lt;/a">http://www.gnu.org/software/unrtf/unrtf.html&lt;/a</A>&gt;)&lt;/li&gt;
+-&lt;/ul&gt;
+-&lt;/blockquote&gt;
+-&lt;p&gt;The indexation part uses a MySQL database, version 4.1
+-(&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://www.mysql.org/">http://www.mysql.org/</A>&quot;&gt;<A HREF="http://www.mysql.org/&lt;/a">http://www.mysql.org/&lt;/a</A>&gt;). You will need to install such a database or
+-get in touch with your DBA. The following assumes a local mysql
+-installation, with no root password. Maay has not been tested with
+-MySQL 5.0, but it should work. Please report if you encounter problems
+-with this version of MySQL.&lt;/p&gt;
+-&lt;p&gt;Once everything else is installed, you can point you web browser to
+-&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and download the latest
+-source tarball. Unpack it, go to the newly created directory and run:&lt;/p&gt;
+-&lt;pre class=&quot;literal-block&quot;&gt;
+-# python setup.py install
+-&lt;/pre&gt;
+-&lt;p&gt;It is now necessary to create the MySQL database instance that will
+-store the indexation data:&lt;/p&gt;
+-&lt;pre class=&quot;literal-block&quot;&gt;
+-# mysql -u root mysql
+-mysql&gt; \. sql/mysql.sql
+-&lt;/pre&gt;
+-&lt;p&gt;You're done! See a bit further down in this document for how to start
+-using Maay.&lt;/p&gt;
+-&lt;/div&gt;
+-&lt;div class=&quot;section&quot; id=&quot;how-do-i-install-maay-from-a-package&quot;&gt;
+-&lt;h1&gt;&lt;a name=&quot;how-do-i-install-maay-from-a-package&quot;&gt;How do I install Maay from a package?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;For now, only a Windows installer is available. Download it from
+-&lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://developer.berlios.de/projects/maay/">http://developer.berlios.de/projects/maay/</A>&quot;&gt;<A HREF="http://developer.berlios.de/projects/maay/&lt;/a">http://developer.berlios.de/projects/maay/&lt;/a</A>&gt; and run it. This should
+-install and setup everything properly.&lt;/p&gt;
+-&lt;p&gt;A package for the Debian GNU/Linux distribution will soon be made
+-available.&lt;/p&gt;
+-&lt;/div&gt;
+ &lt;div class=&quot;section&quot; id=&quot;how-do-i-start-using-maay&quot;&gt;
+ &lt;h1&gt;&lt;a name=&quot;how-do-i-start-using-maay&quot;&gt;How do I start using Maay?&lt;/a&gt;&lt;/h1&gt;
+-&lt;p&gt;First, edit the configuration files. On Windows, they are in 
++&lt;p&gt;First, edit the configuration files. On Windows, they are in
+ C:Program FilesMaaywebapp.ini and C:Program
+ FilesMaayindexer.ini. The Windows installer should have set the
+-different configuration values
+-On Unix systems, they are in /etc/maay, and you can copy them to 
+-~/.maay/ if you want to have some personnalized settings. Pay attention 
+-to the index-dir and skip-dir settings in indexer.ini.&lt;/p&gt;
++different configuration values.  On Unix systems, they are in
++/etc/maay, and you can copy them to ~/.maay/ if you want to have some
++personnalized settings. Pay attention to the index-dir and skip-dir
++settings in indexer.ini.&lt;/p&gt;
+ &lt;p&gt;Then, start the Maay service. On Windows, this is done automatically
+ when your machine boots. On unix systems, use /usr/bin/maay-server&lt;/p&gt;
+ &lt;p&gt;You can now visit &lt;a class=&quot;reference&quot; href=&quot;<A HREF="http://localhost:7777/">http://localhost:7777/</A>&quot;&gt;<A HREF="http://localhost:7777/&lt;/a">http://localhost:7777/&lt;/a</A>&gt; which will display the Maay
+@@ -142,7 +85,7 @@
+ &lt;p&gt;Be as precise as possible. Just saying &quot;the indexer does not work&quot;
+ won't give us any clue to help you.&lt;/p&gt;
+ &lt;blockquote&gt;
+-Alexandre Fayolle &lt;&lt;a class=&quot;reference&quot; href=&quot;mailto:alexandre.fayolle&#64;logilab.fr&quot;&gt;alexandre.fayolle&#64;logilab.fr&lt;/a&gt;&gt;, Tue, 15 Nov 2005 09:41:54 +0100&lt;/blockquote&gt;
++Alexandre Fayolle &lt;&lt;a class=&quot;reference&quot; href=&quot;mailto:alexandre.fayolle&#64;logilab.fr&quot;&gt;alexandre.fayolle&#64;logilab.fr&lt;/a&gt;&gt;, Fri, 18 Nov 2005 15:00:58 +0100&lt;/blockquote&gt;
+ &lt;/div&gt;
+ &lt;/div&gt;
+ &lt;/body&gt;
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000541.html">[Maay-svncheckins] r569 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000543.html">[Maay-svncheckins] r571 - trunk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#542">[ date ]</a>
+              <a href="thread.html#542">[ thread ]</a>
+              <a href="subject.html#542">[ subject ]</a>
+              <a href="author.html#542">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

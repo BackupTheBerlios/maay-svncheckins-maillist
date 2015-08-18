@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r322 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r322%20-%20trunk/maay&In-Reply-To=%3C200511071527.jA7FR2S0003077%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000297.html">
+   <LINK REL="Next"  HREF="000299.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r322 - trunk/maay</H1>
+    <B>Fr&#233;d&#233;ric DANG NGOC at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r322%20-%20trunk/maay&In-Reply-To=%3C200511071527.jA7FR2S0003077%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r322 - trunk/maay">dnf at berlios.de
+       </A><BR>
+    <I>Mon Nov  7 16:27:02 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000297.html">[Maay-svncheckins] r321 - trunk/doc
+</A></li>
+        <LI>Next message: <A HREF="000299.html">[Maay-svncheckins] r323 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#298">[ date ]</a>
+              <a href="thread.html#298">[ thread ]</a>
+              <a href="subject.html#298">[ subject ]</a>
+              <a href="author.html#298">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-07 16:27:01 +0100 (Mon, 07 Nov 2005)
+New Revision: 322
+
+Modified:
+   trunk/maay/registrationclient.py
+Log:
+merge version
+
+
+Modified: trunk/maay/registrationclient.py
+===================================================================
+--- trunk/maay/registrationclient.py	2005-11-07 11:06:57 UTC (rev 321)
++++ trunk/maay/registrationclient.py	2005-11-07 15:27:01 UTC (rev 322)
+@@ -19,29 +19,28 @@
+ from twisted.protocols.basic import LineReceiver
+ from time import mktime
+ 
+-class RegistrationClient(LineReceiver):
+-    &quot;&quot;&quot;Client-side stuff to ask/request things from the registration server.
+-       Tightly coupled with registration.py
++class PresenceClient(LineReceiver):
++    &quot;&quot;&quot;Client-side stuff to ask/request things from the presence server.
++       Tightly coupled with presenceserver.py
+     &quot;&quot;&quot;
+-    
+-    def __init__(self, nodeRegistrationCallback):
+-        self._callback = nodeRegistrationCallback
++ 
++    def __init__(self, nodePresenceCallback):
++        self.__callback = nodePresenceCallback
+         self._lineCount = 0
+         
+-    def login(self, nodeId, ip, port, bandwidth) :
+-        print &quot;RegistrationClient login to registration server (node %s at %s:%s)&quot; \
+-              % (nodeId, ip, port)
+-        self.transport.write('login:%s:%s:%s:%s\r\n' \
+-                             % (nodeId, ip, port, bandwidth))
++    def notify(self, nodeId, ip, port, bandwidth) :
++        print &quot;notify to presence server (node %s at %s:%s)&quot; % (nodeId, ip, port)
++        self.transport.write('notify:%s:%s:%s:%s\r\n' % (nodeId, ip,
++                                                     port, bandwidth))
+         return self
+ 
+     def logout(self, nodeId):
+-        print &quot;RegistrationClient logout from registration server (node %s)&quot; % nodeId
++        print &quot;logout from presence server (node %s)&quot; % nodeId
+         self.transport.write('logout:%s\r\n' % nodeId)
+         self.transport.loseConnection()
+ 
+     def who(self):
+-        print &quot;RegistrationClient who&quot;
++        print &quot;PresenceClient who&quot;
+         self.transport.write('who:\r\n')
+ 
+     def lineReceived(self, data):
+@@ -54,7 +53,7 @@
+            &quot;&quot;&quot;
+         self._lineCount += 1
+         data = data.strip()
+-        print &quot;RegistrationClient lineReceived (%s) said %s&quot; % (self._lineCount, data)
++        print &quot;PresenceClient lineReceived (%s) said %s&quot; % (self._lineCount, data)
+         if data.startswith('EOT'):
+             self.transport.loseConnection()
+             return
+@@ -70,16 +69,16 @@
+     return mktime(tuple(date+time+[0,0,0]))
+ 
+ 
+-def login(reactor, regIP, regPort, querier, nodeId, nodeIP, xmlrpcPort, bandwidth):
++def notify(reactor, regIP, regPort, querier, nodeId, nodeIP, xmlrpcPort, bandwidth):
+     &quot;&quot;&quot;registers and transmits the node catalog to querier.registerNode
+     &quot;&quot;&quot;
+     if querier is not None:
+-        c = ClientCreator(reactor, RegistrationClient, querier.registerNode)
++        c = ClientCreator(reactor, PresenceClient, querier.registerNode)
+         d = c.connectTCP(regIP, regPort)
+-        d.addCallback(RegistrationClient.login, nodeId, nodeIP, xmlrpcPort, bandwidth)
+-        d.addCallback(RegistrationClient.who)
++        d.addCallback(PresenceClient.notify, nodeId, nodeIP, xmlrpcPort, bandwidth)
++        d.addCallback(PresenceClient.who)
+     else:
+-        print &quot;Login : no querier found =&gt; no registration / no P2P&quot;
++        print &quot;Login : no querier found =&gt; no presence / no P2P&quot;
+ 
+ def askWho(reactor, regIp, regPort, callback):
+     &quot;&quot;&quot;transmits node catalog to the callback&quot;&quot;&quot;
+@@ -88,7 +87,7 @@
+     d.addCallback(RegistrationClient.who)
+ 
+ def logout(reactor, regIp, regPort, nodeId):
+-    print &quot;Registrator@%s:%s node %s wants to log out.&quot; % (regIp, regPort, nodeId)
+-    c = ClientCreator(reactor, RegistrationClient, None)
++    print &quot;PresenceClient@%s:%s node %s wants to log out.&quot; % (regIp, regPort, nodeId)
++    c = ClientCreator(reactor, PresenceClient, None)
+     d = c.connectTCP(regIp, regPort)
+-    d.addCallback(RegistrationClient.logout)
++    d.addCallback(PresenceClient.logout)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000297.html">[Maay-svncheckins] r321 - trunk/doc
+</A></li>
+	<LI>Next message: <A HREF="000299.html">[Maay-svncheckins] r323 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#298">[ date ]</a>
+              <a href="thread.html#298">[ thread ]</a>
+              <a href="subject.html#298">[ subject ]</a>
+              <a href="author.html#298">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

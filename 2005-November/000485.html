@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r514 - in trunk/maay: . test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r514%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511161123.jAGBNZ7C020747%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000484.html">
+   <LINK REL="Next"  HREF="000486.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r514 - in trunk/maay: . test</H1>
+    <B>afayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r514%20-%20in%20trunk/maay%3A%20.%20test&In-Reply-To=%3C200511161123.jAGBNZ7C020747%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r514 - in trunk/maay: . test">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov 16 12:23:35 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000484.html">[Maay-svncheckins] r513 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000486.html">[Maay-svncheckins] r515 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#485">[ date ]</a>
+              <a href="thread.html#485">[ thread ]</a>
+              <a href="subject.html#485">[ subject ]</a>
+              <a href="author.html#485">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-16 12:23:27 +0100 (Wed, 16 Nov 2005)
+New Revision: 514
+
+Modified:
+   trunk/maay/test/test_texttool.py
+   trunk/maay/texttool.py
+Log:
+fixed bug 5648 (index out of range in makeAbstract)
+
+Modified: trunk/maay/test/test_texttool.py
+===================================================================
+--- trunk/maay/test/test_texttool.py	2005-11-16 10:52:38 UTC (rev 513)
++++ trunk/maay/test/test_texttool.py	2005-11-16 11:23:27 UTC (rev 514)
+@@ -229,7 +229,13 @@
+         expected = ' &lt;b&gt;...&lt;/b&gt;  Inc., 51 Franklin St, Fifth Floor, &lt;b&gt;Boston&lt;/b&gt;, MA  02110-1301 USA'
+         self.assertEquals(expected, abstract)
+ 
++    def testLength200AndUnknownWord(self):
++        try:
++            abstract = makeAbstract(self.text[:200], [u'tralala'])
++        except IndexError:
++            self.fail('bug #5648 is present')
+ 
++
+ if __name__ == '__main__':
+     unittest.main()
+ 
+
+Modified: trunk/maay/texttool.py
+===================================================================
+--- trunk/maay/texttool.py	2005-11-16 10:52:38 UTC (rev 513)
++++ trunk/maay/texttool.py	2005-11-16 11:23:27 UTC (rev 514)
+@@ -440,9 +440,10 @@
+     EXCERPT_MAX_HALF_LEN = EXCERPT_MAX_LEN / 2
+ 
+     if not excerptPositions:
+-        if text_length &gt;= 200:
++        if text_length &gt; 200:
+             end = 200
+-            while text[end].isalpha(): end -= 1
++            while text[end].isalpha():
++                end -= 1
+             return text[:end] + &quot; &lt;b&gt;...&lt;/b&gt;&quot;
+         else:
+             return text
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000484.html">[Maay-svncheckins] r513 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000486.html">[Maay-svncheckins] r515 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#485">[ date ]</a>
+              <a href="thread.html#485">[ thread ]</a>
+              <a href="subject.html#485">[ subject ]</a>
+              <a href="author.html#485">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r665 - trunk
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r665%20-%20trunk&In-Reply-To=%3C200511251533.jAPFXMNu028800%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000636.html">
+   <LINK REL="Next"  HREF="000638.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r665 - trunk</H1>
+    <B>dnf at berlios.de</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r665%20-%20trunk&In-Reply-To=%3C200511251533.jAPFXMNu028800%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r665 - trunk">dnf at berlios.de
+       </A><BR>
+    <I>Fri Nov 25 16:33:22 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000636.html">[Maay-svncheckins] r664 - trunk/maay/win32
+</A></li>
+        <LI>Next message: <A HREF="000638.html">[Maay-svncheckins] r666 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#637">[ date ]</a>
+              <a href="thread.html#637">[ thread ]</a>
+              <a href="subject.html#637">[ subject ]</a>
+              <a href="author.html#637">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: dnf
+Date: 2005-11-25 16:33:19 +0100 (Fri, 25 Nov 2005)
+New Revision: 665
+
+Modified:
+   trunk/setup.py
+Log:
+Add removeServices in setup.py.
+
+
+
+Modified: trunk/setup.py
+===================================================================
+--- trunk/setup.py	2005-11-25 15:17:41 UTC (rev 664)
++++ trunk/setup.py	2005-11-25 15:33:19 UTC (rev 665)
+@@ -57,6 +57,10 @@
+ 			    script = 'maay/win32/updateconfig.py',
+ 			    dest_base = &quot;updateconfig&quot;)
+ 
++removeServices = Target(description = &quot;Services (maay + mysql) uninstaller&quot;,
++			    script = 'maay/win32/removeservices.py',
++			    dest_base = &quot;removeservices&quot;)
++
+ maay_service = Target(description = &quot;The Maay service&quot;,
+                       modules = [&quot;maayservice&quot;],
+                       dest_base = &quot;Maay&quot;)
+@@ -68,7 +72,7 @@
+             
+         
+ 	setup(console = [maay_node, maay_indexer,
+-                         createdb, updateConfig],
++                         createdb, updateConfig, removeServices],
+               service = [maay_service],
+ 		name = name,
+ 		version = version,
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000636.html">[Maay-svncheckins] r664 - trunk/maay/win32
+</A></li>
+	<LI>Next message: <A HREF="000638.html">[Maay-svncheckins] r666 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#637">[ date ]</a>
+              <a href="thread.html#637">[ thread ]</a>
+              <a href="subject.html#637">[ subject ]</a>
+              <a href="author.html#637">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r346 - trunk/maay/test
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r346%20-%20trunk/maay/test&In-Reply-To=%3C200511081758.jA8Hw7Rl007323%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000321.html">
+   <LINK REL="Next"  HREF="000323.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r346 - trunk/maay/test</H1>
+    <B>Aur&#233;lien Camp&#233;as at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r346%20-%20trunk/maay/test&In-Reply-To=%3C200511081758.jA8Hw7Rl007323%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r346 - trunk/maay/test">aurelienc at berlios.de
+       </A><BR>
+    <I>Tue Nov  8 18:58:07 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000321.html">[Maay-svncheckins] r345 - trunk/maay/data
+</A></li>
+        <LI>Next message: <A HREF="000323.html">[Maay-svncheckins] r347 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#322">[ date ]</a>
+              <a href="thread.html#322">[ thread ]</a>
+              <a href="subject.html#322">[ subject ]</a>
+              <a href="author.html#322">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: aurelienc
+Date: 2005-11-08 18:58:06 +0100 (Tue, 08 Nov 2005)
+New Revision: 346
+
+Modified:
+   trunk/maay/test/test_p2p.py
+Log:
+Update according to P2pQuery interfaces changes (to follow).
+
+
+Modified: trunk/maay/test/test_p2p.py
+===================================================================
+--- trunk/maay/test/test_p2p.py	2005-11-08 17:57:27 UTC (rev 345)
++++ trunk/maay/test/test_p2p.py	2005-11-08 17:58:06 UTC (rev 346)
+@@ -25,9 +25,8 @@
+ 
+ class P2pQueryTC(unittest.TestCase):
+     def setUp(self):
+-        self.query = P2pQuery(queryId='1'*40,
+-                              sender='<A HREF="http://localhost:3423">http://localhost:3423</A>',
+-                              ttl=2,
++        self.query = P2pQuery(sender='<A HREF="http://localhost:3423">http://localhost:3423</A>', # should be a hash (auc)
++                              port=3423,
+                               query=Query.fromRawQuery(&quot;foo&quot;))
+ 
+     def testHop(self):
+@@ -48,20 +47,22 @@
+ 
+     def testSimpleQueryAsKwargs(self):
+         self.assertEquals(self.query.asKwargs(),
+-                          {'id' : '1'*40,
++                          {'qid' : 0,
+                            'sender' : '<A HREF="http://localhost:3423">http://localhost:3423</A>',
+-                           'ttl' : 2,
++                           'port' : 3423,
++                           'ttl' : 5, # default value
+                            'words' : 'foo',
+                            'mime_type' : ''})
+ 
+     def testComplexQueryAsKwargs(self):
+-        query = P2pQuery(queryId='1'*40,
+-                         sender='<A HREF="http://localhost:3423">http://localhost:3423</A>',
++        query = P2pQuery(sender='<A HREF="http://localhost:3423">http://localhost:3423</A>',
++                         port = 3423,
+                          ttl=2,
+                          query=Query.fromRawQuery(&quot;foo bar filetype:pdf&quot;))
+         self.assertEquals(query.asKwargs(),
+-                          {'id' : '1'*40,
++                          {'qid' : 0,
+                            'sender' : '<A HREF="http://localhost:3423">http://localhost:3423</A>',
++                           'port' : 3423,
+                            'ttl' : 2,
+                            'words' : 'foo bar',
+                            'mime_type' : 'application/pdf'})
+@@ -70,9 +71,9 @@
+ 
+ class P2pQuerierTC(unittest.TestCase):
+     def setUp(self):
+-        self.querier = P2pQuerier('0'*40, None)  #XXX: How can we get a querier ?
+-        self.query = P2pQuery(queryId='1'*40,
+-                              sender='<A HREF="http://localhost:3423">http://localhost:3423</A>',
++        self.querier = P2pQuerier('0'*40, None) 
++        self.query = P2pQuery(sender='<A HREF="http://localhost:3423">http://localhost:3423</A>',
++                              port=3423,
+                               ttl=2,
+                               query=Query.fromRawQuery(&quot;foo&quot;))
+ 
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000321.html">[Maay-svncheckins] r345 - trunk/maay/data
+</A></li>
+	<LI>Next message: <A HREF="000323.html">[Maay-svncheckins] r347 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#322">[ date ]</a>
+              <a href="thread.html#322">[ thread ]</a>
+              <a href="subject.html#322">[ subject ]</a>
+              <a href="author.html#322">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

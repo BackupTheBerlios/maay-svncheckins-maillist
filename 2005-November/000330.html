@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r354 - trunk/maay
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-November/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r354%20-%20trunk/maay&In-Reply-To=%3C200511090844.jA98ioKN030885%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000329.html">
+   <LINK REL="Next"  HREF="000331.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r354 - trunk/maay</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r354%20-%20trunk/maay&In-Reply-To=%3C200511090844.jA98ioKN030885%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r354 - trunk/maay">afayolle at berlios.de
+       </A><BR>
+    <I>Wed Nov  9 09:44:50 CET 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000329.html">[Maay-svncheckins] r353 - in trunk/maay: . data
+</A></li>
+        <LI>Next message: <A HREF="000331.html">[Maay-svncheckins] r355 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#330">[ date ]</a>
+              <a href="thread.html#330">[ thread ]</a>
+              <a href="subject.html#330">[ subject ]</a>
+              <a href="author.html#330">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-11-09 09:44:45 +0100 (Wed, 09 Nov 2005)
+New Revision: 354
+
+Modified:
+   trunk/maay/querier.py
+Log:
+a few stylistic changes
+
+Modified: trunk/maay/querier.py
+===================================================================
+--- trunk/maay/querier.py	2005-11-09 08:42:54 UTC (rev 353)
++++ trunk/maay/querier.py	2005-11-09 08:44:45 UTC (rev 354)
+@@ -31,8 +31,8 @@
+ 
+ from logilab.common.db import get_dbapi_compliant_module
+ 
+-from maay.dbentity import FutureDocument, Document, FileInfo, DocumentProvider, \
+-     DocumentScore, Word, Node
++from maay.dbentity import FutureDocument, Document, FileInfo, \
++     DocumentProvider, DocumentScore, Word, Node
+ from maay.texttool import normalizeText, WORDS_RGX, MAX_STORED_SIZE
+ 
+ class MaayAuthenticationError(Exception):
+@@ -93,7 +93,8 @@
+ 
+     searchInPrivate = False
+     
+-    def __init__(self, host='', database='', user='', password='', connection=None):
++    def __init__(self, host='', database='', user='', password='',
++                 connection=None):
+         if connection is None:
+             dbapiMod = get_dbapi_compliant_module('mysql')
+             try:
+@@ -110,8 +111,8 @@
+             except Exception, e:
+                 import traceback
+                 traceback.print_exc()
+-                raise MaayAuthenticationError(&quot;Failed to authenticate user %r, cause is %s&quot;
+-                                              % (user, e))
++                raise MaayAuthenticationError(
++                    &quot;Failed to authenticate user %r [%s]&quot; % (user, e))
+         self._cnx = connection
+ 
+     def _execute(self, query, args=None):
+@@ -190,7 +191,8 @@
+             db_word.commit(cursor, update=False)
+         
+     def _getScoresDict(self, cursor, db_document_id):
+-        _scores = DocumentScore.selectWhere(cursor, db_document_id=db_document_id)
++        _scores = DocumentScore.selectWhere(cursor,
++                                            db_document_id=db_document_id)
+         db_scores = {}
+         while _scores:
+             score = _scores.pop()
+@@ -237,11 +239,11 @@
+                                                       word=word)[0]
+ 
+         for winfo in wordInfo.itervalues():
+-            winfo.download_count += 1/len(words)
++            winfo.download_count += 1 / len(words)
+             winfo.commit(cursor, update=True)
+ 
+         for word,score in scores.iteritems():
+-            score.download_count = max(0, score.download_count) + 1/len(words)
++            score.download_count = max(0, score.download_count) + 1 / len(words)
+             winfo_downloads = wordInfo[word].download_count
+             
+             score.popularity = score.download_count / winfo_downloads
+@@ -257,7 +259,8 @@
+ 
+     def registerNode(self, nodeId, ip, port, bandwidth, lastSeenTime=None):
+         &quot;&quot;&quot;this will be used as a callback in registrationclient/login&quot;&quot;&quot;
+-        print &quot;AnonymousQuerier registerNode (callback) %s %s:%s&quot; % (nodeId, ip, port)
++        print &quot;AnonymousQuerier registerNode (callback) %s %s:%s&quot; % \
++                                                             (nodeId, ip, port)
+         lastSeenTime = lastSeenTime or int(time.time())
+         cursor = self._cnx.cursor()
+         node = Node.selectOrInsertWhere(cursor, node_id=nodeId)[0]
+@@ -313,7 +316,8 @@
+     def removeFileInfo(self, filename):
+         &quot;&quot;&quot;remove filename from the database `files` table&quot;&quot;&quot;
+         cursor = self._cnx.cursor()
+-        rows = cursor.execute('DELETE FROM files WHERE file_name = %s', filename)
++        rows = cursor.execute('DELETE FROM files WHERE file_name = %s',
++                              filename)
+         cursor.close()
+         self._cnx.commit()
+         #print &quot;removed %s&quot; % filename
+@@ -326,12 +330,12 @@
+         cursor = self._cnx.cursor()
+         query1 = &quot;&quot;&quot;DELETE documents
+                     FROM documents LEFT JOIN files
+-                                   ON documents.db_document_id = files.db_document_id
++                             ON documents.db_document_id = files.db_document_id
+                     WHERE files.db_document_id IS NULL&quot;&quot;&quot;
+         rows = cursor.execute(query1)
+         query2 = &quot;&quot;&quot;DELETE document_scores
+                     FROM document_scores LEFT JOIN documents
+-                                   ON document_scores.db_document_id = documents.db_document_id
++                       document_scores.db_document_id = documents.db_document_id
+                     WHERE documents.db_document_id IS NULL&quot;&quot;&quot;
+         rows += cursor.execute(query2)
+         cursor.close()
+@@ -343,7 +347,8 @@
+         &quot;&quot;&quot;Inserts or update information in table documents,
+         file_info, document_score and word&quot;&quot;&quot;
+         # XXX Decide if we can compute the content_hash and mime_type
+-        # ourselves or if the indexer should do it and pass the values as an argument
++        # ourselves or if the indexer should do it and
++        # pass the values as an argument
+         cursor = self._cnx.cursor()
+         # insert or update in table file_info
+         fileinfo = FileInfo.selectWhere(cursor, file_name=futureDoc.filename)
+@@ -376,11 +381,13 @@
+         else:
+             # file unknown
+             # try to find a Document with same hash value
+-            doc = Document.selectWhere(cursor, document_id=futureDoc.content_hash)
++            doc = Document.selectWhere(cursor,
++                                       document_id=futureDoc.content_hash)
+             if doc:
+                 doc = doc[0]
+                 doc.state = futureDoc.state
+-                doc.publication_time = max(doc.publication_time, futureDoc.lastModificationTime)
++                doc.publication_time = max(doc.publication_time,
++                                           futureDoc.lastModificationTime)
+                 doc.commit(cursor, update=True)
+             else:
+                 doc = self._createDocument(cursor, futureDoc)
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000329.html">[Maay-svncheckins] r353 - in trunk/maay: . data
+</A></li>
+	<LI>Next message: <A HREF="000331.html">[Maay-svncheckins] r355 - trunk/maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#330">[ date ]</a>
+              <a href="thread.html#330">[ thread ]</a>
+              <a href="subject.html#330">[ subject ]</a>
+              <a href="author.html#330">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>

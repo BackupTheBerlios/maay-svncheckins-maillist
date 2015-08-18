@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [Maay-svncheckins] r172 - trunk/maay/configuration
+   </TITLE>
+   <LINK REL="Index" HREF="http://lists.berlios.de/pipermail/maay-svncheckins/2005-October/index.html" >
+   <LINK REL="made" HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r172%20-%20trunk/maay/configuration&In-Reply-To=%3C200510071234.j97CYWm0001081%40sheep.berlios.de%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000144.html">
+   <LINK REL="Next"  HREF="000146.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[Maay-svncheckins] r172 - trunk/maay/configuration</H1>
+    <B>Alexandre Fayolle at BerliOS</B> 
+    <A HREF="mailto:maay-svncheckins%40lists.berlios.de?Subject=Re%3A%20%5BMaay-svncheckins%5D%20r172%20-%20trunk/maay/configuration&In-Reply-To=%3C200510071234.j97CYWm0001081%40sheep.berlios.de%3E"
+       TITLE="[Maay-svncheckins] r172 - trunk/maay/configuration">afayolle at berlios.de
+       </A><BR>
+    <I>Fri Oct  7 14:34:32 CEST 2005</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000144.html">[Maay-svncheckins] r171 - trunk/maay
+</A></li>
+        <LI>Next message: <A HREF="000146.html">[Maay-svncheckins] r173 - in trunk: . maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#145">[ date ]</a>
+              <a href="thread.html#145">[ thread ]</a>
+              <a href="subject.html#145">[ subject ]</a>
+              <a href="author.html#145">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Author: afayolle
+Date: 2005-10-07 14:34:22 +0200 (Fri, 07 Oct 2005)
+New Revision: 172
+
+Modified:
+   trunk/maay/configuration/indexer.ini
+Log:
+added comments and updated to new format
+
+Modified: trunk/maay/configuration/indexer.ini
+===================================================================
+--- trunk/maay/configuration/indexer.ini	2005-10-07 11:47:34 UTC (rev 171)
++++ trunk/maay/configuration/indexer.ini	2005-10-07 12:34:22 UTC (rev 172)
+@@ -1,8 +1,28 @@
+ [INDEXER]
++# Host on which the maay server is running
+ host=localhost
++#Port on which the maay server is listening
+ port=6789
++
++# User login on the maay server 
+ user=maay
++# User password on the maay server
+ password=maay
+-index-dir=c:\
+-skip-dir=c:\windows
+-verbose=yes
+\ No newline at end of file
++
++# Which directories are to be indexed
++#  - private indexed directories are not available to  queries from other nodes
++#  - public indexed directories are available to these queries
++#  - skip dirs are not indexed
++#
++# If a document is available through both a public and a private directory, 
++# the public version prevails
++#
++# You can use a comma separated list of values to specify several
++# directories in each configuration variable. 
++private-index-dirs=c:\
++private-skip-dirs=c:\windows
++public-index-dirs=
++private-index-dirs=
++
++# print messages in the console
++verbose=yes
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000144.html">[Maay-svncheckins] r171 - trunk/maay
+</A></li>
+	<LI>Next message: <A HREF="000146.html">[Maay-svncheckins] r173 - in trunk: . maay
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#145">[ date ]</a>
+              <a href="thread.html#145">[ thread ]</a>
+              <a href="subject.html#145">[ subject ]</a>
+              <a href="author.html#145">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.berlios.de/mailman/listinfo/maay-svncheckins">More information about the Maay-svncheckins
+mailing list</a><br>
+</body></html>
